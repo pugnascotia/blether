@@ -1,0 +1,17 @@
+{
+  "name": "blether",
+  "version": "0.1.0",
+  "description": "Yet another Smalltalk to JavaScript compiler",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "smalltalk"
+  ],
+  "author": "Rory Hunter <roryhunter@gmail.com>",
+  "license": "GPL2",
+  "devDependencies": {
+    "pegjs": "~0.8.0"
+  }
+}
