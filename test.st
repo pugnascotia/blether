@@ -10,9 +10,10 @@ Object subclass: #Foo variables: #( #input #index #interval #console ).
 
     fs := require value: 'fs'.
 
-    fs writeFileSync: 'message.txt' content: 'This file was written by Amber.' 
+    fs foo bar writeFileSync: 'message.txt' content: 'This file was written by Amber.' 
        errFn:  nil.!.
 
 !Foo bar: arse with: twit
     | badger |
-    console log: 'Badger!'!.
+    console log: 'Badger!'.
+	badger := 1 + 2!.
