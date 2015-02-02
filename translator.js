@@ -14,8 +14,10 @@ var Translator = function() {
 	this.visitClassDeclaration = function(node) {
 		var output = "var " + node.className.visit(this) + " = function() {\n";
 
-		for (var i = 0; i < node.varNames.length; i++) {
-			output += "this." + node.varNames[i].visit(this) + " = null;\n";
+		var instanceNames = node.varNames.value;
+
+		for (var i = 0; i < instanceNames.length; i++) {
+			output += "this." + instanceNames[i].visit(this) + " = null;\n";
 		}
 
 		output += "};\n\n";

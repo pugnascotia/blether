@@ -105,9 +105,30 @@ unaryPattern   = ws selector:unarySelector {
                      return new Blether.UnaryPattern(selector);
                  }
 
-expression     = assignment / cascade / binarySend / keywordSend
+expressionChain = message:message (ws chain:expressionChain { return chain })? {
+	if (chain) {
+		return chain.setReceiver(message);
+	}
+	else {
+		return new Blether.send(message);
+	}
+}
+
+expression2    = send:(keywordSend / binarySend) message:(ws mess:expressionChain { return mess })? {
+//	console.log("expression2 send:[" + send + "] message:[" + message + "]");
+	if (message) {
+		return message.setReceiver(send);
+	}
+	else {
+		//return new Blether.Send(send);
+		return send;
+	}
+}
+
+expression     = assignment / cascade / expression2
 
 expressionList = ws "." ws expression:expression {return expression;}
+
 expressions    = first:expression others:expressionList* { return [first].concat(others); }
 
 assignment     = variable:variable ws ':=' ws expression:expression {
@@ -150,8 +171,9 @@ operand        = literal / reference / subexpression
 
 
 unaryMessage   = ws selector:unarySelector !":" {
-                     return new Blether.Send(selector);
-                 }
+//	console.log("unarySelector selector:[" + selector + "]");
+	return new Blether.Send(selector);
+}
 
 unaryTail      = message:unaryMessage ws tail:unaryTail? ws {
                      if (tail) {
@@ -162,47 +184,54 @@ unaryTail      = message:unaryMessage ws tail:unaryTail? ws {
                      }
                  }
 
-unarySend      = receiver:operand ws tail:unaryTail? {
-                     if (tail) {
-                         return tail.setReceiver(receiver);
-                     }
-                     else {
-                         return receiver;
-                     }
-                 }
+unarySend = receiver:operand ws tail:unaryTail? {
+	if (tail) {
+		return tail.setReceiver(receiver);
+	}
+	else {
+		return receiver;
+	}
+}
+
 
 binaryMessage  = ws selector:binarySelector ws arg:(unarySend / operand) {
-                      return new Blether.Send(selector, [arg]);
-                 }
+//	console.log("binaryMessage selector:[" + selector + "] arg:[" + arg + "]");
+	return new Blether.Send(selector, [arg]);
+}
 
-binaryTail     = message:binaryMessage tail:binaryTail? {
-                     if (tail) {
-                         return tail.setReceiver(message);
-                      }
-                     else {
-                         return message;
-                     }
-                 }
 
-binarySend     = receiver:unarySend tail:binaryTail? {
-                     if (tail) {
-                         return tail.setReceiver(receiver);
-                     }
-                     else {
-                         return receiver;
-                     }
-                 }
+binaryTail = message:binaryMessage tail:binaryTail? {
+	if (tail) {
+		return tail.setReceiver(message);
+	}
+	else {
+		return message;
+	}
+}
+
+
+binarySend = receiver:unarySend tail:binaryTail? {
+	if (tail) {
+		return tail.setReceiver(receiver);
+	}
+	else {
+		return receiver;
+	}
+}
 
 
 keywordMessage = pairs:keywordPair+ {
-                     var selector = [];
-                     var args = [];
-                      for(var i = 0; i < pairs.length; i++) {
-                          selector.push(pairs[i].key);
-                          args.push(pairs[i].arg);
-                      }
-                      return new Blether.Send(selector.join("_").replace(/:/g, ''), args);
-                 }
+	var selector = [];
+	var args = [];
+	for(var i = 0; i < pairs.length; i++) {
+		selector.push(pairs[i].key);
+		args.push(pairs[i].arg);
+	}
+	var synthesizedSelector = selector.join("_").replace(/:/g, '');
+
+//	console.log("keywordMessage selector:[" + synthesizedSelector + "] args:[" + args + "]");
+	return new Blether.Send(synthesizedSelector, args);
+}
 
 keywordSend    = receiver:binarySend tail:keywordMessage {
                      return tail.setReceiver(receiver);
@@ -216,7 +245,7 @@ cascade        = ws send:(keywordSend / binarySend) messages:(ws ";" ws mess:mes
                      for(var i = 0; i < messages.length; i++) {
                          cascade.push(messages[i]);
                      }
-                    return new Blether.Cascade(send.receiver, cascade);
+                    return new Blether.Cascade(send, cascade);
                  }
 
 jsStatement    = "<" val:((">>" {return ">";} / [^>])*) ">" {
