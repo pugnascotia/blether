@@ -6,13 +6,48 @@ var Translator = function() {
 
 	this.visitProgram = function(node) {
 		var self = this;
-		return node.elements.reduce(function(output, childNode) {
-			return output + childNode.visit(self);
-		}, '');
+
+		var output =
+"var _extends = function(child, parent) {\n" +
+"	for (var key in parent) {\n" +
+"		if (_hasProp.call(parent, key)) child[key] = parent[key];\n" +
+"	}\n" +
+"\n" +
+"	function ctor() {\n" +
+"		this.constructor = child;\n" +
+"	}\n" +
+"	ctor.prototype = parent.prototype;\n" +
+"	child.prototype = new ctor();\n" +
+"	child.__super__ = parent.prototype;\n" +
+"	return child;\n" +
+"};\n" +
+"var _hasProp = {}.hasOwnProperty;\n";
+
+		node.elements.forEach(function(childNode) {
+			output += childNode.visit(self);
+		});
+
+		return output;
 	};
 
 	this.visitClassDeclaration = function(node) {
-		var output = "var " + node.className.visit(this) + " = function() {\n";
+		var output = "var " + node.className.visit(this) + " = (function(";
+
+		var hasSuper = node.superClass !== "Object";
+
+		if (hasSuper) { output += "_super" };
+		
+		output += ") {\n";
+
+		if (hasSuper) {
+			output += "_extends(" + node.className + ", _super);\n\n";
+		};
+
+		output += "function " + node.className + "() {\n";
+		if (hasSuper) {
+			output += "    return " + node.className + ".__super__.constructor.apply(this, arguments);\n";
+		}
+		output += "};\n\n";
 
 		var instanceNames = node.varNames.value;
 
@@ -20,11 +55,13 @@ var Translator = function() {
 			output += "this." + instanceNames[i].visit(this) + " = null;\n";
 		}
 
-		output += "};\n\n";
+		output += "\nreturn " + node.className + ";\n\n";
 
-		// TODO: Setup super access
-		output += node.className.visit(this) + ".prototype = new " +
-			(node.superClass ? node.superClass : "Object") + "();\n\n";
+		output += "})(";
+
+		if (hasSuper) { output += node.superClass };
+		
+		output += ");\n\n";
 
 		return output;
 	};

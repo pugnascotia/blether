@@ -1,4 +1,23 @@
-var Blether = {};
+var Blether = {
+	"classes": {}
+};
+
+Blether.ParseError = function(err) {
+	return {
+		"name": "Blether Parse Error",
+		"message": err.msg,
+		"line": err.line,
+		"column": err.column
+	};
+};
+
+Blether.ParseError.prototype = new Error;
+Blether.ParseError.prototype.toString = function() {
+	return this.message + ":" + this.line + ":" + this.column };
+
+
+/* The language parts */
+
 
 Blether.String = function(string) {
 	this._type = 'String';
@@ -68,7 +87,7 @@ Blether.UndefinedObject = function() {
 };
 
 Blether.UndefinedObject.prototype = {};
-Blether.UndefinedObject.prototype.toString = function() { return "null" };
+Blether.UndefinedObject.prototype.toString = function() { return "nil" };
 Blether.UndefinedObject.prototype.visit = function(visitor) { return visitor.visitUndefinedObject(this) };
 
 //------------------------------------------------------------------------------
@@ -253,10 +272,12 @@ Blether.MethodDeclaration.prototype.visit = function(visitor) { return visitor.v
 
 //------------------------------------------------------------------------------
 
-Blether.ClassDeclaration = function(className, varNames) {
+Blether.ClassDeclaration = function(className, superClass, varNames) {
 	this._type = 'ClassDeclaration';
 	this.className = className;
+	this.superClass = superClass;
 	this.varNames = varNames;
+	this.methods = [];
 };
 
 Blether.ClassDeclaration.prototype = {};
