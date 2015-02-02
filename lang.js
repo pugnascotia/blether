@@ -1,5 +1,9 @@
 var Blether = {
-	"classes": {}
+	"classes": {
+		"Object": {
+			"methods": {}
+		}
+	}
 };
 
 Blether.ParseError = function(err) {
@@ -140,9 +144,15 @@ Blether.BinaryPattern.prototype.visit = function(visitor) { return visitor.visit
 Blether.KeywordPattern = function(keywordPairs) {
 	this._type = 'KeywordPattern';
 	this.pairs = keywordPairs;
+	this.selector = "#";
+
+	for(var i = 0; i < this.pairs.length; i++) {
+		this.selector += this.pairs[i].key;
+	}
 };
 
 Blether.KeywordPattern.prototype = {};
+Blether.KeywordPattern.prototype.toString = function() { return this.selector };
 Blether.KeywordPattern.prototype.visit = function(visitor) { return visitor.visitKeywordPattern(this) };
 
 //------------------------------------------------------------------------------
@@ -277,7 +287,7 @@ Blether.ClassDeclaration = function(className, superClass, varNames) {
 	this.className = className;
 	this.superClass = superClass;
 	this.varNames = varNames;
-	this.methods = [];
+	this.methods = {};
 };
 
 Blether.ClassDeclaration.prototype = {};

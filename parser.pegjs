@@ -269,6 +269,14 @@ associations = first:associationSend others:associationList* {
 }
 
 classDeclaration = superClass:selector ws "subclass:" ws className:symbol ws "variables:" ws varNames:literalArray ws "." {
+	if (!Blether.classes[superClass]) {
+		throw Blether.ParseError({
+			"line": line(),
+			"column": column(),
+			"msg": "Super-class " + superClass + " not defined"
+		});
+	}
+
 	if (Blether.classes[className]) {
 		throw Blether.ParseError({
 			"line": line(),
@@ -291,6 +299,15 @@ classAndMethod = "!" className:className ws body:method "!" ws? "." {
 			"msg": "Unknown class " + className
 		});
 	}
+
+	if (Blether.classes[className].methods[body.selector]) {
+		throw Blether.ParseError({
+			"line": line(),
+			"column": column(),
+			"msg": "Method " + body.selector + "already defined on class " + className
+		});
+	}
+
 
 	return Blether.classes[className].methods[body.selector] = 
 		new Blether.MethodDeclaration(className, body);
