@@ -36,6 +36,9 @@ Blether.Array = function(array) {
 };
 
 Blether.Array.prototype = [];
+Blether.Array.prototype.toString = function() {
+	return "[" + this.value.map(function(each) { return '"' + each + '"' }).join(", ") + "]";
+};
 Blether.Array.prototype.visit = function(visitor) { return visitor.visitArray(this) };
 
 //------------------------------------------------------------------------------
@@ -65,6 +68,7 @@ Blether.UndefinedObject = function() {
 };
 
 Blether.UndefinedObject.prototype = {};
+Blether.UndefinedObject.prototype.toString = function() { return "null" };
 Blether.UndefinedObject.prototype.visit = function(visitor) { return visitor.visitUndefinedObject(this) };
 
 //------------------------------------------------------------------------------
@@ -75,6 +79,7 @@ Blether.Boolean = function(bool) {
 };
 
 Blether.Boolean.prototype = new Boolean();
+Blether.Boolean.prototype.toString = function() { return this.value.toString() };
 Blether.Boolean.prototype.visit = function(visitor) { return visitor.visitUndefinedObject(this) };
 
 //------------------------------------------------------------------------------
@@ -85,6 +90,7 @@ Blether.Variable = function(id) {
 };
 
 Blether.Variable.prototype = {};
+Blether.Variable.prototype.toString = function() { return this.value };
 Blether.Variable.prototype.visit = function(visitor) { return visitor.visitVariable(this) };
 
 //------------------------------------------------------------------------------
@@ -95,6 +101,7 @@ Blether.UnaryPattern = function(selector) {
 };
 
 Blether.UnaryPattern.prototype = {};
+Blether.UnaryPattern.prototype.toString = function() { return this.selector };
 Blether.UnaryPattern.prototype.visit = function(visitor) { return visitor.visitUnaryPattern(this) };
 
 //------------------------------------------------------------------------------
@@ -106,6 +113,7 @@ Blether.BinaryPattern = function(selector, arg) {
 };
 
 Blether.BinaryPattern.prototype = {};
+Blether.BinaryPattern.prototype.toString = function() { return this.selector = " - " + this.arg };
 Blether.BinaryPattern.prototype.visit = function(visitor) { return visitor.visitBinaryPattern(this) };
 
 //------------------------------------------------------------------------------
@@ -165,13 +173,20 @@ Blether.Block.prototype.visit = function(visitor) { return visitor.visitBlock(th
 
 Blether.Send = function(selector, args) {
 	this._type = 'Send';
-	this.selector = selector;
-	this.args = args;
 	this.receiver = null;
+	this.args = args || [];
+	this.selector = selector;
 };
 
+Blether.Send.prototype.setReceiver = function() { throw new Error("ARSE") };
 
-Blether.Send.prototype = {};
+Blether.Send.prototype.toString = function() {
+	var argsStr = "[" + this.args.map(function(each){return '"' + each + '"'}).join(", ") + "]";
+	return "Send(#" + this.selector +
+		(this.received ? " to " + this.receiver : '') +
+		(this.args.length > 0 ? " with args " + argsStr : '') + ")";
+};
+
 Blether.Send.prototype.visit = function(visitor) { return visitor.visitSend(this) };
 Blether.Send.prototype.setReceiver = function(anObject) {
 	if (this.receiver === null) {

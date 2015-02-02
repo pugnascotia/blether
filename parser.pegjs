@@ -8,12 +8,14 @@ start = program
 separator      = [ \t\v\f\u00A0\uFEFF\n\r\u2028\u2029]+
 
 comments       = comment:('"' [^"]* '"')+ {
-                    return Blether.Comment(comment);
-                  }
+                     return new Blether.Comment(comment);
+                 }
 
 ws             = (separator / comments)*
 
-identifier     = first:[a-zA-Z] others:[a-zA-Z0-9]* {return first + others.join("");}
+identifier     = first:[a-zA-Z] others:[a-zA-Z0-9]* {
+                     return first + others.join("");
+                 }
 
 keyword        = first:identifier last:":" {return first + last;}
 
@@ -32,11 +34,11 @@ character      = "$" char:. {
 symbol         = "#" rest:bareSymbol {return rest;}
 
 bareSymbol         = val:(selector / binarySelector / node:string {return node._value();}) {
-                      return new Blether.Symbol(val);
-                  }
+                       return new Blether.Symbol(val);
+                   }
 
 number         = val:(numberExp / hex / float / integer) {
-                      return new Blether.Number(val);
+                     return new Blether.Number(val);
                  }
 
 numberExp      = n:((float / integer) "e" integer) {return parseFloat(n.join(""));}
@@ -63,9 +65,9 @@ dynamicDictionary = "#{" ws expressions:associations? ws "}" {
                       return new Blether.DynamicDictionary(expressions);
                     }
 
-pseudoBooleanVariable = val:( 'true' {return true;} 'false' {return false;}) {
-						   return new Blether.Boolean(val);
-					   }
+pseudoBooleanVariable = val:( 'true' {return true;} / 'false' {return false;}) {
+                            return new Blether.Boolean(val);
+                        }
 
 pseudoNilVariable = val:'nil' {
                       return new Blether.UndefinedObject();
@@ -80,41 +82,39 @@ runtimeLiteral = dynamicDictionary / dynamicArray / block
 literal        = runtimeLiteral / parseTimeLiteral
 
 variable       = identifier:identifier {
-                      return new Blether.Variable(identifier);
+                     return new Blether.Variable(identifier);
                  }
 
 reference      = variable
 
 keywordPair    = ws key:keyword ws arg:binarySend {return {key:key, arg:arg};}
 
-binarySelector = bin:[\\+*/=><,@%~|&-]+ {
-					return bin.join("");
-				}
+binarySelector = bin:[\\+*/=><,@%~|&-]+ { return bin.join(""); }
 
 unarySelector  = identifier
 
 keywordPattern = pairs:(ws key:keyword ws arg:identifier {return {key:key, arg:arg};})+ {
                      return new Blether.KeywordPattern(pairs);
                  }
-binaryPattern  = ws selector:binarySelector ws arg:identifier {
-					return new Blether.BinaryPattern(selector, arg);
-				}
-unaryPattern   = ws selector:unarySelector {
-					return new Blether.UnaryPattern(selector);
-				}
 
-expression     = assignment / cascade / keywordSend / binarySend
+binaryPattern  = ws selector:binarySelector ws arg:identifier {
+                     return new Blether.BinaryPattern(selector, arg);
+                 }
+
+unaryPattern   = ws selector:unarySelector {
+                     return new Blether.UnaryPattern(selector);
+                 }
+
+expression     = assignment / cascade / binarySend / keywordSend
 
 expressionList = ws "." ws expression:expression {return expression;}
 expressions    = first:expression others:expressionList* { return [first].concat(others); }
 
 assignment     = variable:variable ws ':=' ws expression:expression {
-					 console.log("assignment");
-                    return new Blether.Assignment(variable, expression);
+                     return new Blether.Assignment(variable, expression);
                  }
 
 ret            = '^' ws expression:expression ws '.'? {
-                      // FIXME why does Amber use an array of ndoes?
                       return new Blether.Return(expression);
                  }
   
@@ -137,24 +137,29 @@ statements     = ret:ret "."* {return [ret];}
 sequence       = jsSequence / stSequence
 
 stSequence     = temps:temps? ws statements:statements? ws {
-                      return new Blether.Sequence(temps, statements);
+                     return new Blether.Sequence(temps, statements);
                  }
 
 jsSequence     = jsStatement
 
 block          = '[' params:blockParamList? ws sequence:sequence? ws ']' {
-                    return new Blether.Block(params, sequence);
+                     return new Blether.Block(params, sequence);
                  }
 
 operand        = literal / reference / subexpression
 
 
 unaryMessage   = ws selector:unarySelector !":" {
-                      return new Blether.Send(selector);
+                     return new Blether.Send(selector);
                  }
 
 unaryTail      = message:unaryMessage ws tail:unaryTail? ws {
-					 return tail ? tail.setReceiver(message) : message;
+                     if (tail) {
+                         return tail.setReceiver(message);
+                     }
+                     else {
+                         return message;
+                     }
                  }
 
 unarySend      = receiver:operand ws tail:unaryTail? {
@@ -167,8 +172,7 @@ unarySend      = receiver:operand ws tail:unaryTail? {
                  }
 
 binaryMessage  = ws selector:binarySelector ws arg:(unarySend / operand) {
-					 console.log("binaryMessage [" + selector + "] [" + arg + "]");
-                      return Blether.Send(selector, [arg]);
+                      return new Blether.Send(selector, [arg]);
                  }
 
 binaryTail     = message:binaryMessage tail:binaryTail? {
@@ -182,7 +186,6 @@ binaryTail     = message:binaryMessage tail:binaryTail? {
 
 binarySend     = receiver:unarySend tail:binaryTail? {
                      if (tail) {
-						console.warn("binarySend [" + receiver + "] [" + tail + "]");
                          return tail.setReceiver(receiver);
                      }
                      else {
@@ -202,8 +205,6 @@ keywordMessage = pairs:keywordPair+ {
                  }
 
 keywordSend    = receiver:binarySend tail:keywordMessage {
-                     //return tail._valueForReceiver_(receiver);
-					 console.log("keywordSend [" + receiver + "] [" + tail + "]");
                      return tail.setReceiver(receiver);
                  }
 
@@ -219,9 +220,6 @@ cascade        = ws send:(keywordSend / binarySend) messages:(ws ";" ws mess:mes
                  }
 
 jsStatement    = "<" val:((">>" {return ">";} / [^>])*) ">" {
-                     //return $globals.JSStatementNode._new()
-                     //       ._position_((line()).__at(column()))
-                     //       ._source_(val.join(""))
                       return new Blether.JsStatement(val.join(""));
                  }
 
@@ -250,7 +248,9 @@ classAndMethod = "!" className:className ws body:method "!" ws? "." {
                     return new Blether.MethodDeclaration(className, body);
                   }
 
-programElement = ws? element:(comments / classAndMethod / classDeclaration) ws?  { return element }
+programElement = ws? element:(comments / classAndMethod / classDeclaration) ws?  {
+                     return element
+                 }
 
 program = first:programElement others:programElement* {
               return new Blether.Program([first].concat(others));
