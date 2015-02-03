@@ -137,7 +137,7 @@ Blether.BinaryPattern = function(selector, arg) {
 };
 
 Blether.BinaryPattern.prototype = {};
-Blether.BinaryPattern.prototype.toString = function() { return this.selector = " - " + this.arg; };
+Blether.BinaryPattern.prototype.toString = function() { return this.selector + " - " + this.arg; };
 Blether.BinaryPattern.prototype.visit = function(visitor) { return visitor.visitBinaryPattern(this); };
 
 //------------------------------------------------------------------------------
@@ -292,6 +292,9 @@ Blether.MethodDeclaration = function(className, body) {
 
 Blether.MethodDeclaration.prototype = {};
 Blether.MethodDeclaration.prototype.visit = function(visitor) { return visitor.visitMethodDeclaration(this); };
+Blether.MethodDeclaration.prototype.getClass = function() {
+	return this.context.classes[this.className];
+};
 
 //------------------------------------------------------------------------------
 

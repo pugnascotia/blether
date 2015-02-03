@@ -1,7 +1,7 @@
 var Translator = function() {
 	"use strict";
 
-	var printedClassPrerequisites = false;
+	this.printedClassPrerequisites = false;
 
 	var classPrerequisites =
 "var _extends = function(child, parent) {\n" +
@@ -19,6 +19,32 @@ var Translator = function() {
 "};\n\n" +
 "var _hasProp = {}.hasOwnProperty;\n\n";
 
+	function convertBinaryChars(str) {
+		var mapping = {
+			"\\": "backslash",
+			"+": "plus",
+			"*": "multiply",
+			"/": "divide",
+			"=": "equals",
+			">": "greater_than",
+			"<": "less_than",
+			",": "join",
+			"@": "at",
+			"%": "modulo",
+			"~": "tilde",
+			"|": "or",
+			"&": "and",
+			"-": "minus"
+		};
+
+		if (str.match(/[\\+*/=><,@%~|&-]/)) {
+			return str.split("").map(function(e) { return mapping[e]; }).join("_") + "$";
+		}
+		else {
+			return str;
+		}
+	}
+
 	this.visit = function(something) {
 		return something.visit(this);
 	};
@@ -30,7 +56,7 @@ var Translator = function() {
 
 		node.elements.forEach(function(childNode) {
 			// Skip methods since these are visited inside classes
-			if (childNode._type !== "MethodDeclaration") {
+			if (childNode._type !== "MethodDeclaration" || typeof childNode.getClass().superClass === "undefined") {
 				output += childNode.visit(self);
 			}
 		});
@@ -42,13 +68,14 @@ var Translator = function() {
 		var self = this;
 		var output = "";
 
-		if (!printedClassPrerequisites) {
+		var hasSuper = node.superClass !== "Object";
+
+		if (!this.printedClassPrerequisites && hasSuper) {
 			output += classPrerequisites;
+			this.printedClassPrerequisites = true;
 		}
 
-		output = "var " + node.className.visit(this) + " = (function(";
-
-		var hasSuper = node.superClass !== "Object";
+		output += "var " + node.className.visit(this) + " = (function(";
 
 		if (hasSuper) {
 			output += "_super";
@@ -128,7 +155,7 @@ var Translator = function() {
 	};
 
 	this.visitBinaryPattern = function(node) {
-		return [node.selector, [node.arg]];
+		return [convertBinaryChars(node.selector), [node.arg]];
 	};
 
 	this.visitKeywordPattern = function(node) {
@@ -171,7 +198,7 @@ var Translator = function() {
 
 	this.visitSend = function(node) {
 		var self = this;
-		var output = node.receiver.visit(this) + "." + node.selector + "(";
+		var output = node.receiver.visit(this) + "." + convertBinaryChars(node.selector) + "(";
 
 		if (typeof node.args !== "undefined") {
 			output += node.args.map(function(each) { return each.visit(self); }).join(", ");
