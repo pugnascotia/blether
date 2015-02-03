@@ -148,6 +148,11 @@ var Translator = function() {
 		return node.value;
 	};
 
+	this.visitStatement = function(node) {
+
+		return node.expression.visit(this) + ";\n";
+	};
+
 	this.visitSequence = function(node) {
 		var output = "";
 
@@ -196,6 +201,18 @@ var Translator = function() {
 		"\n}";
 	};
 
+	this.visitCascade = function(node) {
+		var self = this;
+
+		var output = "var _receiver = " + node.receiver.visit(this) + ";\n";
+
+		output += node.messages.map(function(each) {
+			each.receiver = new Blether.Variable("_receiver");
+			return each.visit(self);
+		}).join(";\n");
+
+		return output;
+	};
 };
 
 

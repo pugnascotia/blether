@@ -147,7 +147,7 @@ statements = ret:ret "."* {return [ret];}
 }
 
 statement = expr:expression "." {
-	return expr;
+	return new Blether.Statement(expr);
 }
 
 sequence = jsSequence / stSequence
@@ -231,13 +231,13 @@ keywordSend = receiver:binarySend tail:keywordMessage {
 
 message = binaryMessage / unaryMessage / keywordMessage
 
-cascade = ws send:(keywordSend / binarySend) messages:(ws ";" ws mess:message {return mess;})+ {
-	var cascade = [];
-	cascade.push(send);
-	for(var i = 0; i < messages.length; i++) {
-		cascade.push(messages[i]);
+cascade = ws send:(keywordSend / binarySend) cascade:(ws ";" ws mess:message {return mess;})+ {
+
+	var messages = [send];
+	for(var i = 0; i < cascade.length; i++) {
+		messages.push(cascade[i]);
 	}
-	return new Blether.Cascade(send, cascade);
+	return new Blether.Cascade(send.receiver, messages);
 }
 
 jsStatement = "<" val:((">>" {return ">";} / [^>])*) ">" {

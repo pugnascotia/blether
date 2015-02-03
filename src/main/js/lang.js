@@ -190,6 +190,15 @@ Blether.Sequence.prototype.visit = function(visitor) { return visitor.visitSeque
 
 //------------------------------------------------------------------------------
 
+Blether.Statement = function(expression) {
+	this._type = "Statement";
+	this.expression = expression;
+};
+
+Blether.Statement.prototype.visit = function(visitor) { return visitor.visitStatement(this); };
+
+//------------------------------------------------------------------------------
+
 Blether.Block = function(paramList, sequence) {
 	this._type = "Block";
 	this.params = paramList;
@@ -230,10 +239,10 @@ Blether.Send.prototype.setReceiver = function(anObject) {
 
 //------------------------------------------------------------------------------
 
-Blether.Cascade = function(receiver, cascade) {
+Blether.Cascade = function(receiver, messages) {
 	this._type = "Cascade";
 	this.receiver = receiver;
-	this.cascade = cascade;
+	this.messages = messages;
 };
 
 Blether.Cascade.prototype = {};
