@@ -1,4 +1,4 @@
-var Translator = function(context) {
+var Translator = function() {
 
 	this.visit = function(something) {
 		return something.visit(this);
@@ -40,13 +40,15 @@ var Translator = function(context) {
 
 		var hasSuper = node.superClass !== "Object";
 
-		if (hasSuper) { output += "_super" };
+		if (hasSuper) {
+			output += "_super";
+		}
 		
 		output += ") {\n";
 
 		if (hasSuper) {
 			output += "_extends(" + node.className + ", _super);\n\n";
-		};
+		}
 
 		output += "function " + node.className + "() {\n";
 		if (hasSuper) {
@@ -72,7 +74,9 @@ var Translator = function(context) {
 
 		output += "})(";
 
-		if (hasSuper) { output += node.superClass };
+		if (hasSuper) {
+			output += node.superClass;
+		}
 		
 		output += ");\n\n";
 
@@ -88,7 +92,7 @@ var Translator = function(context) {
 	};
 
 	this.visitString = function(node) {
-		return '"' + node.value.replace(/"/g, "\\\"") + '"';
+		return "\"" + node.value.replace(/"/g, "\\\"") + "\"";
 	};
 
 	this.visitMethod = function(node) {
@@ -127,7 +131,7 @@ var Translator = function(context) {
 		for(i = 0; i < node.pairs.length; i++){
 		    params.push(node.pairs[i].arg);
 		}
-		return [keywords.join("_").replace(/:/g, ''), params];
+		return [keywords.join("_").replace(/:/g, ""), params];
 	};
 
 	this.visitSymbol = function(node) {
@@ -135,9 +139,9 @@ var Translator = function(context) {
 	};
 
 	this.visitSequence = function(node) {
-		var output = '';
+		var output = "";
 
-		output += node.temps.map(function(each) { return "var " + each + ";\n" }).join("");
+		output += node.temps.map(function(each) { return "var " + each + ";\n"; }).join("");
 
 		var self = this;
 		output += node.statements.map(function(each) {
@@ -152,7 +156,7 @@ var Translator = function(context) {
 		var output = node.receiver.visit(this) + "." + node.selector + "(";
 
 		if (typeof node.args !== "undefined") {
-			output += node.args.map(function(each) { return each.visit(self) }).join(", ");
+			output += node.args.map(function(each) { return each.visit(self); }).join(", ");
 		}
 
 		output += ")";
@@ -172,7 +176,7 @@ var Translator = function(context) {
 		return node.value;
 	};
 
-	this.visitUndefinedObject = function(node) {
+	this.visitUndefinedObject = function() {
 		return "null";
 	};
 
