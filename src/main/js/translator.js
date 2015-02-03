@@ -1,14 +1,9 @@
 var Translator = function() {
 	"use strict";
 
-	this.visit = function(something) {
-		return something.visit(this);
-	};
+	var printedClassPrerequisites = false;
 
-	this.visitProgram = function(node) {
-		var self = this;
-
-		var output =
+	var classPrerequisites =
 "var _extends = function(child, parent) {\n" +
 "	for (var key in parent) {\n" +
 "		if (_hasProp.call(parent, key)) child[key] = parent[key];\n" +
@@ -24,8 +19,17 @@ var Translator = function() {
 "};\n\n" +
 "var _hasProp = {}.hasOwnProperty;\n\n";
 
+	this.visit = function(something) {
+		return something.visit(this);
+	};
+
+	this.visitProgram = function(node) {
+		var self = this;
+
+		var output = "";
+
 		node.elements.forEach(function(childNode) {
-			// Methods are output inside classes
+			// Skip methods since these are visited inside classes
 			if (childNode._type !== "MethodDeclaration") {
 				output += childNode.visit(self);
 			}
@@ -36,8 +40,13 @@ var Translator = function() {
 
 	this.visitClassDeclaration = function(node) {
 		var self = this;
+		var output = "";
 
-		var output = "var " + node.className.visit(this) + " = (function(";
+		if (!printedClassPrerequisites) {
+			output += classPrerequisites;
+		}
+
+		output = "var " + node.className.visit(this) + " = (function(";
 
 		var hasSuper = node.superClass !== "Object";
 

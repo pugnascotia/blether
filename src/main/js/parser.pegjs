@@ -108,12 +108,10 @@ expressionChain = message:message (ws chain:expressionChain { return chain })? {
 }
 
 expression2 = send:(keywordSend / binarySend) message:(ws mess:expressionChain { return mess })? {
-	//	console.log("expression2 send:[" + send + "] message:[" + message + "]");
 	if (message) {
 		return message.setReceiver(send);
 	}
 	else {
-		//return new Blether.Send(send);
 		return send;
 	}
 }
@@ -148,6 +146,10 @@ statements = ret:ret "."* {return [ret];}
 	return expressions || [];
 }
 
+statement = expr:expression "." {
+	return expr;
+}
+
 sequence = jsSequence / stSequence
 
 stSequence = temps:temps? ws statements:statements? ws {
@@ -164,7 +166,6 @@ operand = literal / reference / subexpression
 
 
 unaryMessage = ws selector:unarySelector !":" {
-	//	console.log("unarySelector selector:[" + selector + "]");
 	return new Blether.Send(selector);
 }
 
@@ -188,7 +189,6 @@ unarySend = receiver:operand ws tail:unaryTail? {
 
 
 binaryMessage = ws selector:binarySelector ws arg:(unarySend / operand) {
-	//	console.log("binaryMessage selector:[" + selector + "] arg:[" + arg + "]");
 	return new Blether.Send(selector, [arg]);
 }
 
@@ -222,7 +222,6 @@ keywordMessage = pairs:keywordPair+ {
 	}
 	var synthesizedSelector = selector.join("_").replace(/:/g, '');
 
-	//	console.log("keywordMessage selector:[" + synthesizedSelector + "] args:[" + args + "]");
 	return new Blether.Send(synthesizedSelector, args);
 }
 
@@ -306,7 +305,7 @@ classAndMethod = "!" className:className ws body:method "!" ws? "." {
 		new Blether.MethodDeclaration(className, body);
 }
 
-programElement = ws? element:(comments / classAndMethod / classDeclaration) ws?  {
+programElement = ws? element:(comments / classAndMethod / classDeclaration / statement) ws?  {
 	return element
 }
 
