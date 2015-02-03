@@ -1,3 +1,4 @@
+// Global context object and root of the language types used by the parser
 var Blether = {
 	"classes": {
 		"Object": {
@@ -310,5 +311,3 @@ Blether.Program = function(elements) {
 Blether.Program.prototype = {};
 Blether.Program.prototype.visit = function(visitor) { return visitor.visitProgram(this); };
 
-
-module.exports = Blether;

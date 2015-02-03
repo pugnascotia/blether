@@ -1,4 +1,5 @@
 var Translator = function() {
+	"use strict";
 
 	this.visit = function(something) {
 		return something.visit(this);
@@ -188,9 +189,10 @@ var Translator = function() {
 
 };
 
-function translate(ast) {
-	return new Translator().visit(ast);
-}
 
-
-module.exports = { "translate": translate };
+module.exports = {
+	"translate": function(text) {
+		var ast = BletherParser.parse(text);
+		return new Translator().visit(ast);
+	}
+};

@@ -1,8 +1,3 @@
-{
-	// Import AST types
-	var Blether = require("./lang.js");
-}
-
 start = program
 
 separator = [ \t\v\f\u00A0\uFEFF\n\r\u2028\u2029]+

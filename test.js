@@ -3,23 +3,17 @@ if (global.v8debug) {
 }
 
 var fs = require("fs");
-var parser = require("./parser.js");
-var translator = require("./translator.js");
+var blether = require("./target/blether.js");
 var util = require('util');
 
 var text = fs.readFileSync("test.st").toString();
 
 try {
-	var ast = parser.parse(text);
+	var js = blether.translate(text);
+	console.log(js);
 }
 catch (e) {
 	console.log("Failed at line [" + e.line + "], column [" + e.column + "]: " + e);
 	console.log(e);
 	process.exit();
 }
-
-//console.log(util.inspect(ast, false, null));
-
-var js = translator.translate(ast);
-
-console.log(js);

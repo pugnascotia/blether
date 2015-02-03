@@ -21,7 +21,8 @@ module.exports = function(grunt) {
 		peg: {
 			grammer: {
 				src: "src/main/js/parser.pegjs",
-				dest: "target/parser.js"
+				dest: "target/parser.js",
+				options: { exportVar: "var BletherParser" }
 			}
 		},
 
@@ -36,8 +37,12 @@ module.exports = function(grunt) {
 		// Configure the grunt-peg plugin
 		concat: {
 			dist: {
-				src: javascriptFiles.concat("target/parser.js"),
-				dest: 'target/blether.js'
+				src: [
+					"src/main/js/lang.js",
+					"target/parser.js",
+					"src/main/js/translator.js",
+				],
+				dest: "target/blether.js"
 			}
 		},
 
@@ -56,14 +61,11 @@ module.exports = function(grunt) {
 		watch: {
 			scripts: {
 				files: javascriptFiles,
-				tasks: ['jshint', 'concat', 'uglify'],
-				options: {
-					spawn: true,
-				},
+				tasks: ['jshint', 'concat' ]
 			},
 			grammar: {
 				files: [ 'src/main/js/parser.pegjs' ],
-				tasks: [ 'peg' ]
+				tasks: [ 'peg', 'concat' ]
 			}
 		},
 	});
@@ -74,6 +76,7 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks("grunt-contrib-jshint");
 	grunt.loadNpmTasks("grunt-contrib-uglify");
 	grunt.loadNpmTasks('grunt-peg');
+	grunt.loadNpmTasks('grunt-contrib-watch');
 
 	// Tell Grunt what to do when we type "grunt" into the terminal.
 	grunt.registerTask("default", [
