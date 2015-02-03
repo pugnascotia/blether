@@ -17,7 +17,8 @@ Blether.ParseError = function(err) {
 
 Blether.ParseError.prototype = new Error;
 Blether.ParseError.prototype.toString = function() {
-	return this.message + ":" + this.line + ":" + this.column };
+	return this.message + ":" + this.line + ":" + this.column;
+};
 
 
 /* The language parts */
@@ -275,6 +276,9 @@ Blether.MethodDeclaration = function(className, body) {
 	this._type = 'MethodDeclaration';
 	this.className = className;
 	this.body = body;
+	this.context = Blether;
+
+	this.context.classes[className].methods[body.selector] = this;
 };
 
 Blether.MethodDeclaration.prototype = {};
@@ -288,10 +292,14 @@ Blether.ClassDeclaration = function(className, superClass, varNames) {
 	this.superClass = superClass;
 	this.varNames = varNames;
 	this.methods = {};
+	this.context = Blether;
 };
 
 Blether.ClassDeclaration.prototype = {};
 Blether.ClassDeclaration.prototype.visit = function(visitor) { return visitor.visitClassDeclaration(this) };
+Blether.ClassDeclaration.prototype.getMethods = function() {
+	return this.context.classes[this.className].methods;
+};
 
 //------------------------------------------------------------------------------
 

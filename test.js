@@ -18,7 +18,7 @@ catch (e) {
 	process.exit();
 }
 
-console.log(util.inspect(ast, false, null));
+//console.log(util.inspect(ast, false, null));
 
 var js = translator.translate(ast);
 

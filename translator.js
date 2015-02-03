@@ -1,4 +1,4 @@
-var Translator = function() {
+var Translator = function(context) {
 
 	this.visit = function(something) {
 		return something.visit(this);
@@ -20,17 +20,22 @@ var Translator = function() {
 "	child.prototype = new ctor();\n" +
 "	child.__super__ = parent.prototype;\n" +
 "	return child;\n" +
-"};\n" +
-"var _hasProp = {}.hasOwnProperty;\n";
+"};\n\n" +
+"var _hasProp = {}.hasOwnProperty;\n\n";
 
 		node.elements.forEach(function(childNode) {
-			output += childNode.visit(self);
+			// Methods are output inside classes
+			if (childNode._type !== "MethodDeclaration") {
+				output += childNode.visit(self);
+			}
 		});
 
 		return output;
 	};
 
 	this.visitClassDeclaration = function(node) {
+		var self = this;
+
 		var output = "var " + node.className.visit(this) + " = (function(";
 
 		var hasSuper = node.superClass !== "Object";
@@ -53,6 +58,14 @@ var Translator = function() {
 
 		for (var i = 0; i < instanceNames.length; i++) {
 			output += "this." + instanceNames[i].visit(this) + " = null;\n";
+		}
+
+		var methods = node.getMethods();
+		
+		for (var prop in methods) {
+			if (methods.hasOwnProperty(prop)) {
+				output += methods[prop].visit(self);
+			}
 		}
 
 		output += "\nreturn " + node.className + ";\n\n";
