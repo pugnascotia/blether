@@ -7,11 +7,21 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
-    "smalltalk"
+    "smalltalk",
+    "javascript",
+    "pegjs"
   ],
-  "author": "Rory Hunter <roryhunter@gmail.com>",
+  "author": "Rory Hunter <roryhunter2@gmail.com>",
   "license": "GPL2",
   "devDependencies": {
-    "pegjs": "~0.8.0"
+    "pegjs": "~0.8.0",
+    "time-grunt": "~1.0.0",
+    "grunt-contrib-concat": "~0.5.0",
+    "grunt-contrib-watch": "~0.6.1",
+    "grunt-cli": "~0.1.13",
+    "grunt-contrib-uglify": "~0.7.0",
+    "grunt": "~0.4.5",
+    "grunt-contrib-jshint": "~0.11.0",
+    "grunt-peg": "~1.5.0"
   }
 }
