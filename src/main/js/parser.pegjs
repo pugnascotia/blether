@@ -146,7 +146,7 @@ statements = ret:ret "."* {return [ret];}
 	return expressions || [];
 }
 
-statement = expr:expression "." {
+statement = expr:(e:expression "." { return e } / jsStatement) {
 	return new Blether.Statement(expr);
 }
 

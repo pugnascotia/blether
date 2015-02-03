@@ -149,8 +149,11 @@ var Translator = function() {
 	};
 
 	this.visitStatement = function(node) {
+		var output = node.expression.visit(this);
 
-		return node.expression.visit(this) + ";\n";
+		output += (output[output.length -1] !== ";") ? ";\n" : "\n";
+
+		return output;
 	};
 
 	this.visitSequence = function(node) {
@@ -212,6 +215,10 @@ var Translator = function() {
 		}).join(";\n");
 
 		return output;
+	};
+
+	this.visitJsStatement = function(node) {
+		return node.javascript.trim();
 	};
 };
 
