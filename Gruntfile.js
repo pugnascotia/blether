@@ -40,6 +40,7 @@ module.exports = function(grunt) {
 				src: [
 					"src/main/js/lang.js",
 					"target/parser.js",
+					"src/main/js/selector.js",
 					"src/main/js/translator.js",
 				],
 				dest: "target/blether.js"
@@ -66,6 +67,10 @@ module.exports = function(grunt) {
 			grammar: {
 				files: [ 'src/main/js/parser.pegjs' ],
 				tasks: [ 'peg', 'concat' ]
+			},
+			build: {
+				files: [ "Gruntfile.js" ],
+				tasks: [ "default" ]
 			}
 		},
 	});

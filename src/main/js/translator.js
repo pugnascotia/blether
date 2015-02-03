@@ -19,32 +19,6 @@ var Translator = function() {
 "};\n\n" +
 "var _hasProp = {}.hasOwnProperty;\n\n";
 
-	function convertBinaryChars(str) {
-		var mapping = {
-			"\\": "backslash",
-			"+": "plus",
-			"*": "multiply",
-			"/": "divide",
-			"=": "equals",
-			">": "greater_than",
-			"<": "less_than",
-			",": "join",
-			"@": "at",
-			"%": "modulo",
-			"~": "tilde",
-			"|": "or",
-			"&": "and",
-			"-": "minus"
-		};
-
-		if (str.match(/[\\+*/=><,@%~|&-]/)) {
-			return str.split("").map(function(e) { return mapping[e]; }).join("_") + "$";
-		}
-		else {
-			return str;
-		}
-	}
-
 	this.visit = function(something) {
 		return something.visit(this);
 	};
@@ -151,11 +125,11 @@ var Translator = function() {
 	};
 
 	this.visitUnaryPattern = function(node) {
-		return[node.selector, []];
+		return[convertSelector(node.selector), []];
 	};
 
 	this.visitBinaryPattern = function(node) {
-		return [convertBinaryChars(node.selector), [node.arg]];
+		return [convertSelector(node.selector), [node.arg]];
 	};
 
 	this.visitKeywordPattern = function(node) {
@@ -168,7 +142,7 @@ var Translator = function() {
 		for(i = 0; i < node.pairs.length; i++){
 		    params.push(node.pairs[i].arg);
 		}
-		return [keywords.join("_").replace(/:/g, ""), params];
+		return [convertSelector(keywords.join("_").replace(/:/g, "$")), params];
 	};
 
 	this.visitSymbol = function(node) {
@@ -198,7 +172,7 @@ var Translator = function() {
 
 	this.visitSend = function(node) {
 		var self = this;
-		var output = node.receiver.visit(this) + "." + convertBinaryChars(node.selector) + "(";
+		var output = node.receiver.visit(this) + "." + convertSelector(node.selector) + "(";
 
 		if (typeof node.args !== "undefined") {
 			output += node.args.map(function(each) { return each.visit(self); }).join(", ");
@@ -253,6 +227,10 @@ var Translator = function() {
 module.exports = {
 	"translate": function(text) {
 		var ast = BletherParser.parse(text);
+
+		// var util = require("util");
+		// console.log(util.inspect(ast, false, null));
+
 		return new Translator().visit(ast);
 	}
 };

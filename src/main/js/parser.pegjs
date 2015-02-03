@@ -220,9 +220,8 @@ keywordMessage = pairs:keywordPair+ {
 		selector.push(pairs[i].key);
 		args.push(pairs[i].arg);
 	}
-	var synthesizedSelector = selector.join("_").replace(/:/g, '');
 
-	return new Blether.Send(synthesizedSelector, args);
+	return new Blether.Send(selector.join(""), args);
 }
 
 keywordSend = receiver:binarySend tail:keywordMessage {
