@@ -1,29 +1,31 @@
 /* exported convertSelector */
 function convertSelector(selector) {
 
-	function convertBinaryChars(str) {
-		var mapping = {
-			"\\": "backslash",
-			"+": "plus",
-			"*": "multiply",
-			"/": "divide",
-			"=": "equals",
-			">": "greater_than",
-			"<": "less_than",
-			",": "join",
-			"@": "at",
-			"%": "modulo",
-			"~": "tilde",
-			"|": "or",
-			"&": "and",
-			"-": "minus"
-		};
+	var mapping = {
+		"\\": "backslash",
+		"+": "plus",
+		"*": "multiply",
+		"/": "divide",
+		"=": "equals",
+		">": "greater_than",
+		"<": "less_than",
+		",": "join",
+		"@": "at",
+		"%": "modulo",
+		"~": "tilde",
+		"|": "or",
+		"&": "and",
+		"-": "minus"
+	};
 
-		return str.split("").map(function(e) { return mapping[e]; }).join("_") + "$";
-	}
+	var javascriptEquivalents = {
+		"do": "forEach",
+		"doWithIndex": "forEach",
+		"select": "filter"
+	};
 
 	if (selector.match(/[\\+*/=><,@%~|&-]/)) {
-		return convertBinaryChars(selector);
+		return selector.split("").map(function(e) { return mapping[e]; }).join("_") + "$";
 	}
 
 	if (selector.match(/:/)) {
@@ -36,12 +38,6 @@ function convertSelector(selector) {
 			selector = selector_parts[0];
 		}
 	}
-
-	var javascriptEquivalents = {
-		"do": "forEach",
-		"doWithIndex": "forEach",
-		"select": "filter"
-	};
 
 	if (javascriptEquivalents.hasOwnProperty(selector)) {
 		return javascriptEquivalents[selector];
