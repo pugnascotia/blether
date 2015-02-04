@@ -215,6 +215,10 @@ var Translator = function() {
 				output = this.convertIfNilIfNotNil(receiver, node);
 				break;
 
+			case "new":
+				output = this.convertNew(receiver);
+				break;
+
 			default:
 				output = receiver + "." + selector + "(";
 
@@ -340,6 +344,10 @@ var Translator = function() {
 		output += "})()\n";
 
 		return output;
+	};
+
+	this.convertNew = function(receiver) {
+		return "new " + receiver + "()";
 	};
 };
 
