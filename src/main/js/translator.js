@@ -114,7 +114,7 @@ var Translator = function() {
 	this.visitMethod = function(node) {
 
 		var output = "function(" + node.selector.visit(this)[1].join(", ") + ") {\n";
-		output += "var _self = this;\n";
+		output += "var self = this;\n";
 
 		var self = this;
 
@@ -270,6 +270,12 @@ var Translator = function() {
 
 	this.visitJsStatement = function(node) {
 		return node.javascript.trim();
+	};
+
+	this.visitVariableDeclaration = function(node) {
+		return node.variables.map(function(each) {
+			return "var " + each + ";\n";
+		}).join("");
 	};
 
 	this.convertIfNil = function(receiver, node) {

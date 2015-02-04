@@ -312,3 +312,13 @@ Blether.Program = function(elements) {
 
 Blether.Program.prototype.visit = function(visitor) { return visitor.visitProgram(this); };
 
+//------------------------------------------------------------------------------
+
+Blether.VariableDeclaration = function(vars) {
+	this._type = "VariableDeclaration";
+	this.variables = vars;
+};
+
+Blether.VariableDeclaration.prototype.visit = function(visitor) { return visitor.visitVariableDeclaration(this); };
+
+

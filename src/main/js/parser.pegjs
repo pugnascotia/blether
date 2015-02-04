@@ -130,7 +130,20 @@ ret = '^' ws expression:expression ws '.'? {
 	return new Blether.Return(expression);
 }
 
-temps = "|" vars:(ws variable:identifier {return variable;})* ws "|" {return vars;}
+temps = "|" vars:(ws variable:identifier {return variable;})* ws "|" {
+	
+	vars.forEach(function(each) {
+		if (each === "self") {
+			throw Blether.ParseError({
+				"line": line(),
+				"column": column(),
+				"msg": "Cannot name a variable [self]"
+			});
+		}
+	});
+
+	return vars;
+}
 
 blockParamList = params:((ws ":" ws param:identifier {return param;})+) ws "|" {return params;}
 
@@ -308,6 +321,6 @@ programElement = ws? element:(comments / classAndMethod / classDeclaration / sta
 	return element
 }
 
-program = first:programElement others:programElement* {
+program = first:(ws? decl:temps ws? { return new Blether.VariableDeclaration(decl); } / programElement) others:programElement* {
 	return new Blether.Program([first].concat(others));
 }
