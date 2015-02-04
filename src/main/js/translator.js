@@ -269,12 +269,14 @@ var Translator = function() {
 	this.visitCascade = function(node) {
 		var self = this;
 
-		var output = "var _receiver = " + node.receiver.visit(this) + ";\n";
+		var output = "(function(_receiver) {\n";
 
-		output += node.messages.map(function(each) {
+		node.messages.forEach(function(each, index, array) {
 			each.receiver = new Blether.Variable("_receiver");
-			return each.visit(self);
-		}).join(";\n");
+			output += (index === array.length - 1 ? "return " : "") + each.visit(self) + ";\n";
+		});
+
+		output += "})(" + node.receiver.visit(this) + ")";
 
 		return output;
 	};
