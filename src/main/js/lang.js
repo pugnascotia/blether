@@ -70,7 +70,7 @@ Blether.Array.prototype.visit = function(visitor) { return visitor.visitArray(th
 
 Blether.DynamicArray = function(array) {
 	this._type = "DynamicArray";
-	this.value = array || [];
+	this.values = array || [];
 };
 
 Blether.DynamicArray.prototype = new Blether.Array();
@@ -80,7 +80,7 @@ Blether.DynamicArray.prototype.visit = function(visitor) { return visitor.visitD
 
 Blether.DynamicDictionary = function(dict) {
 	this._type = "DynamicDictionary";
-	this.value = dict || {};
+	this.values = dict || {};
 };
 
 Blether.DynamicDictionary.prototype.visit = function(visitor) { return visitor.visitDynamicDictionary(this); };

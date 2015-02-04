@@ -292,6 +292,27 @@ var Translator = function() {
 		return "[" + node.value.map(function(each) { return each.visit(self); }).join(",") + "]";
 	};
 
+	this.visitDynamicArray = function(node) {
+		var self = this;
+		return "[" + node.values.map(function(each) { return each.visit(self); }).join(", ") + "]";
+	};
+
+	this.visitDynamicDictionary = function(node) {
+		var output = "{\n";
+
+		var values = [];
+
+		for (var i = 0, j = 1; j < node.values.length; i += 2, j += 2) {
+			values.push(node.values[i].visit(this) + ": " + node.values[j].visit(this));
+		}
+
+		output += values.join(",\n");
+
+		output += "\n}";
+
+		return output;
+	};
+
 	this.convertIfNil = function(receiver, node) {
 		var block = node.args[0];
 		var output;
