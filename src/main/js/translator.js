@@ -284,9 +284,7 @@ var Translator = function() {
 	};
 
 	this.visitVariableDeclaration = function(node) {
-		return node.variables.map(function(each) {
-			return "var " + each + ";\n";
-		}).join("");
+		return "var " + node.variables.join(", ") + ";\n";
 	};
 
 	this.visitArray = function(node) {
