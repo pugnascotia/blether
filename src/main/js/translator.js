@@ -61,17 +61,22 @@ var Translator = function() {
 			output += "_extends(" + node.className + ", _super);\n\n";
 		}
 
-		output += "function " + node.className + "() {\n";
+		var instanceNames = node.varNames.value;
+
+		output += "function " + node.className + "(";
+		output += instanceNames.map(function(each) { return "_" + each.visit(self); }).join(", ");
+		output += ") {\n";
+
 		if (hasSuper) {
 			output += "    return " + node.className + ".__super__.constructor.apply(this, arguments);\n";
 		}
+
+		instanceNames.forEach(function(each) {
+			var name = each.visit(self);
+			output += "this." + name + " = _" + name + ";\n";
+		});
+
 		output += "};\n\n";
-
-		var instanceNames = node.varNames.value;
-
-		for (var i = 0; i < instanceNames.length; i++) {
-			output += "this." + instanceNames[i].visit(this) + " = null;\n";
-		}
 
 		var methods = node.getMethods();
 		
@@ -281,7 +286,7 @@ var Translator = function() {
 	this.convertIfNil = function(receiver, node) {
 		var block = node.args[0];
 
-		// TODO check type of block
+		// TODO check that block is indeed a Block
 
 		if (block.params.length > 1) {
 			throw "Cannot supply more than one argument to an ifNotNil: block";
