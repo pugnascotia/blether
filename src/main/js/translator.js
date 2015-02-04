@@ -153,7 +153,7 @@ var Translator = function() {
 		for(i = 0; i < node.pairs.length; i++){
 		    params.push(node.pairs[i].arg);
 		}
-		return [convertSelector(keywords.join("_").replace(/:/g, "$")), params];
+		return [convertSelector(keywords.join("")), params];
 	};
 
 	this.visitSymbol = function(node) {
@@ -192,19 +192,7 @@ var Translator = function() {
 		var selector = convertSelector(node.selector);
 
 		if (receiver === "super") {
-			if (typeof this.currentClass !== "undefined") {
-				output = this.currentClass + ".__super__." + selector + ".call(self";
-				if (node.args.length > 0) {
-					node.args.forEach(function(each) {
-						output += ", " + each.visit(self);
-					});
-				}
-				output += ")";
-				return output;
-			}
-			else {
-				throw "Can't use [super] outside a method declaration";
-			}
+			return this.convertSuper(selector, node);
 		}
 
 		switch (node.selector) {
@@ -367,6 +355,23 @@ var Translator = function() {
 
 	this.convertNew = function(receiver) {
 		return "new " + receiver + "()";
+	};
+
+	this.convertSuper = function(selector, node) {
+		var self = this;
+		if (typeof this.currentClass !== "undefined") {
+			var output = this.currentClass + ".__super__." + selector + ".call(self";
+			if (node.args.length > 0) {
+				node.args.forEach(function(each) {
+					output += ", " + each.visit(self);
+				});
+			}
+			output += ")";
+			return output;
+		}
+		else {
+			throw "Can't use [super] outside a method declaration";
+		}
 	};
 };
 
