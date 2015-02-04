@@ -83,7 +83,6 @@ Blether.DynamicDictionary = function(dict) {
 	this.value = dict || {};
 };
 
-Blether.DynamicDictionary.prototype = {};
 Blether.DynamicDictionary.prototype.visit = function(visitor) { return visitor.visitDynamicDictionary(this); };
 
 //------------------------------------------------------------------------------
@@ -92,7 +91,6 @@ Blether.UndefinedObject = function() {
 	this._type = "UndefinedObject";
 };
 
-Blether.UndefinedObject.prototype = {};
 Blether.UndefinedObject.prototype.toString = function() { return "nil"; };
 Blether.UndefinedObject.prototype.visit = function(visitor) { return visitor.visitUndefinedObject(this); };
 
@@ -104,7 +102,7 @@ Blether.Boolean = function(bool) {
 };
 
 Blether.Boolean.prototype.toString = function() { return this.value.toString(); };
-Blether.Boolean.prototype.visit = function(visitor) { return visitor.visitUndefinedObject(this); };
+Blether.Boolean.prototype.visit = function(visitor) { return visitor.visitBoolean(this); };
 
 //------------------------------------------------------------------------------
 
@@ -113,7 +111,6 @@ Blether.Variable = function(id) {
 	this.value = id;
 };
 
-Blether.Variable.prototype = {};
 Blether.Variable.prototype.toString = function() { return this.value; };
 Blether.Variable.prototype.visit = function(visitor) { return visitor.visitVariable(this); };
 
@@ -124,7 +121,6 @@ Blether.UnaryPattern = function(selector) {
 	this.selector = selector;
 };
 
-Blether.UnaryPattern.prototype = {};
 Blether.UnaryPattern.prototype.toString = function() { return this.selector; };
 Blether.UnaryPattern.prototype.visit = function(visitor) { return visitor.visitUnaryPattern(this); };
 
@@ -136,7 +132,6 @@ Blether.BinaryPattern = function(selector, arg) {
 	this.arg = arg;
 };
 
-Blether.BinaryPattern.prototype = {};
 Blether.BinaryPattern.prototype.toString = function() { return this.selector + " - " + this.arg; };
 Blether.BinaryPattern.prototype.visit = function(visitor) { return visitor.visitBinaryPattern(this); };
 
@@ -152,7 +147,6 @@ Blether.KeywordPattern = function(keywordPairs) {
 	}
 };
 
-Blether.KeywordPattern.prototype = {};
 Blether.KeywordPattern.prototype.toString = function() { return this.selector; };
 Blether.KeywordPattern.prototype.visit = function(visitor) { return visitor.visitKeywordPattern(this); };
 
@@ -164,7 +158,6 @@ Blether.Assignment = function(variable, expression) {
 	this.expression = expression;
 };
 
-Blether.Assignment.prototype = {};
 Blether.Assignment.prototype.visit = function(visitor) { return visitor.visitAssignment(this); };
 
 //------------------------------------------------------------------------------
@@ -174,7 +167,6 @@ Blether.Return = function(expression) {
 	this.value = expression;
 };
 
-Blether.Return.prototype = {};
 Blether.Return.prototype.visit = function(visitor) { return visitor.visitReturn(this); };
 
 //------------------------------------------------------------------------------
@@ -185,7 +177,6 @@ Blether.Sequence = function(temps, statements) {
 	this.statements = statements || [];
 };
 
-Blether.Sequence.prototype = {};
 Blether.Sequence.prototype.visit = function(visitor) { return visitor.visitSequence(this); };
 
 //------------------------------------------------------------------------------
@@ -201,11 +192,10 @@ Blether.Statement.prototype.visit = function(visitor) { return visitor.visitStat
 
 Blether.Block = function(paramList, sequence) {
 	this._type = "Block";
-	this.params = paramList;
+	this.params = paramList || [];
 	this.sequence = sequence;
 };
 
-Blether.Block.prototype = {};
 Blether.Block.prototype.visit = function(visitor) { return visitor.visitBlock(this); };
 
 //------------------------------------------------------------------------------
@@ -217,7 +207,9 @@ Blether.Send = function(selector, args) {
 	this.selector = selector;
 };
 
-Blether.Send.prototype.setReceiver = function() { throw new Error("ARSE"); };
+Blether.Send.prototype.visit = function(visitor) {
+	return visitor.visitSend(this);
+};
 
 Blether.Send.prototype.toString = function() {
 	var argsStr = "[" + this.args.map(function(each){return "\"" + each + "\"";}).join(", ") + "]";
@@ -226,7 +218,6 @@ Blether.Send.prototype.toString = function() {
 		(this.args.length > 0 ? " with args " + argsStr : "") + ")";
 };
 
-Blether.Send.prototype.visit = function(visitor) { return visitor.visitSend(this); };
 Blether.Send.prototype.setReceiver = function(anObject) {
 	if (this.receiver === null) {
 		this.receiver = anObject;
@@ -237,6 +228,8 @@ Blether.Send.prototype.setReceiver = function(anObject) {
 	return this;
 };
 
+//Blether.Send.prototype.setReceiver = function(anObject) {
+
 //------------------------------------------------------------------------------
 
 Blether.Cascade = function(receiver, messages) {
@@ -245,7 +238,6 @@ Blether.Cascade = function(receiver, messages) {
 	this.messages = messages;
 };
 
-Blether.Cascade.prototype = {};
 Blether.Cascade.prototype.visit = function(visitor) { return visitor.visitCascade(this); };
 
 //------------------------------------------------------------------------------
@@ -255,7 +247,6 @@ Blether.JsStatement = function(javascript) {
 	this.javascript = javascript;
 };
 
-Blether.JsStatement.prototype = {};
 Blether.JsStatement.prototype.visit = function(visitor) { return visitor.visitJsStatement(this); };
 
 //------------------------------------------------------------------------------
@@ -266,7 +257,6 @@ Blether.Method = function(selector, sequences) {
 	this.sequences = sequences;
 };
 
-Blether.Method.prototype = {};
 Blether.Method.prototype.visit = function(visitor) { return visitor.visitMethod(this); };
 
 //------------------------------------------------------------------------------
@@ -276,7 +266,6 @@ Blether.Comment = function(comment) {
 	this.comment = comment;
 };
 
-Blether.Comment.prototype = {};
 Blether.Comment.prototype.visit = function(visitor) { return visitor.visitComment(this); };
 
 //------------------------------------------------------------------------------
@@ -290,8 +279,10 @@ Blether.MethodDeclaration = function(className, body) {
 	this.context.classes[className].methods[body.selector] = this;
 };
 
-Blether.MethodDeclaration.prototype = {};
-Blether.MethodDeclaration.prototype.visit = function(visitor) { return visitor.visitMethodDeclaration(this); };
+Blether.MethodDeclaration.prototype.visit = function(visitor) {
+	return visitor.visitMethodDeclaration(this);
+};
+
 Blether.MethodDeclaration.prototype.getClass = function() {
 	return this.context.classes[this.className];
 };
@@ -307,7 +298,6 @@ Blether.ClassDeclaration = function(className, superClass, varNames) {
 	this.context = Blether;
 };
 
-Blether.ClassDeclaration.prototype = {};
 Blether.ClassDeclaration.prototype.visit = function(visitor) { return visitor.visitClassDeclaration(this); };
 Blether.ClassDeclaration.prototype.getMethods = function() {
 	return this.context.classes[this.className].methods;
@@ -320,6 +310,5 @@ Blether.Program = function(elements) {
 	this.elements = elements;
 };
 
-Blether.Program.prototype = {};
 Blether.Program.prototype.visit = function(visitor) { return visitor.visitProgram(this); };
 

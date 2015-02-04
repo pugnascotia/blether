@@ -158,27 +158,68 @@ var Translator = function() {
 	};
 
 	this.visitSequence = function(node) {
+		var self = this;
+
 		var output = "";
 
-		output += node.temps.map(function(each) { return "var " + each + ";\n"; }).join("");
+		node.temps.forEach(function(each) {
+			output += "var " + each + ";\n";
+		});
 
-		var self = this;
-		output += node.statements.map(function(each) {
-			return each.visit(self) + ";\n";
-		}).join("");
+		node.statements.forEach(function(each, index, array) {
+			output += (index === array.length - 1 ? "return " : "") + each.visit(self) + ";\n";
+		});
 
 		return output;
 	};
 
 	this.visitSend = function(node) {
 		var self = this;
-		var output = node.receiver.visit(this) + "." + convertSelector(node.selector) + "(";
+		var output = "";
 
-		if (typeof node.args !== "undefined") {
-			output += node.args.map(function(each) { return each.visit(self); }).join(", ");
+		var receiver = node.receiver.visit(this);
+		var selector = convertSelector(node.selector);
+
+		switch (node.selector) {
+
+			case "isNil":
+				output += "(typeof (" + receiver + ") === \"undefined\")";
+				break;
+
+			case "notNil":
+				output += "(typeof (" + receiver + ") !== \"undefined\")";
+				break;
+
+			case "isEmpty":
+				output += "(" + receiver + ".length === 0)";
+				break;
+
+			case "notEmpty":
+				output += "(" + receiver + ".length > 0)";
+				break;
+
+			case "ifNil:":
+				output = this.convertIfNil(receiver, node);
+				break;
+
+			case "ifNotNil:":
+				output = this.convertIfNotNil(receiver, node);
+				break;
+
+			case "ifNil:ifNotNil:":
+				output = this.convertIfNilIfNotNil(receiver, node);
+				break;
+
+			default:
+				output = receiver + "." + selector + "(";
+
+				//if (typeof node.args !== "undefined") {
+					output += node.args.map(function(each) { return each.visit(self); }).join(", ");
+				//}
+				output += ")";
+
+				break;
 		}
-
-		output += ")";
 		
 		return output;
 	};
@@ -199,10 +240,14 @@ var Translator = function() {
 		return "null";
 	};
 
+	this.visitBoolean = function(node) {
+		return node.value.toString();
+	};
+
 	this.visitBlock = function(node) {
 		return "function (" + node.params.join(", ") + ") {\n" +
 			node.sequence.visit(this) +
-		"\n}";
+		"}";
 	};
 
 	this.visitCascade = function(node) {
@@ -220,6 +265,70 @@ var Translator = function() {
 
 	this.visitJsStatement = function(node) {
 		return node.javascript.trim();
+	};
+
+	this.convertIfNil = function(receiver, node) {
+		var block = node.args[0];
+		var output;
+		output  = "(function() {";
+		output += "var _receiver = " + receiver + ";\n";
+		output += "if (typeof _receiver === \"undefined\") {\n";
+		output += "return (" + block.visit(this) + ")();\n";
+		output += "})()\n";
+		return output;
+	};
+
+	this.convertIfNil = function(receiver, node) {
+		var block = node.args[0];
+
+		// TODO check type of block
+
+		if (block.params.length > 1) {
+			throw "Cannot supply more than one argument to an ifNotNil: block";
+		}
+
+		var output;
+		output  = "(function() {";
+		output += "var _receiver = " + receiver + ";\n";
+		output += "if (typeof _receiver !== \"undefined\") {\n";
+
+		output += "return (" + block.visit(this) + ")(";
+		if (block.params.length === 1) {
+			output += "_receiver";
+		}
+		output += ");\n";
+		output += "}})()\n";
+		return output;
+	};
+
+	this.convertIfNilIfNotNil = function(receiver, node) {
+
+		var ifNilBlock    = node.args[0];
+		var ifNotNilBlock = node.args[1];
+
+		if (ifNilBlock.params.length !== 0) {
+			throw "ifNil: block does not take parameters";
+		}
+
+		if (ifNotNilBlock.params.length > 1) {
+			throw "ifNotNil: block takes at most one parameter";
+		}
+
+		var output = "(function() {";
+		output += "var _receiver = " + receiver + ";\n";
+		output += "if (typeof _receiver === \"undefined\") {\n";
+		output += "return (" + ifNilBlock.visit(this) + ")();";
+		output += "}\n";
+		output += "else {\n";
+		output += "return (" + ifNotNilBlock.visit(this) + ")(";
+		if (ifNotNilBlock.params.length === 1) {
+			output += "_receiver";
+		}
+		output += ");\n";
+		output += "}\n";
+		output += "})()\n";
+
+		return output;
 	};
 };
 
