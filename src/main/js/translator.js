@@ -229,6 +229,11 @@ var Translator = function() {
 				output = this.convertNew(receiver);
 				break;
 
+			case "whileTrue:":
+			case "whileFalse:":
+				output = this.convertWhile(node);
+				break;
+
 			default:
 				output = receiver + "." + selector + "(";
 				output += node.args.map(function(each) { return each.visit(self); }).join(", ");
@@ -398,6 +403,27 @@ var Translator = function() {
 		else {
 			throw "Can't use [super] outside a method declaration";
 		}
+	};
+
+	this.convertWhile = function(node) {
+		if (!(node.receiver._type === "Boolean" || node.receiver._type === "Block")) {
+			throw node.selector + " can be sent to booleans or blocks only";
+		}
+
+		var loopCondition;
+		var invert = (node.selector === "whileFalse:" ? "!" : "");
+		if (node.receiver._type === "Boolean") {
+			loopCondition = invert + node.receiver.visit(this);
+		}
+		else {
+			loopCondition = invert + "(" + node.receiver.visit(this) + ")()";
+		}
+
+		var output = "while (" + loopCondition + ") {\n";
+		output += "(" + node.args[0].visit(this) + ")();\n";
+		output += "}\n";
+
+		return output;
 	};
 };
 
