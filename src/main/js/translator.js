@@ -102,7 +102,13 @@ var Translator = function() {
 	this.visitMethodDeclaration = function(node) {
 		var methodName = node.body.selector.visit(this)[0];
 
-		var output = node.className + ".prototype." + methodName + " = " + node.body.visit(this) + ";\n\n";
+		var output = node.className + ".prototype." + methodName + " = ";
+		
+		this.currentClass = node.className;
+		output += node.body.visit(this);
+		this.currentClass = null;
+
+		output += ";\n\n";
 
 		return output;
 	};
@@ -185,6 +191,22 @@ var Translator = function() {
 		var receiver = node.receiver.visit(this);
 		var selector = convertSelector(node.selector);
 
+		if (receiver === "super") {
+			if (typeof this.currentClass !== "undefined") {
+				output = this.currentClass + ".__super__." + selector + ".call(self";
+				if (node.args.length > 0) {
+					node.args.forEach(function(each) {
+						output += ", " + each.visit(self);
+					});
+				}
+				output += ")";
+				return output;
+			}
+			else {
+				throw "Can't use [super] outside a method declaration";
+			}
+		}
+
 		switch (node.selector) {
 
 			case "isNil":
@@ -221,10 +243,7 @@ var Translator = function() {
 
 			default:
 				output = receiver + "." + selector + "(";
-
-				//if (typeof node.args !== "undefined") {
-					output += node.args.map(function(each) { return each.visit(self); }).join(", ");
-				//}
+				output += node.args.map(function(each) { return each.visit(self); }).join(", ");
 				output += ")";
 
 				break;
