@@ -49,7 +49,7 @@ var Translator = function() {
 			this.printedClassPrerequisites = true;
 		}
 
-		output += "var " + node.className.visit(this) + " = (function(";
+		output += "var " + node.className.value + " = (function(";
 
 		if (hasSuper) {
 			output += "_super";
@@ -157,7 +157,7 @@ var Translator = function() {
 	};
 
 	this.visitSymbol = function(node) {
-		return node.value;
+		return "\"" + node.value + "\"";
 	};
 
 	this.visitStatement = function(node) {
@@ -287,6 +287,11 @@ var Translator = function() {
 		return node.variables.map(function(each) {
 			return "var " + each + ";\n";
 		}).join("");
+	};
+
+	this.visitArray = function(node) {
+		var self = this;
+		return "[" + node.value.map(function(each) { return each.visit(self); }).join(",") + "]";
 	};
 
 	this.convertIfNil = function(receiver, node) {
