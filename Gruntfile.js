@@ -69,7 +69,7 @@ module.exports = function(grunt) {
 				tasks: [ 'peg', 'concat' ]
 			},
 			build: {
-				files: [ "Gruntfile.js" ],
+				files: [ "Gruntfile.js", ".jshintrc" ],
 				tasks: [ "default" ]
 			}
 		},

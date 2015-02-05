@@ -1,15 +1,29 @@
 {
-	"boss": true,
+	"bitwise": true,
 	"curly": true,
+	"debug": true,
 	"eqeqeq": true,
 	"eqnull": true,
 	"expr": true,
+	"forin": true,
+	"freeze": true,
 	"immed": true,
+	"lastsemic": true,
+	"newcap": true,
 	"noarg": true,
+	"node": true,
+	"nonew": true,
 	"onevar": true,
 	"quotmark": "double",
+	"singleGroups": true,
 	"smarttabs": true,
 	"trailing": true,
+	"undef": true,
 	"unused": true,
-	"node": true
+	"globals": {
+		"Blether": true,
+		"BletherParser": true,
+		"BletherTreeModifier": true,
+		"convertSelector": true
+	}
 }
