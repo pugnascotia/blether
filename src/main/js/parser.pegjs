@@ -59,7 +59,7 @@ dynamicDictionary = "#{" ws expressions:associations? ws "}" {
 }
 
 pseudoBooleanVariable = val:( 'true' {return true;} / 'false' {return false;}) {
-	return new Blether.Boolean(val);
+	return new Blether.Boolean(val).at(line(), column(), text());
 }
 
 pseudoNilVariable = val:'nil' {
@@ -75,6 +75,14 @@ runtimeLiteral = dynamicDictionary / dynamicArray / block
 literal = runtimeLiteral / parseTimeLiteral
 
 variable = identifier:identifier {
+	if (identifier === "this") {
+		throw Blether.ParseError({
+			"line": line(),
+			"column": column(),
+			"msg": "Use [self] instead of [this]"
+		});
+	}
+
 	return new Blether.Variable(identifier).at(line(), column(), text());
 }
 
