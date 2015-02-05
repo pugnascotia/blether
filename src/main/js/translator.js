@@ -191,8 +191,9 @@ var Translator = function() {
 		var receiver = node.receiver.visit(this);
 		var selector = convertSelector(node.selector);
 
-		if (receiver === "super") {
-			return this.convertSuper(selector, node);
+		switch (receiver) {
+			case "super":
+				return this.convertSuper(selector, node);
 		}
 
 		switch (node.selector) {
@@ -232,6 +233,10 @@ var Translator = function() {
 			case "whileTrue:":
 			case "whileFalse:":
 				output = this.convertWhile(node);
+				break;
+
+			case "asJQuery":
+				output = this.convertJQuery(node);
 				break;
 
 			default:
@@ -439,6 +444,10 @@ var Translator = function() {
 		output += "}\n";
 
 		return output;
+	};
+
+	this.convertJQuery = function(node) {
+		return "jQuery(" + node.receiver.visit(this) + ")";
 	};
 };
 
