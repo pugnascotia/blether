@@ -272,7 +272,7 @@ associations = first:associationSend others:associationList* {
 	return first.concat.apply(first, others);
 }
 
-classDeclaration = superClass:selector ws "subclass:" ws className:symbol ws "variables:" ws varNames:literalArray ws "." {
+classDeclaration = superClass:selector ws "subclass:" ws className:symbol ws ("variables:" / "instanceVariableNames:") ws varNames:literalArray ("classVariableNames:" ws string ws "poolDictionaries:" string)? ws "." {
 	if (!Blether.classes[superClass]) {
 		throw Blether.ParseError({
 			"line": line(),
