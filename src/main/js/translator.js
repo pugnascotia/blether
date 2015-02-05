@@ -1,4 +1,4 @@
-var Translator = function() {
+var BletherTranslator = function() {
 	"use strict";
 
 	this.printedClassPrerequisites = false;
@@ -19,8 +19,8 @@ var Translator = function() {
 "};\n\n" +
 "var _hasProp = {}.hasOwnProperty;\n\n";
 
-	this.visit = function(something) {
-		return something.visit(this);
+	this.visit = function(node) {
+		return node.visit(this);
 	};
 
 	this.visitProgram = function(node) {
@@ -64,7 +64,7 @@ var Translator = function() {
 		var instanceNames = node.varNames.value;
 
 		output += "function " + node.className + "(";
-		output += instanceNames.map(function(each) { return "_" + each.visit(self); }).join(", ");
+		output += instanceNames.map(function(each) { return "_" + each.value }).join(", ");
 		output += ") {\n";
 
 		if (hasSuper) {
@@ -72,7 +72,7 @@ var Translator = function() {
 		}
 
 		instanceNames.forEach(function(each) {
-			var name = each.visit(self);
+			var name = each.value;
 			output += "this." + name + " = _" + name + ";\n";
 		});
 
@@ -163,7 +163,7 @@ var Translator = function() {
 	this.visitStatement = function(node) {
 		var output = node.expression.visit(this);
 
-		output += (output[output.length -1] !== ";") ? ";\n" : "\n";
+		output += output[output.length -1] !== ";" ? ";\n" : "\n";
 
 		return output;
 	};
@@ -241,7 +241,7 @@ var Translator = function() {
 
 			default:
 				output = receiver + "." + selector + "(";
-				output += node.args.map(function(each) { return each.visit(self); }).join(", ");
+				output += node.args.map(function(each) { return each.visit(self) }).join(", ");
 				output += ")";
 
 				break;
@@ -301,12 +301,12 @@ var Translator = function() {
 
 	this.visitArray = function(node) {
 		var self = this;
-		return "[" + node.value.map(function(each) { return each.visit(self); }).join(",") + "]";
+		return "[" + node.value.map(function(each) { return each.visit(self) }).join(",") + "]";
 	};
 
 	this.visitDynamicArray = function(node) {
 		var self = this;
-		return "[" + node.values.map(function(each) { return each.visit(self); }).join(", ") + "]";
+		return "[" + node.values.map(function(each) { return each.visit(self) }).join(", ") + "]";
 	};
 
 	this.visitDynamicDictionary = function(node) {
@@ -436,7 +436,7 @@ var Translator = function() {
 		}
 
 		var loopCondition;
-		var invert = (node.selector === "whileFalse:" ? "!" : "");
+		var invert = node.selector === "whileFalse:" ? "!" : "";
 		loopCondition = invert + "(" + node.receiver.visit(this) + ")()";
 
 		var output = "while (" + loopCondition + ") {\n";
@@ -459,6 +459,6 @@ module.exports = {
 		// var util = require("util");
 		// console.log(util.inspect(ast, false, null));
 
-		return new Translator().visit(ast);
+		return new BletherTranslator().visit(ast);
 	}
 };

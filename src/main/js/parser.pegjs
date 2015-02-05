@@ -50,6 +50,10 @@ literalArrayRest = lits:(ws lit:(parseTimeLiteral / bareLiteralArray / bareSymbo
 	return new Blether.Array(lits).at(line(), column(), text());
 }
 
+symbolArray = "#(" syms:( ws sym:(symbol / bareSymbol) { return sym; })* ws ")" {
+	return new Blether.Array(syms).at(line(), column(), text());
+}
+
 dynamicArray = "{" ws expressions:expressions? ws "."? "}" {
 	return new Blether.DynamicArray(expressions).at(line(), column(), text());
 }
@@ -280,7 +284,7 @@ associations = first:associationSend others:associationList* {
 	return first.concat.apply(first, others);
 }
 
-classDeclaration = superClass:selector ws "subclass:" ws className:symbol ws ("variables:" / "instanceVariableNames:") ws varNames:literalArray ("classVariableNames:" ws string ws "poolDictionaries:" string)? ws "." {
+classDeclaration = superClass:selector ws "subclass:" ws className:symbol ws ("variables:" / "instanceVariableNames:") ws varNames:symbolArray (ws "classVariableNames:" ws string ws "poolDictionaries:" string)? ws "." {
 	if (!Blether.classes[superClass]) {
 		throw Blether.ParseError({
 			"line": line(),
@@ -325,7 +329,7 @@ classAndMethod = "!" className:className ws body:method "!" ws? "." {
 		new Blether.MethodDeclaration(className, body).at(line(), column(), text());
 }
 
-programElement = ws? element:(comments / classAndMethod / classDeclaration / statement) ws?  {
+programElement = ws? element:(classAndMethod / classDeclaration / statement) ws?  {
 	return element
 }
 
