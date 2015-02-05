@@ -337,7 +337,11 @@ var Translator = function() {
 		// TODO check that block is indeed a Block
 
 		if (block.params.length > 1) {
-			throw "Cannot supply more than one argument to an ifNotNil: block";
+			throw Blether.ParseError({
+				"line": block.line,
+				"column": block.column,
+				"msg": "Cannot supply more than one argument to an ifNotNil: block"
+			});
 		}
 
 		var output;
@@ -360,11 +364,19 @@ var Translator = function() {
 		var ifNotNilBlock = node.args[1];
 
 		if (ifNilBlock.params.length !== 0) {
-			throw "ifNil: block does not take parameters";
+			throw Blether.ParseError({
+				"line": ifNilBlock.line,
+				"column": ifNilBlock.column,
+				"msg": "ifNil: block does not take parameters"
+			});
 		}
 
 		if (ifNotNilBlock.params.length > 1) {
-			throw "ifNotNil: block takes at most one parameter";
+			throw Blether.ParseError({
+				"line": ifNotNilBlock.line,
+				"column": ifNotNilBlock.column,
+				"msg": "ifNotNil: block takes at most one parameters"
+			});
 		}
 
 		var output = "(function() {";
@@ -401,23 +413,26 @@ var Translator = function() {
 			return output;
 		}
 		else {
-			throw "Can't use [super] outside a method declaration";
+			throw Blether.ParseError({
+				"line": node.line,
+				"column": node.column,
+				"msg": "Can't use [super] outside a method declaration" 
+			});
 		}
 	};
 
 	this.convertWhile = function(node) {
-		if (!(node.receiver._type === "Boolean" || node.receiver._type === "Block")) {
-			throw node.selector + " can be sent to booleans or blocks only";
+		if (node.receiver._type !== "Block") {
+			throw Blether.ParseError({
+				"line": node.line,
+				"column": node.column,
+				"msg": node.selector + " can be sent to blocks only"
+			});
 		}
 
 		var loopCondition;
 		var invert = (node.selector === "whileFalse:" ? "!" : "");
-		if (node.receiver._type === "Boolean") {
-			loopCondition = invert + node.receiver.visit(this);
-		}
-		else {
-			loopCondition = invert + "(" + node.receiver.visit(this) + ")()";
-		}
+		loopCondition = invert + "(" + node.receiver.visit(this) + ")()";
 
 		var output = "while (" + loopCondition + ") {\n";
 		output += "(" + node.args[0].visit(this) + ")();\n";

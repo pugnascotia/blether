@@ -17,21 +17,21 @@ selector = first:[a-zA-Z] others:[a-zA-Z0-9\:]* {return first + others.join("");
 className = first:[A-Z] others:[a-zA-Z0-9]* {return first + others.join("");}
 
 string = "'" val:(("''" {return "'";} / [^'])*) "'" {
-	return new Blether.String(val.join(""));
+	return new Blether.String(val.join("")).at(line(), column(), text());
 }
 
 character = "$" char:. {
-	return new Blether.String(char);
+	return new Blether.String(char).at(line(), column(), text());
 }
 
 symbol = "#" rest:bareSymbol {return rest;}
 
 bareSymbol = val:(selector / binarySelector / node:string {return node._value();}) {
-	return new Blether.Symbol(val);
+	return new Blether.Symbol(val).at(line(), column(), text());
 }
 
 number = val:(numberExp / hex / float / integer) {
-	return new Blether.Number(val);
+	return new Blether.Number(val).at(line(), column(), text());
 }
 
 numberExp = n:((float / integer) "e" integer) {return parseFloat(n.join(""));}
@@ -47,15 +47,15 @@ literalArray = "#(" rest:literalArrayRest {return rest;}
 bareLiteralArray = "(" rest:literalArrayRest {return rest;}
 
 literalArrayRest = lits:(ws lit:(parseTimeLiteral / bareLiteralArray / bareSymbol) {return lit; })* ws ")" {
-	return new Blether.Array(lits);
+	return new Blether.Array(lits).at(line(), column(), text());
 }
 
 dynamicArray = "{" ws expressions:expressions? ws "."? "}" {
-	return new Blether.DynamicArray(expressions);
+	return new Blether.DynamicArray(expressions).at(line(), column(), text());
 }
 
 dynamicDictionary = "#{" ws expressions:associations? ws "}" {
-	return new Blether.DynamicDictionary(expressions);
+	return new Blether.DynamicDictionary(expressions).at(line(), column(), text());
 }
 
 pseudoBooleanVariable = val:( 'true' {return true;} / 'false' {return false;}) {
@@ -63,7 +63,7 @@ pseudoBooleanVariable = val:( 'true' {return true;} / 'false' {return false;}) {
 }
 
 pseudoNilVariable = val:'nil' {
-	return new Blether.UndefinedObject();
+	return new Blether.UndefinedObject().at(line(), column(), text());
 }
 
 pseudoVariable = pseudoBooleanVariable / pseudoNilVariable
@@ -75,7 +75,7 @@ runtimeLiteral = dynamicDictionary / dynamicArray / block
 literal = runtimeLiteral / parseTimeLiteral
 
 variable = identifier:identifier {
-	return new Blether.Variable(identifier);
+	return new Blether.Variable(identifier).at(line(), column(), text());
 }
 
 reference = variable
@@ -87,15 +87,15 @@ binarySelector = bin:[\\+*/=><,@%~|&-]+ { return bin.join(""); }
 unarySelector = identifier
 
 keywordPattern = pairs:(ws key:keyword ws arg:identifier {return {key:key, arg:arg};})+ {
-	return new Blether.KeywordPattern(pairs);
+	return new Blether.KeywordPattern(pairs).at(line(), column(), text());
 }
 
 binaryPattern = ws selector:binarySelector ws arg:identifier {
-	return new Blether.BinaryPattern(selector, arg);
+	return new Blether.BinaryPattern(selector, arg).at(line(), column(), text());
 }
 
 unaryPattern = ws selector:unarySelector {
-	return new Blether.UnaryPattern(selector);
+	return new Blether.UnaryPattern(selector).at(line(), column(), text());
 }
 
 expressionChain = message:message (ws chain:expressionChain { return chain })? {
@@ -103,7 +103,7 @@ expressionChain = message:message (ws chain:expressionChain { return chain })? {
 		return chain.setReceiver(message);
 	}
 	else {
-		return new Blether.send(message);
+		return new Blether.send(message).at(line(), column(), text());
 	}
 }
 
@@ -123,21 +123,21 @@ expressionList = ws "." ws expression:expression {return expression;}
 expressions = first:expression others:expressionList* { return [first].concat(others); }
 
 assignment = variable:variable ws ':=' ws expression:expression {
-	return new Blether.Assignment(variable, expression);
+	return new Blether.Assignment(variable, expression).at(line(), column(), text());
 }
 
 ret = '^' ws expression:expression ws '.'? {
-	return new Blether.Return(expression);
+	return new Blether.Return(expression).at(line(), column(), text());
 }
 
 temps = "|" vars:(ws variable:identifier {return variable;})* ws "|" {
 	
 	vars.forEach(function(each) {
-		if (each === "self") {
+		if (each === "self" || each === "this") {
 			throw Blether.ParseError({
 				"line": line(),
 				"column": column(),
-				"msg": "Cannot name a variable [self]"
+				"msg": "Cannot name a variable [" + each + "]"
 			});
 		}
 	});
@@ -160,26 +160,26 @@ statements = ret:ret "."* {return [ret];}
 }
 
 statement = expr:(e:expression "." { return e } / jsStatement) {
-	return new Blether.Statement(expr);
+	return new Blether.Statement(expr).at(line(), column(), text());
 }
 
 sequence = jsSequence / stSequence
 
 stSequence = temps:temps? ws statements:statements? ws {
-	return new Blether.Sequence(temps, statements);
+	return new Blether.Sequence(temps, statements).at(line(), column(), text());
 }
 
 jsSequence = jsStatement
 
 block = '[' params:blockParamList? ws sequence:sequence? ws ']' {
-	return new Blether.Block(params, sequence);
+	return new Blether.Block(params, sequence).at(line(), column(), text());
 }
 
 operand = literal / reference / subexpression
 
 
 unaryMessage = ws selector:unarySelector !":" {
-	return new Blether.Send(selector);
+	return new Blether.Send(selector).at(line(), column(), text());
 }
 
 unaryTail = message:unaryMessage ws tail:unaryTail? ws {
@@ -202,7 +202,7 @@ unarySend = receiver:operand ws tail:unaryTail? {
 
 
 binaryMessage = ws selector:binarySelector ws arg:(unarySend / operand) {
-	return new Blether.Send(selector, [arg]);
+	return new Blether.Send(selector, [arg]).at(line(), column(), text());
 }
 
 
@@ -234,7 +234,7 @@ keywordMessage = pairs:keywordPair+ {
 		args.push(pairs[i].arg);
 	}
 
-	return new Blether.Send(selector.join(""), args);
+	return new Blether.Send(selector.join(""), args).at(line(), column(), text());
 }
 
 keywordSend = receiver:binarySend tail:keywordMessage {
@@ -249,16 +249,16 @@ cascade = ws send:(keywordSend / binarySend) cascade:(ws ";" ws mess:message {re
 	for(var i = 0; i < cascade.length; i++) {
 		messages.push(cascade[i]);
 	}
-	return new Blether.Cascade(send.receiver, messages);
+	return new Blether.Cascade(send.receiver, messages).at(line(), column(), text());
 }
 
 jsStatement = "<" val:((">>" {return ">";} / [^>])*) ">" {
-	return new Blether.JsStatement(val.join(""));
+	return new Blether.JsStatement(val.join("")).at(line(), column(), text());
 }
 
 
 method = pattern:(keywordPattern / binaryPattern / unaryPattern) ws sequence:sequence? ws {
-	return new Blether.Method(pattern, [sequence]);
+	return new Blether.Method(pattern, [sequence]).at(line(), column(), text());
 }
 
 
@@ -292,7 +292,7 @@ classDeclaration = superClass:selector ws "subclass:" ws className:symbol ws ("v
 	return Blether.classes[className] = new Blether.ClassDeclaration(
 		className,
 		superClass,
-		varNames);
+		varNames).at(line(), column(), text());
 }
 
 classAndMethod = "!" className:className ws body:method "!" ws? "." {
@@ -314,7 +314,7 @@ classAndMethod = "!" className:className ws body:method "!" ws? "." {
 
 
 	return Blether.classes[className].methods[body.selector] = 
-		new Blether.MethodDeclaration(className, body);
+		new Blether.MethodDeclaration(className, body).at(line(), column(), text());
 }
 
 programElement = ws? element:(comments / classAndMethod / classDeclaration / statement) ws?  {
@@ -322,5 +322,5 @@ programElement = ws? element:(comments / classAndMethod / classDeclaration / sta
 }
 
 program = first:(ws? decl:temps ws? { return new Blether.VariableDeclaration(decl); } / programElement) others:programElement* {
-	return new Blether.Program([first].concat(others));
+	return new Blether.Program([first].concat(others)).at(line(), column(), text());
 }
