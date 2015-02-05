@@ -256,12 +256,7 @@ keywordSend = receiver:binarySend tail:keywordMessage {
 message = binaryMessage / unaryMessage / keywordMessage
 
 cascade = ws send:(keywordSend / binarySend) cascade:(ws ";" ws mess:message {return mess;})+ {
-
-	var messages = [send];
-	for(var i = 0; i < cascade.length; i++) {
-		messages.push(cascade[i]);
-	}
-	return new Blether.Cascade(send.receiver, messages).at(line(), column(), text());
+	return new Blether.Cascade(send.receiver, [send].concat(cascade)).at(line(), column(), text());
 }
 
 jsStatement = "<" val:((">>" {return ">";} / [^>])*) ">" {

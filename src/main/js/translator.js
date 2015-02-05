@@ -259,7 +259,7 @@ var BletherTranslator = function() {
 	};
 
 	this.visitVariable = function(node) {
-		return node.value;
+		return typeof node.alias === "undefined" ? node.value : node.alias;
 	};
 
 	this.visitUndefinedObject = function() {
@@ -459,6 +459,11 @@ module.exports = {
 		// var util = require("util");
 		// console.log(util.inspect(ast, false, null));
 
-		return new BletherTranslator().visit(ast);
+		var modifiedAst = new BletherTreeModifier().visit(ast);
+
+		// var util = require("util");
+		// console.log(util.inspect(modifiedAst, false, null));
+
+		return new BletherTranslator().visit(modifiedAst);
 	}
 };

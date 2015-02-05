@@ -38,9 +38,7 @@ Blether.Node.prototype.at = function(line, column, source) {
 	return this;
 };
 
-
 //------------------------------------------------------------------------------
-
 
 Blether.String = function(string) {
 	this._type = "String";
@@ -266,7 +264,7 @@ Blether.Send.prototype.setReceiver = function(anObject) {
 Blether.Cascade = function(receiver, messages) {
 	this._type = "Cascade";
 	this.receiver = receiver;
-	this.messages = messages;
+	this.messages = messages || [];
 };
 
 Blether.Cascade.prototype = new Blether.Node();
