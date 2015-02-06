@@ -68,15 +68,10 @@ var BletherTreeModifier = function() {
 	};
 	
     this.visitVariable = function(node) {
-		var alias;
 
-		switch (node.value) {
-			case "Transcript":
-				alias = "console";
-				break;
+		if (Blether.Shims.hasOwnProperty(node.value)) {
+			node.shim = Blether.Shims[node.value];
 		}
-
-		node.alias = alias;
 
 		return node;
 	};

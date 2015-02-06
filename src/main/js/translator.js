@@ -186,6 +186,10 @@ var BletherTranslator = function() {
 
 	this.visitSend = function(node) {
 		var self = this;
+
+		if (node.receiver.hasOwnProperty("shim")) {
+			return node.receiver.shim.visitSend(this, node);
+		}
 		var output = "";
 
 		var receiver = node.receiver.visit(this);
@@ -259,7 +263,7 @@ var BletherTranslator = function() {
 	};
 
 	this.visitVariable = function(node) {
-		return typeof node.alias === "undefined" ? node.value : node.alias;
+		return node.hasOwnProperty("shim") ? node.shim.visitVariable(this, node) : node.value;
 	};
 
 	this.visitUndefinedObject = function() {
@@ -279,10 +283,13 @@ var BletherTranslator = function() {
 	this.visitCascade = function(node) {
 		var self = this;
 
-		var output = "(function(_receiver) {\n";
+		var output = "(function(_) {\n";
 
 		node.messages.forEach(function(each, index, array) {
-			each.receiver = new Blether.Variable("_receiver");
+			each.receiver = new Blether.Variable("_");
+			if (node.receiver.hasOwnProperty("shim")) {
+				each.receiver.shim = node.receiver.shim;
+			}
 			output += (index === array.length - 1 ? "return " : "") + each.visit(self) + ";\n";
 		});
 
