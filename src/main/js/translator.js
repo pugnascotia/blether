@@ -114,7 +114,7 @@ var BletherTranslator = function() {
 	};
 
 	this.visitString = function(node) {
-		return "\"" + node.value.replace(/"/g, "\\\"") + "\"";
+		return "new STString(\"" + node.value.replace(/"/g, "\\\"") + "\")";
 	};
 
 	this.visitMethod = function(node) {
@@ -157,7 +157,7 @@ var BletherTranslator = function() {
 	};
 
 	this.visitSymbol = function(node) {
-		return "\"" + node.value + "\"";
+		return this.visitString(node);
 	};
 
 	this.visitStatement = function(node) {
@@ -277,7 +277,7 @@ var BletherTranslator = function() {
 	};
 
 	this.visitNumber = function(node) {
-		return node.value.toString();
+		return "new STNumber(" + node.value.toString() + ")";
 	};
 
 	this.visitVariable = function(node) {
@@ -493,6 +493,15 @@ module.exports = {
 		// var util = require("util");
 		// console.log(util.inspect(modifiedAst, false, null));
 
+		// var path = require("path");
+		// var fs   = require("fs");
+
+		// var runtimePath = path.join(path.dirname(fs.realpathSync(__filename)), "adaptors.js");
+		// var runtime = fs.readFileSync(runtimePath).toString();
+
+		// var translation = new BletherTranslator().visit(modifiedAst);
+
+		// return runtime + translation;
 		return new BletherTranslator().visit(modifiedAst);
 	}
 };
