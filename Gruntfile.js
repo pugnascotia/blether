@@ -49,14 +49,25 @@ module.exports = function(grunt) {
 			}
 		},
 
+		copy: {
+			runtime: {
+				src: "src/main/js/adaptors.js",
+				dest: "target/adaptors.js"
+			}
+		},
+
 		// Configure the grunt-contrib-uglify plugin
 		uglify: {
 			options: {
 				banner: '/*! <%= pkg.name %> <%= grunt.template.today("dd-mm-yyyy") %> */\n'
 			},
-			build: {
+			blether: {
 				src: 'target/blether.js',
 				dest: 'target/blether.min.js'
+			},
+			runtime: {
+				src: 'target/adaptors.js',
+				dest: 'target/adaptors.min.js'
 			}
 		},
 
@@ -64,11 +75,11 @@ module.exports = function(grunt) {
 		watch: {
 			scripts: {
 				files: javascriptFiles,
-				tasks: ['jshint', 'concat' ]
+				tasks: ['jshint', 'concat', 'copy' ]
 			},
 			grammar: {
 				files: [ 'src/main/js/parser.pegjs' ],
-				tasks: [ 'peg', 'concat' ]
+				tasks: [ 'peg', 'concat', 'copy' ]
 			},
 			build: {
 				files: [ "Gruntfile.js", ".jshintrc" ],
@@ -84,13 +95,15 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks("grunt-contrib-uglify");
 	grunt.loadNpmTasks('grunt-peg');
 	grunt.loadNpmTasks('grunt-contrib-watch');
+	grunt.loadNpmTasks('grunt-contrib-copy');
 
 	// Tell Grunt what to do when we type "grunt" into the terminal.
 	grunt.registerTask("default", [
 		"jshint",
 		"peg",
 		"concat",
-		"uglify",
+		"copy",
+		"uglify"
 	]);
 
 };

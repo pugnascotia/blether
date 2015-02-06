@@ -493,15 +493,14 @@ module.exports = {
 		// var util = require("util");
 		// console.log(util.inspect(modifiedAst, false, null));
 
-		// var path = require("path");
-		// var fs   = require("fs");
+		var path = require("path");
+		var fs   = require("fs");
 
-		// var runtimePath = path.join(path.dirname(fs.realpathSync(__filename)), "adaptors.js");
-		// var runtime = fs.readFileSync(runtimePath).toString();
+		var runtimePath = path.join(path.dirname(fs.realpathSync(__filename)), "adaptors.js");
+		var runtime = fs.readFileSync(runtimePath).toString();
 
-		// var translation = new BletherTranslator().visit(modifiedAst);
+		var translation = new BletherTranslator().visit(modifiedAst);
 
-		// return runtime + translation;
-		return new BletherTranslator().visit(modifiedAst);
+		return runtime + translation;
 	}
 };
