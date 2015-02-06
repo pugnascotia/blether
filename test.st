@@ -1,8 +1,10 @@
 " A comment! "
 
-Object subclass: #Foo variables: #( #input #index #interval #console ).
+| sum |
 
-Foo subclass: #Twit variables: #( #input #index #interval #console ).
+Object subclass: #Foo variables: #( #input #index #interval ).
+
+Foo subclass: #Twit variables: #( #input #index #interval ).
 
 !Foo main
 	| fs |
@@ -17,10 +19,10 @@ Foo subclass: #Twit variables: #( #input #index #interval #console ).
 
 !Foo bar: arse with: twit
     | badger |
-    console log: 'Badger!'.
-	badger := 1 + 2!.
+    Transcript show: 'Badger!'.
+    Transcript nl.
+	^badger := 1 + 2!.
 
-!Object bar: arse with: twit
-    | badger |
-    console log: 'Badger!'.
-	badger := 1 + 2!.
+sum := Foo new bar: 'foo' with: 'arse'.
+
+Transcript show: sum; cr.

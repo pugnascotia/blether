@@ -107,6 +107,11 @@ var BletherTreeModifier = function() {
 		}
 		return node;
 	};
+
+	this.visitReturn = function(node) {
+		node.value = node.value.visit(this);
+		return node;
+	};
 	
     this.visitBinaryPattern = identity;
     this.visitKeywordPattern = identity;

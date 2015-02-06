@@ -177,9 +177,16 @@ var BletherTranslator = function() {
 			output += "var " + each + ";\n";
 		});
 
+		var needsReturn = true;
+
 		node.statements.forEach(function(each, index, array) {
-			output += (index === array.length - 1 ? "return " : "") + each.visit(self) + ";\n";
+			needsReturn = !(index === array.length - 1 && each._type === "Return");
+			output += each.visit(self) + ";\n";
 		});
+
+		if (needsReturn) {
+			output += "return self;\n";
+		}
 
 		return output;
 	};
@@ -341,6 +348,10 @@ var BletherTranslator = function() {
 		output += "\n}";
 
 		return output;
+	};
+
+	this.visitReturn = function(node) {
+		return "return " + node.value.visit(this);
 	};
 
 	this.convertIfNil = function(receiver, node) {
