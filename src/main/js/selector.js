@@ -9,7 +9,6 @@ function convertSelector(selector) {
 		"=": "equals",
 		">": "greater_than",
 		"<": "less_than",
-		",": "join",
 		"@": "at",
 		"%": "modulo",
 		"~": "tilde",
@@ -19,10 +18,15 @@ function convertSelector(selector) {
 	};
 
 	var javascriptEquivalents = {
-		"do": "forEach",
-		"doWithIndex": "forEach",
-		"select": "filter"
+		"do:": "forEach",
+		"doWithIndex:": "forEach",
+		"select:": "filter",
+		"," : "concat"
 	};
+
+	if (javascriptEquivalents.hasOwnProperty(selector)) {
+		return javascriptEquivalents[selector];
+	}
 
 	if (selector.match(/[\\+*/=><,@%~|&-]/)) {
 		return selector.split("").map(function(e) { return mapping[e]; }).join("_") + "$";
@@ -37,10 +41,6 @@ function convertSelector(selector) {
 		else {
 			selector = selector_parts[0];
 		}
-	}
-
-	if (javascriptEquivalents.hasOwnProperty(selector)) {
-		return javascriptEquivalents[selector];
 	}
 
 	return selector;

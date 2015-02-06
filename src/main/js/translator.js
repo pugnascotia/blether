@@ -190,15 +190,15 @@ var BletherTranslator = function() {
 		if (node.receiver.hasOwnProperty("shim")) {
 			return node.receiver.shim.visitSend(this, node);
 		}
-		var output = "";
 
 		var receiver = node.receiver.visit(this);
-		var selector = convertSelector(node.selector);
 
 		switch (receiver) {
 			case "super":
-				return this.convertSuper(selector, node);
+				return this.convertSuper(convertSelector(node.selector), node);
 		}
+
+		var output = "";
 
 		switch (node.selector) {
 
@@ -243,11 +243,22 @@ var BletherTranslator = function() {
 				output = this.convertJQuery(node);
 				break;
 
+			case "==":
+				output = receiver + " === " + node.args[0].visit(self);
+				break;
+
+			case "~~":
+				output = receiver + " !== " + node.args[0].visit(self);
+				break;
+
+			case "~=":
+				output = "!(" + receiver + ".equals$(" + node.args[0].visit(self) + "))";
+				break;
+
 			default:
-				output = receiver + "." + selector + "(";
+				output = receiver + "." + convertSelector(node.selector) + "(";
 				output += node.args.map(function(each) { return each.visit(self) }).join(", ");
 				output += ")";
-
 				break;
 		}
 		
