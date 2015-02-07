@@ -41,7 +41,6 @@ module.exports = function(grunt) {
 					"src/main/js/lang.js",
 					"target/parser.js",
 					"src/main/js/selector.js",
-					"src/main/js/shims.js",
 					"src/main/js/tree_modifier.js",
 					"src/main/js/translator.js",
 				],

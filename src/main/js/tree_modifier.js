@@ -68,11 +68,6 @@ var BletherTreeModifier = function() {
 	};
 	
     this.visitVariable = function(node) {
-
-		if (Blether.Shims.hasOwnProperty(node.value)) {
-			node.shim = Blether.Shims[node.value];
-		}
-
 		return node;
 	};
 	
