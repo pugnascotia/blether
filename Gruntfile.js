@@ -50,8 +50,8 @@ module.exports = function(grunt) {
 
 		copy: {
 			runtime: {
-				src: "src/main/js/adaptors.js",
-				dest: "target/adaptors.js"
+				src: "src/main/js/runtime.js",
+				dest: "target/runtime.js"
 			}
 		},
 
@@ -65,8 +65,8 @@ module.exports = function(grunt) {
 				dest: 'target/blether.min.js'
 			},
 			runtime: {
-				src: 'target/adaptors.js',
-				dest: 'target/adaptors.min.js'
+				src: 'target/runtime.js',
+				dest: 'target/runtime.min.js'
 			}
 		},
 

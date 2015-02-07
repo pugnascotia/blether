@@ -489,7 +489,7 @@ module.exports = {
 		var path = require("path");
 		var fs   = require("fs");
 
-		var runtimePath = path.join(path.dirname(fs.realpathSync(__filename)), "adaptors.js");
+		var runtimePath = path.join(path.dirname(fs.realpathSync(__filename)), "runtime.js");
 		var runtime = fs.readFileSync(runtimePath).toString();
 
 		var translation = new BletherTranslator().visit(modifiedAst);
