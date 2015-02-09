@@ -282,10 +282,10 @@ Blether.JsStatement.prototype.visit = function(visitor) { return visitor.visitJs
 
 //------------------------------------------------------------------------------
 
-Blether.Method = function(selector, sequences) {
+Blether.Method = function(selector, sequence) {
 	this._type = "Method";
 	this.selector = selector;
-	this.sequences = sequences;
+	this.sequence = sequence;
 };
 
 Blether.Method.prototype = new Blether.Node();

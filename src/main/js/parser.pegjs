@@ -265,7 +265,7 @@ jsStatement = "<" val:((">>" {return ">";} / [^>])*) ">" {
 
 
 method = pattern:(keywordPattern / binaryPattern / unaryPattern) ws sequence:sequence? ws {
-	return new Blether.Method(pattern, [sequence]).at(line(), column(), text());
+	return new Blether.Method(pattern, sequence).at(line(), column(), text());
 }
 
 
@@ -318,7 +318,6 @@ classAndMethod = "!" className:className ws body:method "!" ws? "." {
 			"msg": "Method " + body.selector + "already defined on class " + className
 		});
 	}
-
 
 	return Blether.classes[className].methods[body.selector] = 
 		new Blether.MethodDeclaration(className, body).at(line(), column(), text());

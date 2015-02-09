@@ -123,7 +123,16 @@ var BletherTranslator = function() {
 		output += "var self = this;\n";
 
 		// If method has return caret, wrap with try block
-		var hasReturnOperator = new BletherReturnOperatorVisitor().visit(node);
+		var hasReturnOperator = false;
+		var returnOperatorVisitor = new BletherReturnOperatorVisitor();
+
+		for (var i = 0; i < node.sequence.statements.length; i++ ) {
+			var each = node.sequence.statements[i];
+			if (each._type !== "Return" && returnOperatorVisitor.visit(each)) {
+				hasReturnOperator = true;
+				break;
+			}
+		}
 
 		if (hasReturnOperator) {
 			output += "try {\n";
@@ -134,9 +143,7 @@ var BletherTranslator = function() {
 		var oldContext = this.context;
 		this.context = "method";
 
-		node.sequences.forEach(function(each) {
-			output += each.visit(self);
-		});
+		output += node.sequence.visit(self);
 
 		this.context = oldContext;
 
@@ -202,8 +209,13 @@ var BletherTranslator = function() {
 		var needsReturn = true;
 
 		node.statements.forEach(function(each, index, array) {
-			if (index === array.length - 1 && self.context !== "method" && each._type !== "Return") {
-				output += "return ";
+			if (index === array.length - 1) {
+				if (each._type !== "Return") {
+					output += "return ";
+				}
+				else {
+					needsReturn = false;
+				}
 			}
 			output += each.visit(self) + ";\n";
 		});
@@ -398,7 +410,7 @@ var BletherTranslator = function() {
 		return output;
 	};
 
-	this.convertIfNil = function(receiver, node) {
+	this.convertIfNotNil = function(receiver, node) {
 		var block = node.args[0];
 
 		if (block.params.length > 1) {

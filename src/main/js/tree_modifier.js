@@ -29,9 +29,7 @@ var BletherTreeModifier = function() {
 	};
 
     this.visitMethod = function(node) {
-		for (var i = 0; i < node.sequences.length; i++) {
-			node.sequences[i] = node.sequences[i].visit(this);
-		}
+		node.sequence = node.sequence.visit(this);
 
 		return node;
 	};
