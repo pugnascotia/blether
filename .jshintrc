@@ -23,6 +23,7 @@
 		"Blether": true,
 		"BletherParser": true,
 		"BletherTreeModifier": true,
+		"BletherReturnOperatorVisitor": true,
 		"convertSelector": true,
 		"jQuery": true
 	}

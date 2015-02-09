@@ -1,4 +1,4 @@
-/* exported STString, STNumber, Transcript */
+/* exported STString, STNumber, Transcript, STReturnValue */
 var STString = (function() {
 	function STString(s) {
 		this.value = s || "";
@@ -73,3 +73,7 @@ var Transcript = (function() {
 
 	return T;
 })();
+
+var STReturnValue = function(value) {
+	this.value = value;
+};

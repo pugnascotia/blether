@@ -42,6 +42,7 @@ module.exports = function(grunt) {
 					"target/parser.js",
 					"src/main/js/selector.js",
 					"src/main/js/tree_modifier.js",
+					"src/main/js/return_operator_visitor.js",
 					"src/main/js/translator.js",
 				],
 				dest: "target/blether.js"

@@ -122,15 +122,37 @@ var BletherTranslator = function() {
 		var output = "function(" + node.selector.visit(this)[1].join(", ") + ") {\n";
 		output += "var self = this;\n";
 
+		// If method has return caret, wrap with try block
+		var hasReturnOperator = new BletherReturnOperatorVisitor().visit(node);
+
+		if (hasReturnOperator) {
+			output += "try {\n";
+		}
+
 		var self = this;
+
+		var oldContext = this.context;
+		this.context = "method";
 
 		node.sequences.forEach(function(each) {
 			output += each.visit(self);
 		});
 
-		output += "}";
+		this.context = oldContext;
 
-		// node.sequences
+		if (hasReturnOperator) {
+			output += "}\n";
+			output += "catch (e) {\n";
+			output += "  if (e instanceof STReturnValue) {\n";
+			output += "    return e.value;\n";
+			output += "  }\n";
+			output += "  else {\n";
+			output += "    throw e;\n";
+			output += "  }\n";
+			output += "}\n";
+		}
+
+		output += "}";
 
 		return output;
 	};
@@ -147,10 +169,10 @@ var BletherTranslator = function() {
 		var keywords = [];
 		var params = [];
 		var i = 0;
-		for(i = 0; i < node.pairs.length; i++){
+		for (i = 0; i < node.pairs.length; i++) {
 		    keywords.push(node.pairs[i].key);
 		}
-		for(i = 0; i < node.pairs.length; i++){
+		for (i = 0; i < node.pairs.length; i++) {
 		    params.push(node.pairs[i].arg);
 		}
 		return [convertSelector(keywords.join("")), params];
@@ -180,11 +202,13 @@ var BletherTranslator = function() {
 		var needsReturn = true;
 
 		node.statements.forEach(function(each, index, array) {
-			needsReturn = !(index === array.length - 1 && each._type === "Return");
+			if (index === array.length - 1 && self.context !== "method" && each._type !== "Return") {
+				output += "return ";
+			}
 			output += each.visit(self) + ";\n";
 		});
 
-		if (needsReturn) {
+		if (needsReturn && self.context === "method") {
 			output += "return self;\n";
 		}
 
@@ -295,9 +319,14 @@ var BletherTranslator = function() {
 	};
 
 	this.visitBlock = function(node) {
-		return "function (" + node.params.join(", ") + ") {\n" +
+		var oldContext = this.context;
+		this.context = "block";
+		var output = "function (" + node.params.join(", ") + ") {\n" +
 			node.sequence.visit(this) +
 		"}";
+
+		this.context = oldContext;
+		return output;
 	};
 
 	this.visitCascade = function(node) {
@@ -350,7 +379,12 @@ var BletherTranslator = function() {
 	};
 
 	this.visitReturn = function(node) {
-		return "return " + node.value.visit(this);
+		if (this.context === "method" ) {
+			return "return " + node.value.visit(this);
+		}
+		else {
+			return "throw new STReturnValue(" + node.value.visit(this) + ")";
+		}
 	};
 
 	this.convertIfNil = function(receiver, node) {
@@ -366,8 +400,6 @@ var BletherTranslator = function() {
 
 	this.convertIfNil = function(receiver, node) {
 		var block = node.args[0];
-
-		// TODO check that block is indeed a Block
 
 		if (block.params.length > 1) {
 			throw Blether.ParseError({
