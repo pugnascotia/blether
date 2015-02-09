@@ -209,7 +209,7 @@ var BletherTranslator = function() {
 		var needsReturn = true;
 
 		node.statements.forEach(function(each, index, array) {
-			if (index === array.length - 1) {
+			if (index === array.length - 1 && self.context !== "method") {
 				if (each._type !== "Return") {
 					output += "return ";
 				}
