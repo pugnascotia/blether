@@ -344,10 +344,10 @@ var BletherTranslator = function() {
 	this.visitCascade = function(node) {
 		var self = this;
 
-		var output = "(function(_) {\n";
+		var output = "(function(_recv) {\n";
 
 		node.messages.forEach(function(each, index, array) {
-			each.receiver = new Blether.Variable("_");
+			each.receiver = new Blether.Variable("_recv");
 			output += (index === array.length - 1 ? "return " : "") + each.visit(self) + ";\n";
 		});
 
