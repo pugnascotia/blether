@@ -23,6 +23,10 @@ var STString = (function() {
 		return new STString(ret);
 	};
 
+	STString.prototype.asJQuery = function() {
+		return jQuery(this.valueOf());
+	};
+
 	return STString;
 })();
 

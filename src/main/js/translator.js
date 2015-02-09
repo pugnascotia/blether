@@ -242,10 +242,6 @@ var BletherTranslator = function() {
 				output = this.convertWhile(node);
 				break;
 
-			case "asJQuery":
-				output = this.convertJQuery(node);
-				break;
-
 			case "==":
 				output = receiver + " === " + node.args[0].visit(self);
 				break;
@@ -466,10 +462,6 @@ var BletherTranslator = function() {
 		output += "}\n";
 
 		return output;
-	};
-
-	this.convertJQuery = function(node) {
-		return "jQuery(" + node.receiver.visit(this) + ")";
 	};
 };
 
