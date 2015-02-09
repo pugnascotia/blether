@@ -242,6 +242,16 @@ var BletherTranslator = function() {
 				output = this.convertWhile(node);
 				break;
 
+			case "ifTrue:":
+			case "ifFalse:":
+				output = this.convertSingleIf(node);
+				break;
+
+			case "ifTrue:ifFalse:":
+			case "ifFalse:ifTrue:":
+				output = this.convertIfTrueIfFalse(node);
+				break;
+
 			case "==":
 				output = receiver + " === " + node.args[0].visit(self);
 				break;
@@ -462,6 +472,44 @@ var BletherTranslator = function() {
 		output += "}\n";
 
 		return output;
+	};
+
+	this.convertSingleIf = function(node) {
+		if (node.args[0]._type !== "Block") {
+			throw Blether.ParseError({
+				"line": node.line,
+				"column": node.column,
+				"msg": node.selector + " accepts literal blocks only"
+			});
+		}
+
+		var invert = node.selector === "ifFalse:" ? "!" : "";
+		
+		if (invert) {
+			return node.receiver.visit(this) + " ? null : (" + node.args[0].visit(this) + ")()";
+		}
+		else {
+			return node.receiver.visit(this) + " ? (" + node.args[0].visit(this) + ")() : null";
+		}
+	};
+
+	this.convertIfTrueIfFalse = function(node) {
+		if (node.args[0]._type !== "Block" || node.args[1]._type !== "Block") {
+			throw Blether.ParseError({
+				"line": node.line,
+				"column": node.column,
+				"msg": node.selector + " accepts literal blocks only"
+			});
+		}
+
+		var invert = node.selector === "ifFalse:ifTrue:" ? "!" : "";
+		
+		if (invert) {
+			return node.receiver.visit(this) + " ? (" + node.args[1].visit(this) + ")() : (" + node.args[0].visit(this) + ")()";
+		}
+		else {
+			return node.receiver.visit(this) + " ? (" + node.args[0].visit(this) + ")() : (" + node.args[1].visit(this) + ")()";
+		}
 	};
 };
 
