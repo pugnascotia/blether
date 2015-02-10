@@ -1,0 +1,4 @@
+{ name: 'Blether Parse Error',
+  message: 'Super-class Foo not defined',
+  line: 1,
+  column: 1 }

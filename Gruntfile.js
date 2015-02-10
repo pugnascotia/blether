@@ -1,22 +1,18 @@
 module.exports = function(grunt) {
-	'use strict';
+	"use strict";
 
 	// Time our tasks in a spangly way
-	require('time-grunt')(grunt);
+	require("time-grunt")(grunt);
 
 	// Auto-load only required tasks
-	// require('jit-grunt')(grunt);
+	// require("jit-grunt")(grunt);
 
 	// Force use of Unix newlines
-	grunt.util.linefeed = '\n';
-
-	var javascriptFiles = [
-		'src/*/js/**/*.js',
-	];
+	grunt.util.linefeed = "\n";
 
 	// 1. All configuration goes here 
 	grunt.initConfig({
-		pkg: grunt.file.readJSON('package.json'),
+		pkg: grunt.file.readJSON("package.json"),
 		
 		peg: {
 			grammer: {
@@ -28,7 +24,7 @@ module.exports = function(grunt) {
 
 		// Configure the grunt-contrib-jshint plugin
 		jshint: {
-			files: javascriptFiles,
+			files: [ "src/**/*.js", "test/**/*.js", "Gruntfile.js" ],
 			options: {
 				jshintrc: ".jshintrc"
 			}
@@ -59,31 +55,31 @@ module.exports = function(grunt) {
 		// Configure the grunt-contrib-uglify plugin
 		uglify: {
 			options: {
-				banner: '/*! <%= pkg.name %> <%= grunt.template.today("dd-mm-yyyy") %> */\n'
+				banner: "/*! <%= pkg.name %> <%= grunt.template.today(\"dd-mm-yyyy\") %> */\n"
 			},
 			blether: {
-				src: 'target/blether.js',
-				dest: 'target/blether.min.js'
+				src: "target/blether.js",
+				dest: "target/blether.min.js"
 			},
 			runtime: {
-				src: 'target/runtime.js',
-				dest: 'target/runtime.min.js'
+				src: "target/runtime.js",
+				dest: "target/runtime.min.js"
 			}
 		},
 
 		// Configure the grunt-contrib-watch plugin
 		watch: {
 			scripts: {
-				files: javascriptFiles,
-				tasks: ['jshint', 'concat', 'copy', 'mochaTest' ]
+				files: "test/**/*.js",
+				tasks: ["jshint", "concat", "copy", "mochaTest" ]
 			},
 			tests: {
-				files: [ 'test/**/*.js', 'test/**/*.st', 'test/**/*.result' ],
-				tasks: [ 'mochaTest' ]
+				files: [ "src/test/**/*.js", "test/**/*.js", "test/**/*.st", "test/**/*.result" ],
+				tasks: [ "mochaTest" ]
 			},
 			grammar: {
-				files: [ 'src/main/js/parser.pegjs' ],
-				tasks: [ 'peg', 'concat', 'copy', 'mochaTest' ]
+				files: [ "src/main/js/parser.pegjs" ],
+				tasks: [ "peg", "concat", "copy", "mochaTest" ]
 			},
 			build: {
 				files: [ "Gruntfile.js", ".jshintrc" ],
@@ -95,7 +91,7 @@ module.exports = function(grunt) {
 			test: {
 				options: {
 					"reporter": "spec",
-					"captureFile": 'results.txt',
+					"captureFile": "results.txt",
 					"quiet": false,
 					"clearRequireCache": false
 				},
@@ -104,15 +100,15 @@ module.exports = function(grunt) {
 		}
 	});
 
-	// Usually we'd tell Grunt what plugins we plan to use as follows, but
+	// Usually we"d tell Grunt what plugins we plan to use as follows, but
 	// jit-grunt (see above) does away with this.
 	grunt.loadNpmTasks("grunt-contrib-concat");
 	grunt.loadNpmTasks("grunt-contrib-jshint");
 	grunt.loadNpmTasks("grunt-contrib-uglify");
-	grunt.loadNpmTasks('grunt-peg');
-	grunt.loadNpmTasks('grunt-contrib-watch');
-	grunt.loadNpmTasks('grunt-contrib-copy');
-	grunt.loadNpmTasks('grunt-mocha-test');
+	grunt.loadNpmTasks("grunt-peg");
+	grunt.loadNpmTasks("grunt-contrib-watch");
+	grunt.loadNpmTasks("grunt-contrib-copy");
+	grunt.loadNpmTasks("grunt-mocha-test");
 
 	// Tell Grunt what to do when we type "grunt" into the terminal.
 	grunt.registerTask("default", [

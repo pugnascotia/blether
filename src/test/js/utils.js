@@ -1,7 +1,16 @@
 var assert = require("assert");
-var testUtils = {};
+var util = require("util");
 
 var blether = require("../../../target/blether.js");
+
+var testUtils = {};
+
+function appendNewlineIfNecessary(s) {
+	if (typeof s === "string" && s.length !== 0 && s.slice(-1) !== "\n") {
+		return s + "\n";
+	}
+	return s;
+}
 
 testUtils.getArtifacts = function(testName) {
 	var path = require("path");
@@ -18,10 +27,18 @@ testUtils.getArtifacts = function(testName) {
 
 testUtils.generateAndCompare = function(artifactPrefix) {
 	var artifacts = testUtils.getArtifacts(artifactPrefix);
-	// Do not prefix generated source with the required runtime
-	var actual = blether.translate(artifacts.source, { include_runtime: false });
 
-	assert.equal(artifacts.expected, actual);
+	var actual;
+
+	// Do not prefix generated source with the required runtime
+	try {
+		actual = blether.translate(artifacts.source, { include_runtime: false });
+	}
+	catch (e) {
+		actual = util.inspect(e, null, false);
+	}
+
+	assert.equal(appendNewlineIfNecessary(artifacts.expected), appendNewlineIfNecessary(actual));
 };
 
 module.exports = testUtils;

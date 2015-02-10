@@ -25,6 +25,8 @@
 		"BletherTreeModifier": true,
 		"BletherReturnOperatorVisitor": true,
 		"convertSelector": true,
-		"jQuery": true
+		"jQuery": true,
+		"describe": true,
+		"it": true
 	}
 }
