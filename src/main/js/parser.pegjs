@@ -1,3 +1,11 @@
+{
+Blether.classes = {
+	"Object": {
+		"methods": {}
+	}
+}
+}
+
 start = program
 
 separator = [ \t\v\f\u00A0\uFEFF\n\r\u2028\u2029]+
@@ -279,7 +287,7 @@ associations = first:associationSend others:associationList* {
 	return first.concat.apply(first, others);
 }
 
-classDeclaration = superClass:selector ws "subclass:" ws className:symbol ws ("variables:" / "instanceVariableNames:") ws varNames:symbolArray (ws "classVariableNames:" ws string ws "poolDictionaries:" string)? ws "." {
+classDeclaration = superClass:selector ws "subclass:" ws className:symbol ws ("variables:" / "instanceVariableNames:") ws varNames:symbolArray (ws "classVariableNames:" ws symbolArray ws "poolDictionaries:" ws symbolArray)? ws "." {
 	if (!Blether.classes[superClass]) {
 		throw Blether.ParseError({
 			"line": line(),
