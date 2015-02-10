@@ -26,6 +26,12 @@ var BletherTranslator = function() {
 	this.visitProgram = function(node) {
 		var self = this;
 
+		this.context = {
+			"instanceVars": [],
+			"temps": [],
+			"returnContext": "root"
+		};
+
 		var output = "";
 
 		node.elements.forEach(function(childNode) {
@@ -78,6 +84,15 @@ var BletherTranslator = function() {
 
 		output += "};\n\n";
 
+		var oldContext = this.context;
+
+		this.context = {
+			"currentClass": node.className.value,
+			"instanceVars": ["self"].concat(instanceNames.map(function(e) { return e.value })),
+			"temps": [],
+			"returnContext": "method"
+		};
+
 		var methods = node.getMethods();
 		
 		for (var prop in methods) {
@@ -85,6 +100,8 @@ var BletherTranslator = function() {
 				output += methods[prop].visit(self);
 			}
 		}
+
+		this.context = oldContext;
 
 		output += "\nreturn " + node.className + ";\n\n";
 
@@ -104,9 +121,7 @@ var BletherTranslator = function() {
 
 		var output = node.className + ".prototype." + methodName + " = ";
 		
-		this.currentClass = node.className;
 		output += node.body.visit(this);
-		this.currentClass = null;
 
 		output += ";\n\n";
 
@@ -119,7 +134,14 @@ var BletherTranslator = function() {
 
 	this.visitMethod = function(node) {
 
-		var output = "function(" + node.selector.visit(this)[1].join(", ") + ") {\n";
+		var argumentNames = node.selector.visit(this)[1];
+		
+		console.log(this.context);
+
+		var oldTemps = this.context.temps;
+		this.context.temps = oldTemps.concat(argumentNames);
+
+		var output = "function(" + argumentNames.join(", ") + ") {\n";
 		output += "var self = this;\n";
 
 		// If method has return caret, wrap with try block
@@ -140,12 +162,12 @@ var BletherTranslator = function() {
 
 		var self = this;
 
-		var oldContext = this.context;
-		this.context = "method";
+		var oldReturnContext = this.context.returnContext;
+		this.context.returnContext = "method";
 
 		output += node.sequence.visit(self);
 
-		this.context = oldContext;
+		this.context.returnContext = oldReturnContext;
 
 		if (hasReturnOperator) {
 			output += "}\n";
@@ -160,6 +182,8 @@ var BletherTranslator = function() {
 		}
 
 		output += "}";
+
+		this.context.temps = oldTemps;
 
 		return output;
 	};
@@ -202,6 +226,9 @@ var BletherTranslator = function() {
 
 		var output = "";
 
+		var oldTemps = this.context.temps;
+		this.context.temps = [].concat(oldTemps, node.temps);
+
 		node.temps.forEach(function(each) {
 			output += "var " + each + ";\n";
 		});
@@ -224,6 +251,8 @@ var BletherTranslator = function() {
 			output += "return self;\n";
 		}
 
+		this.context.temps = oldTemps;
+
 		return output;
 	};
 
@@ -231,6 +260,10 @@ var BletherTranslator = function() {
 		var self = this;
 
 		var receiver = node.receiver.visit(this);
+
+		if (node.receiver._type === "Block") {
+			receiver = "(" + receiver + ")";
+		}
 
 		switch (receiver) {
 			case "super":
@@ -319,7 +352,31 @@ var BletherTranslator = function() {
 	};
 
 	this.visitVariable = function(node) {
-		return node.value;
+		var i;
+
+		for (i = 0; i < this.context.temps.length; i++) {
+			if (node.value === this.context.temps[i]) {
+				return node.value;
+			}
+		}
+
+		for (i = 0; i < this.context.instanceVars.length; i++) {
+			if (node.value === this.context.instanceVars[i]) {
+				return "self." + node.value;
+			}
+		}
+
+		if (node.value.match(/^[A-Z]/)) {
+			console.warn("Assuming " + node.value + " is a class name");
+			return node.value;
+		}
+		else {
+			throw Blether.ParseError({
+				"line": node.line,
+				"column": node.column,
+				"msg": "Unknown variable name [" + node.value + "]"
+			});
+		}
 	};
 
 	this.visitUndefinedObject = function() {
@@ -331,13 +388,20 @@ var BletherTranslator = function() {
 	};
 
 	this.visitBlock = function(node) {
-		var oldContext = this.context;
-		this.context = "block";
-		var output = "function (" + node.params.join(", ") + ") {\n" +
-			node.sequence.visit(this) +
-		"}";
+		var oldContext = this.context.returnContext;
+		this.context.returnContext = "block";
+		var output = "function (" + node.params.join(", ") + ") {\n";
 
-		this.context = oldContext;
+		var oldTemps = this.context.temps;
+		this.context.temps = [].concat(oldTemps, node.params);
+
+		output += node.sequence.visit(this);
+
+		this.context.temps = oldTemps;
+
+		output += "}";
+
+		this.context.returnContext = oldContext;
 		return output;
 	};
 
@@ -360,7 +424,9 @@ var BletherTranslator = function() {
 		return node.javascript.trim();
 	};
 
+	// Highest-level variables i.e. global
 	this.visitVariableDeclaration = function(node) {
+		this.context.temps = this.context.temps.concat(node.variables);
 		return "var " + node.variables.join(", ") + ";\n";
 	};
 
@@ -391,7 +457,7 @@ var BletherTranslator = function() {
 	};
 
 	this.visitReturn = function(node) {
-		if (this.context === "method" ) {
+		if (this.context.returnContext === "method" ) {
 			return "return " + node.value.visit(this);
 		}
 		else {
@@ -479,8 +545,8 @@ var BletherTranslator = function() {
 
 	this.convertSuper = function(selector, node) {
 		var self = this;
-		if (typeof this.currentClass !== "undefined") {
-			var output = this.currentClass + ".__super__." + selector + ".call(self";
+		if (typeof this.context.currentClass !== "undefined") {
+			var output = this.context.currentClass + ".__super__." + selector + ".call(self";
 			if (node.args.length > 0) {
 				node.args.forEach(function(each) {
 					output += ", " + each.visit(self);
