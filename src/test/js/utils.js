@@ -25,6 +25,18 @@ testUtils.getArtifacts = function(artifactPrefix) {
 	return { source: source, expected: expected};
 };
 
+testUtils.getSource = function(artifactPrefix) {
+	var path = require("path");
+	var fs = require("fs");
+
+	var utilsPath = fs.realpathSync(__filename);
+	var testDir = path.join(path.dirname(utilsPath), "..", "..", "..", "test");
+
+	var source   = fs.readFileSync(path.join(testDir, artifactPrefix + ".st")).toString();
+
+	return source;
+};
+
 testUtils.generateAndCompare = function(artifactPrefix) {
 	var artifacts = testUtils.getArtifacts(artifactPrefix);
 
@@ -39,6 +51,14 @@ testUtils.generateAndCompare = function(artifactPrefix) {
 	}
 
 	assert.equal(appendNewlineIfNecessary(artifacts.expected), appendNewlineIfNecessary(actual));
+};
+
+testUtils.expectSyntaxError = function(artifactPrefix) {
+
+	assert.throws(function() {
+		blether.translate(testUtils.getSource(artifactPrefix));
+	},
+	/Expected/);
 };
 
 module.exports = testUtils;

@@ -18,6 +18,10 @@ describe("Class creation", function(){
 		testUtils.generateAndCompare("class/undefined_superclass");
     });
 
+    it("should fail if the class is already defined", function(){
+		testUtils.generateAndCompare("class/already_defined");
+    });
+
 	it("should configure the super-class correctly", function() {
 		testUtils.generateAndCompare("class/superclass");
 	});
