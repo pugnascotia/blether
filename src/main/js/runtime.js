@@ -13,6 +13,10 @@ var STString = (function() {
 
 	STString.prototype.toString = STString.prototype.valueOf = function() { return this.value };
 
+	STString.prototype.equals$ = function(other) {
+		return this.value === other;
+	};
+
 	STString.prototype.concat = function() {
 		var ret = this.value;
 
@@ -38,6 +42,10 @@ var STNumber = (function() {
 	STNumber.prototype = Object.create(Number.prototype);
 
 	STNumber.prototype.valueOf = function() { return this.value };
+
+	STNumber.prototype.equals$ = function(other) {
+		return this.value === other;
+	};
 
 	STNumber.prototype.toString = function() { return this.value.toString() };
 
