@@ -12,15 +12,15 @@ function appendNewlineIfNecessary(s) {
 	return s;
 }
 
-testUtils.getArtifacts = function(testName) {
+testUtils.getArtifacts = function(artifactPrefix) {
 	var path = require("path");
 	var fs = require("fs");
 
 	var utilsPath = fs.realpathSync(__filename);
 	var testDir = path.join(path.dirname(utilsPath), "..", "..", "..", "test");
 
-	var source   = fs.readFileSync(path.join(testDir, testName + ".st")).toString();
-	var expected = fs.readFileSync(path.join(testDir, testName + ".result")).toString();
+	var source   = fs.readFileSync(path.join(testDir, artifactPrefix + ".st")).toString();
+	var expected = fs.readFileSync(path.join(testDir, artifactPrefix + ".result")).toString();
 
 	return { source: source, expected: expected};
 };
