@@ -88,7 +88,7 @@ var BletherTranslator = function() {
 
 		this.context = {
 			"currentClass": node.className.value,
-			"instanceVars": ["self"].concat(instanceNames.map(function(e) { return e.value })),
+			"instanceVars": instanceNames.map(function(e) { return e.value }),
 			"temps": [],
 			"returnContext": "method"
 		};
@@ -135,8 +135,6 @@ var BletherTranslator = function() {
 	this.visitMethod = function(node) {
 
 		var argumentNames = node.selector.visit(this)[1];
-		
-		console.log(this.context);
 
 		var oldTemps = this.context.temps;
 		this.context.temps = oldTemps.concat(argumentNames);
@@ -354,6 +352,10 @@ var BletherTranslator = function() {
 	this.visitVariable = function(node) {
 		var i;
 
+		if (node.value === "self") {
+			return "self";
+		}
+
 		for (i = 0; i < this.context.temps.length; i++) {
 			if (node.value === this.context.temps[i]) {
 				return node.value;
@@ -367,7 +369,7 @@ var BletherTranslator = function() {
 		}
 
 		if (node.value.match(/^[A-Z]/)) {
-			console.warn("Assuming " + node.value + " is a class name");
+			//console.warn("Assuming " + node.value + " is a class name");
 			return node.value;
 		}
 		else {
