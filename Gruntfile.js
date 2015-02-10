@@ -83,7 +83,7 @@ module.exports = function(grunt) {
 			},
 			grammar: {
 				files: [ 'src/main/js/parser.pegjs' ],
-				tasks: [ 'peg', 'concat', 'copy' ]
+				tasks: [ 'peg', 'concat', 'copy', 'mochaTest' ]
 			},
 			build: {
 				files: [ "Gruntfile.js", ".jshintrc" ],

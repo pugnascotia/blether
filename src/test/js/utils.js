@@ -3,13 +3,12 @@ var testUtils = {};
 
 var blether = require("../../../target/blether.js");
 
-testUtils.getArtifacts = function(__testPath) {
+testUtils.getArtifacts = function(testName) {
 	var path = require("path");
 	var fs = require("fs");
 
-	var testPath = fs.realpathSync(__testPath);
-	var testDir = path.dirname(testPath);
-	var testName = path.basename(testPath, ".js");
+	var utilsPath = fs.realpathSync(__filename);
+	var testDir = path.join(path.dirname(utilsPath), "..", "..", "..", "test");
 
 	var source   = fs.readFileSync(path.join(testDir, testName + ".st")).toString();
 	var expected = fs.readFileSync(path.join(testDir, testName + ".result")).toString();
@@ -17,8 +16,8 @@ testUtils.getArtifacts = function(__testPath) {
 	return { source: source, expected: expected};
 };
 
-testUtils.generateAndCompare = function(__testPath) {
-	var artifacts = testUtils.getArtifacts(__testPath);
+testUtils.generateAndCompare = function(artifactPrefix) {
+	var artifacts = testUtils.getArtifacts(artifactPrefix);
 	// Do not prefix generated source with the required runtime
 	var actual = blether.translate(artifacts.source, { include_runtime: false });
 
