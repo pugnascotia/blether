@@ -2,3 +2,4 @@ parser.js
 node_modules
 *.swp
 target
+results.txt

@@ -5,11 +5,8 @@ var blether = require("../../../target/blether.js");
 
 var testUtils = {};
 
-function appendNewlineIfNecessary(s) {
-	if (typeof s === "string" && s.length !== 0 && s.slice(-1) !== "\n") {
-		return s + "\n";
-	}
-	return s;
+function normalise(s) {
+	return s.trim() + "\n";
 }
 
 testUtils.getArtifacts = function(artifactPrefix) {
@@ -50,7 +47,7 @@ testUtils.generateAndCompare = function(artifactPrefix) {
 		actual = util.inspect(e, null, false);
 	}
 
-	assert.equal(appendNewlineIfNecessary(artifacts.expected), appendNewlineIfNecessary(actual));
+	assert.equal(normalise(artifacts.expected), normalise(actual));
 };
 
 testUtils.expectSyntaxError = function(artifactPrefix) {

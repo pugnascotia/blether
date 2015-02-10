@@ -6,4 +6,3 @@ function Foobar() {
 return Foobar;
 
 })();
-

@@ -1,0 +1,74 @@
+var Foobar = (function() {
+function Foobar(_value) {
+this.value = _value;
+};
+
+Foobar.prototype.backslash$ = function(arg) {
+var self = this;
+return self;
+};
+
+Foobar.prototype.plus$ = function(arg) {
+var self = this;
+return self;
+};
+
+Foobar.prototype.multiply$ = function(arg) {
+var self = this;
+return self;
+};
+
+Foobar.prototype.divide$ = function(arg) {
+var self = this;
+return self;
+};
+
+Foobar.prototype.equals$ = function(arg) {
+var self = this;
+return self;
+};
+
+Foobar.prototype.greater_than$ = function(arg) {
+var self = this;
+return self;
+};
+
+Foobar.prototype.less_than$ = function(arg) {
+var self = this;
+return self;
+};
+
+Foobar.prototype.at$ = function(arg) {
+var self = this;
+return self;
+};
+
+Foobar.prototype.modulo$ = function(arg) {
+var self = this;
+return self;
+};
+
+Foobar.prototype.tilde$ = function(arg) {
+var self = this;
+return self;
+};
+
+Foobar.prototype.or$ = function(arg) {
+var self = this;
+return self;
+};
+
+Foobar.prototype.and$ = function(arg) {
+var self = this;
+return self;
+};
+
+Foobar.prototype.minus$ = function(arg) {
+var self = this;
+return self;
+};
+
+
+return Foobar;
+
+})();

@@ -34,4 +34,3 @@ function Bar() {
 return Bar;
 
 })(Foo);
-
