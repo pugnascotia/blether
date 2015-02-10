@@ -323,7 +323,7 @@ classAndMethod = "!" className:className ws body:method "!" ws? "." {
 		throw Blether.ParseError({
 			"line": line(),
 			"column": column(),
-			"msg": "Method " + body.selector + "already defined on class " + className
+			"msg": "Method " + body.selector + " already defined on class " + className
 		});
 	}
 
