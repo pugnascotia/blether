@@ -75,7 +75,11 @@ module.exports = function(grunt) {
 		watch: {
 			scripts: {
 				files: javascriptFiles,
-				tasks: ['jshint', 'concat', 'copy' ]
+				tasks: ['jshint', 'concat', 'copy', 'mochaTest' ]
+			},
+			tests: {
+				files: [ 'test/**/*.js', 'test/**/*.st', 'test/**/*.result' ],
+				tasks: [ 'mochaTest' ]
 			},
 			grammar: {
 				files: [ 'src/main/js/parser.pegjs' ],
@@ -86,6 +90,18 @@ module.exports = function(grunt) {
 				tasks: [ "default" ]
 			}
 		},
+
+		mochaTest: {
+			test: {
+				options: {
+					"reporter": "spec",
+					"captureFile": 'results.txt',
+					"quiet": false,
+					"clearRequireCache": false
+				},
+				src: [ "test/**/*.js" ]
+			}
+		}
 	});
 
 	// Usually we'd tell Grunt what plugins we plan to use as follows, but
@@ -96,6 +112,7 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-peg');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-contrib-copy');
+	grunt.loadNpmTasks('grunt-mocha-test');
 
 	// Tell Grunt what to do when we type "grunt" into the terminal.
 	grunt.registerTask("default", [
@@ -103,7 +120,8 @@ module.exports = function(grunt) {
 		"peg",
 		"concat",
 		"copy",
-		"uglify"
+		"uglify",
+		"mochaTest"
 	]);
 
 };
