@@ -625,7 +625,9 @@ var BletherTranslator = function() {
 
 
 module.exports = {
-	"translate": function(text) {
+	"translate": function(text, _opts) {
+		var opts = _opts || { include_runtime: true };
+
 		var ast = BletherParser.parse(text);
 
 		// var util = require("util");
@@ -636,11 +638,15 @@ module.exports = {
 		// var util = require("util");
 		// console.log(util.inspect(modifiedAst, false, null));
 
-		var path = require("path");
-		var fs   = require("fs");
+		var runtime = "";
 
-		var runtimePath = path.join(path.dirname(fs.realpathSync(__filename)), "runtime.js");
-		var runtime = fs.readFileSync(runtimePath).toString();
+		if (opts.include_runtime) {
+			var path = require("path");
+			var fs   = require("fs");
+
+			var runtimePath = path.join(path.dirname(fs.realpathSync(__filename)), "runtime.js");
+			runtime = fs.readFileSync(runtimePath).toString();
+		}
 
 		var translation = new BletherTranslator().visit(modifiedAst);
 
