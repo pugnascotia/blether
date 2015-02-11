@@ -1,0 +1,12 @@
+var Foobar = (function() {
+function Foobar() {
+};
+
+Foobar.prototype.hello = function() {
+This isn't valid JavaScript but the translater doesn't know that
+};
+
+
+return Foobar;
+
+})();

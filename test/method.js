@@ -32,5 +32,9 @@ describe("Method declaration", function(){
 		testUtils.generateAndCompare("method/keyword_name");
     });
 
+    it("translates JavaScript methods unmolested", function() {
+		testUtils.generateAndCompare("method/javascript_impl");
+    });
+
   });
 });

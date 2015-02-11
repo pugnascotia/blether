@@ -141,6 +141,15 @@ var BletherTranslator = function() {
 		this.context.temps = oldTemps.concat(argumentNames);
 
 		var output = "function(" + argumentNames.join(", ") + ") {\n";
+
+		// FIXME: This should happen through use of the visitor pattern,
+		// but the checks below for return operator depth break it.
+		if (node.sequence._type === "JsStatement") {
+			output += node.sequence.visit(this);
+			output += "\n}";
+			return output;
+		}
+
 		output += "var self = this;\n";
 
 		// If method has return caret, wrap with try block
