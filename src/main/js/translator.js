@@ -654,14 +654,6 @@ module.exports = {
 
 		var ast = BletherParser.parse(text);
 
-		// var util = require("util");
-		// console.log(util.inspect(ast, false, null));
-
-		var modifiedAst = new BletherTreeModifier().visit(ast);
-
-		// var util = require("util");
-		// console.log(util.inspect(modifiedAst, false, null));
-
 		var runtime = "";
 
 		if (opts.include_runtime) {
@@ -672,7 +664,7 @@ module.exports = {
 			runtime = fs.readFileSync(runtimePath).toString();
 		}
 
-		var translation = new BletherTranslator().visit(modifiedAst);
+		var translation = new BletherTranslator().visit(ast);
 
 		return runtime + translation;
 	}
