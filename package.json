@@ -4,7 +4,7 @@
   "description": "Yet another Smalltalk to JavaScript compiler",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --reporter spec --bail --check-leaks test/ "
+    "test": "grunt test"
   },
   "keywords": [
     "smalltalk",

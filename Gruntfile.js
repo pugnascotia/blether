@@ -120,4 +120,6 @@ module.exports = function(grunt) {
 		"mochaTest"
 	]);
 
+	grunt.registerTask("test", [ "default" ]);
+
 };
