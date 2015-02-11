@@ -1,4 +1,5 @@
 {
+/* Reinitiase global data */
 Blether.classes = {
 	"Object": {
 		"methods": {}

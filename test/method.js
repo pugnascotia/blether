@@ -12,6 +12,10 @@ describe("Method declaration", function(){
 		testUtils.generateAndCompare("method/already_defined");
     });
 
+    it("checks that keyword methods do not list the same argument name more than once", function() {
+		testUtils.generateAndCompare("method/unique_keyword_arg_names");
+    });
+
   });
 
   describe("Defining a method", function() {
@@ -22,6 +26,10 @@ describe("Method declaration", function(){
 
     it("translates binary method names", function() {
 		testUtils.generateAndCompare("method/binary_name");
+    });
+
+    it("translates keyword method names", function() {
+		testUtils.generateAndCompare("method/keyword_name");
     });
 
   });

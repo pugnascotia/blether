@@ -1,0 +1,4 @@
+{ name: 'Blether Parse Error',
+  message: 'Argument name argOne repeats in method Foobar>>#one:two:',
+  line: 3,
+  column: 9 }

@@ -117,6 +117,7 @@ var BletherTranslator = function() {
 	};
 
 	this.visitMethodDeclaration = function(node) {
+
 		var methodName = node.body.selector.visit(this)[0];
 
 		var output = node.className + ".prototype." + methodName + " = ";
@@ -195,15 +196,27 @@ var BletherTranslator = function() {
 	};
 
 	this.visitKeywordPattern = function(node) {
-		var keywords = [];
-		var params = [];
-		var i = 0;
-		for (i = 0; i < node.pairs.length; i++) {
-		    keywords.push(node.pairs[i].key);
-		}
-		for (i = 0; i < node.pairs.length; i++) {
-		    params.push(node.pairs[i].arg);
-		}
+		var self = this;
+		var keywords = node.pairs.map(function(p) { return p.key });
+		var params = node.pairs.map(function(p) { return p.arg });
+
+		debugger;
+
+		var argCounts = {};
+		params.forEach(function(p) {
+			argCounts[p] = (argCounts[p] || 0) + 1;
+
+			if (argCounts[p] > 1) {
+
+				throw Blether.ParseError({
+					"line": node.line,
+					"column": node.column,
+					"msg": "Argument name " + p + " repeats in method " +
+						self.context.currentClass + ">>" + node.selector
+				});
+			}
+		});
+
 		return [convertSelector(keywords.join("")), params];
 	};
 

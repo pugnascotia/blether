@@ -82,6 +82,12 @@ var Transcript = (function() {
 	return T;
 })();
 
-var STReturnValue = function(value) {
-	this.value = value;
+var STReturnValue = function(_value) {
+	var value = _value;
+	Object.defineProperty(this, "value", {
+		value: value,
+		writable: false,
+		enumerable: true,
+		configurable: true
+	});
 };
