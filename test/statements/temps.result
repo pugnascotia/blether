@@ -1,0 +1,14 @@
+var Foobar = (function() {
+function Foobar() {
+};
+
+Foobar.prototype.hello = function() {
+var self = this;
+var foo;
+return self;
+};
+
+
+return Foobar;
+
+})();
