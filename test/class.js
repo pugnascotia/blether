@@ -2,6 +2,13 @@ var testUtils = require("../src/test/js/utils.js");
 
 describe("Class creation", function(){
 
+  describe("Defining a class", function() {
+    it("should reject class names without a leading capital", function(){
+		testUtils.expectParseError("class/no_leading_capital", "Class name foobar must start with a capital");
+    });
+  });
+
+
   describe("Extending Object", function() {
     it("should emit basic boilerplate when extending Object with no instance variables", function(){
 		testUtils.generateAndCompare("class/extend_object");

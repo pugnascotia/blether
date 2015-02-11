@@ -289,6 +289,14 @@ associations = first:associationSend others:associationList* {
 }
 
 classDeclaration = superClass:selector ws "subclass:" ws className:symbol ws ("variables:" / "instanceVariableNames:") ws varNames:symbolArray (ws "classVariableNames:" ws symbolArray ws "poolDictionaries:" ws symbolArray)? ws "." {
+	if (!className.value.match(/^[A-Z]/)) {
+		throw Blether.ParseError({
+			"line": line(),
+			"column": column(),
+			"msg": "Class name " + className + " must start with a capital"
+		});
+	}
+
 	if (!Blether.classes[superClass]) {
 		throw Blether.ParseError({
 			"line": line(),

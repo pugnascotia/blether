@@ -58,4 +58,16 @@ testUtils.expectSyntaxError = function(artifactPrefix) {
 	/Expected/);
 };
 
+testUtils.expectParseError = function(artifactPrefix, expectedMessage) {
+
+	try {
+		blether.translate(testUtils.getSource(artifactPrefix));
+		throw "Expected exception to be thrown";
+	}
+	catch (e) {
+		assert.equal("Blether Parse Error", e.name);
+		assert.equal(expectedMessage, e.message);
+	}
+};
+
 module.exports = testUtils;

@@ -1,0 +1,1 @@
+Object subclass: #foobar variables: #().
