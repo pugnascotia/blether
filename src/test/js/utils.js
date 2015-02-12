@@ -73,7 +73,8 @@ testUtils.expectParseError = function(artifactPrefix, expectedMessage) {
 		throw "Expected exception to be thrown";
 	}
 	catch (e) {
-		assert.equal("Blether Parse Error", e.name);
+		//console.log(e);
+		assert.equal("Blether Parse Error", e.name, util.inspect(e, null, false));
 		assert.equal(expectedMessage, e.message);
 	}
 };
