@@ -21,4 +21,15 @@ describe("Sequences and Statements", function(){
 
   });
 
+  describe("Instance variables", function() {
+    it("are resolved when no temporary of the same name exists", function(){
+		testUtils.generateAndCompare("statements/inst_vars_resolved");
+    });
+
+    it("can be hidden by a temporary variable ", function(){
+		testUtils.generateAndCompare("statements/inst_vars_hidden");
+    });
+
+  });
+
 });

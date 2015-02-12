@@ -256,18 +256,25 @@ var BletherTranslator = function() {
 		var needsReturn = true;
 
 		node.statements.forEach(function(each, index, array) {
-			if (index === array.length - 1 && self.context !== "method") {
-				if (each._type !== "Return") {
-					output += "return ";
+			if (index === array.length - 1) {
+				if (self.context.returnContext !== "method") {
+					if (each._type !== "Return") {
+						output += "return ";
+					}
+					else {
+						needsReturn = false;
+					}
 				}
 				else {
-					needsReturn = false;
+					if (each._type === "Return") {
+						needsReturn = false;
+					}
 				}
 			}
 			output += each.visit(self) + ";\n";
 		});
 
-		if (needsReturn && self.context === "method") {
+		if (needsReturn && self.context.returnContext === "method") {
 			output += "return self;\n";
 		}
 

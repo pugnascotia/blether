@@ -1,4 +1,5 @@
 Object.prototype.sayHello = function() {
 var self = this;
-return Transcript.show(new STString("hello"));
+Transcript.show(new STString("hello"));
+return self;
 };
