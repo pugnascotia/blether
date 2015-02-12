@@ -48,7 +48,7 @@ testUtils.generateAndCompare = function(artifactPrefix) {
 	}
 
 	try {
-		assert.equal(artifacts.expected, actual);
+		assert.equal(actual, artifacts.expected);
 	}
 	catch (err) {
 		err.expected = artifacts.expected;
@@ -74,8 +74,8 @@ testUtils.expectParseError = function(artifactPrefix, expectedMessage) {
 	}
 	catch (e) {
 		//console.log(e);
-		assert.equal("Blether Parse Error", e.name, util.inspect(e, null, false));
-		assert.equal(expectedMessage, e.message);
+		assert.equal(e.name, "Blether Parse Error", util.inspect(e, null, false));
+		assert.equal(e.message, expectedMessage);
 	}
 };
 

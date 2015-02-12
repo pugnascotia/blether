@@ -1,0 +1,9 @@
+var foo;
+(function() {
+var _receiver = foo.bar();
+if (typeof _receiver !== "undefined") {
+return (function() {
+return new STString("hello");
+})();
+}
+})();

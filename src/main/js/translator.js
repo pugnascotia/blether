@@ -505,17 +505,22 @@ var BletherTranslator = function() {
 		}
 	};
 
+	// FIXME: Collapse simple blocks into a ternary expression instead of
+	// using a function
 	this.convertIfNil = function(receiver, node) {
 		var block = node.args[0];
 		var output;
-		output  = "(function() {";
+		output  = "(function() {\n";
 		output += "var _receiver = " + receiver + ";\n";
 		output += "if (typeof _receiver === \"undefined\") {\n";
 		output += "return (" + block.visit(this) + ")();\n";
-		output += "})()\n";
+		output += "}\n";
+		output += "})()";
 		return output;
 	};
 
+	// FIXME: Collapse simple blocks into a ternary expression instead of
+	// using a function
 	this.convertIfNotNil = function(receiver, node) {
 		var block = node.args[0];
 
@@ -528,7 +533,7 @@ var BletherTranslator = function() {
 		}
 
 		var output;
-		output  = "(function() {";
+		output  = "(function() {\n";
 		output += "var _receiver = " + receiver + ";\n";
 		output += "if (typeof _receiver !== \"undefined\") {\n";
 
@@ -537,10 +542,13 @@ var BletherTranslator = function() {
 			output += "_receiver";
 		}
 		output += ");\n";
-		output += "}})()\n";
+		output += "}\n";
+		output += "})()";
 		return output;
 	};
 
+	// FIXME: Collapse simple blocks into a ternary expression instead of
+	// using a function
 	this.convertIfNilIfNotNil = function(receiver, node) {
 
 		var ifNilBlock    = node.args[0];
