@@ -1,0 +1,19 @@
+var Foobar = (function() {
+function Foobar() {
+};
+
+Foobar.prototype.test = function() {
+var self = this;
+var fred;
+self.foo = new STString("bar");
+self.baz = fred.run();
+self.quux = new STNumber(1).plus$(new STNumber(2));
+self.schmee = fred.run(new STString("home"));
+self.bob = fred.run_with$(new STString("home"), new STString("Julia"));
+return self;
+};
+
+
+return Foobar;
+
+})();

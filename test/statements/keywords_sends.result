@@ -1,0 +1,17 @@
+var Foobar = (function() {
+function Foobar() {
+};
+
+Foobar.prototype.test = function() {
+var self = this;
+var fred;
+self.foo(new STString("bar"));
+self.foo_baz$(new STString("bar"), new STNumber(1).plus$(new STNumber(1)));
+self.foo_baz_quux$(new STString("bar"), new STNumber(1).plus$(new STNumber(1)), fred.run().for().it());
+return self;
+};
+
+
+return Foobar;
+
+})();

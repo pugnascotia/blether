@@ -301,6 +301,10 @@ var BletherTranslator = function() {
 
 		switch (node.selector) {
 
+			case "at:put:":
+				output += receiver + "." + node.args[0] + " = " + node.args[1].visit(self);
+				break;
+
 			case "isNil":
 				output += "(typeof (" + receiver + ") === \"undefined\")";
 				break;

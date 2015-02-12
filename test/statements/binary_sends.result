@@ -1,0 +1,66 @@
+var Foobar = (function() {
+function Foobar() {
+};
+
+Foobar.prototype.singleBinaries = function() {
+var self = this;
+var fred;
+var jim;
+fred.backslash$(jim);
+fred.plus$(jim);
+fred.multiply$(jim);
+fred.divide$(jim);
+fred.equals$(jim);
+fred.greater_than$(jim);
+fred.less_than$(jim);
+fred.at$(jim);
+fred.modulo$(jim);
+fred.tilde$(jim);
+fred.or$(jim);
+fred.and$(jim);
+fred.minus$(jim);
+return self;
+};
+
+Foobar.prototype.doubleBinaries = function() {
+var self = this;
+var fred;
+var jim;
+fred.backslash_backslash$(jim);
+fred.plus_plus$(jim);
+fred.multiply_multiply$(jim);
+fred.divide_divide$(jim);
+fred.greater_than_greater_than$(jim);
+fred.less_than_less_than$(jim);
+fred.at_at$(jim);
+fred.modulo_modulo$(jim);
+fred.or_or$(jim);
+fred.and_and$(jim);
+fred.minus_minus$(jim);
+return self;
+};
+
+Foobar.prototype.tripleBinaries = function() {
+var self = this;
+var fred;
+var jim;
+fred.backslash_backslash_backslash$(jim);
+fred.plus_plus_plus$(jim);
+fred.multiply_multiply_multiply$(jim);
+fred.divide_divide_divide$(jim);
+fred.equals_equals_equals$(jim);
+fred.greater_than_greater_than_greater_than$(jim);
+fred.less_than_less_than_less_than$(jim);
+fred.at_at_at$(jim);
+fred.modulo_modulo_modulo$(jim);
+fred.tilde_tilde_tilde$(jim);
+fred.or_or_or$(jim);
+fred.and_and_and$(jim);
+fred.minus_minus_minus$(jim);
+return self;
+};
+
+
+return Foobar;
+
+})();

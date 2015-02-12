@@ -1,0 +1,17 @@
+var Foobar = (function() {
+function Foobar() {
+};
+
+Foobar.prototype.doubleBinaries = function() {
+var self = this;
+var fred;
+var jim;
+fred === jim;
+fred !== jim;
+return self;
+};
+
+
+return Foobar;
+
+})();

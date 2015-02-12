@@ -1,0 +1,17 @@
+var Foobar = (function() {
+function Foobar() {
+};
+
+Foobar.prototype.main = function() {
+var self = this;
+var fred;
+fred.run();
+fred.skip().jump();
+fred.dont().stop().moving();
+return self;
+};
+
+
+return Foobar;
+
+})();
