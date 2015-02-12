@@ -110,16 +110,10 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks("grunt-contrib-copy");
 	grunt.loadNpmTasks("grunt-mocha-test");
 
+	grunt.registerTask("build", [ "jshint", "peg", "concat", "copy" ]);
+
+	grunt.registerTask("test", [ "mochaTest" ]);
+
 	// Tell Grunt what to do when we type "grunt" into the terminal.
-	grunt.registerTask("default", [
-		"jshint",
-		"peg",
-		"concat",
-		"copy",
-		"uglify",
-		"mochaTest"
-	]);
-
-	grunt.registerTask("test", [ "default" ]);
-
+	grunt.registerTask("default", [ "build", "test", "uglify" ]);
 };
