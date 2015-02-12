@@ -24,4 +24,22 @@ describe("Basic types", function(){
     });
   });
 
+  describe("Integers", function() {
+    it("should be translated as wrapped numbers", function(){
+		testUtils.generateAndCompare("types/integer");
+    });
+  });
+
+  describe("Floats", function() {
+    it("should be translated as wrapped numbers", function(){
+		testUtils.generateAndCompare("types/float");
+    });
+  });
+
+  describe("Exponentials", function() {
+    it("should be translated as wrapped numbers", function(){
+		testUtils.generateAndCompare("types/exp");
+    });
+  });
+
 });
