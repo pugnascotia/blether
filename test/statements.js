@@ -57,6 +57,10 @@ describe("Sequences and Statements", function(){
   });
 
   describe("Keyword sends", function() {
+    it("should translate #at: to a property get", function(){
+      testUtils.generateAndCompare("statements/keywords_at");
+    });
+
     it("should translate #at:put: to a property set", function(){
       testUtils.generateAndCompare("statements/keywords_at_put");
     });
@@ -66,5 +70,10 @@ describe("Sequences and Statements", function(){
     });
   });
 
+  describe("Cascades", function() {
+	  it("should be translated to an IIFE", function() {
+		  testUtils.generateAndCompare("statements/cascade");
+	  });
+  });
 
 });

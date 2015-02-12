@@ -1,0 +1,6 @@
+(function(_recv) {
+_recv.show(new STString("Hello"));
+_recv.show(new STString(", "));
+_recv.show(new STString("world!"));
+return _recv.nl();
+})(Transcript);

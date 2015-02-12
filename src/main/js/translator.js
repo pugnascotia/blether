@@ -301,8 +301,12 @@ var BletherTranslator = function() {
 
 		switch (node.selector) {
 
+			case "at:":
+				output += receiver + "[" + node.args[0].visit(self) + "]";
+				break;
+
 			case "at:put:":
-				output += receiver + "." + node.args[0] + " = " + node.args[1].visit(self);
+				output += receiver + "[" + node.args[0].visit(self) + "] = " + node.args[1].visit(self);
 				break;
 
 			case "isNil":
@@ -425,7 +429,7 @@ var BletherTranslator = function() {
 	this.visitBlock = function(node) {
 		var oldContext = this.context.returnContext;
 		this.context.returnContext = "block";
-		var output = "function (" + node.params.join(", ") + ") {\n";
+		var output = "function(" + node.params.join(", ") + ") {\n";
 
 		var oldTemps = this.context.temps;
 		this.context.temps = [].concat(oldTemps, node.params);
@@ -443,14 +447,17 @@ var BletherTranslator = function() {
 	this.visitCascade = function(node) {
 		var self = this;
 
-		var output = "(function(_recv) {\n";
+		// Translate this cascade into a block, then visit that block
 
-		node.messages.forEach(function(each, index, array) {
+		var statements = node.messages.map(function(each) {
 			each.receiver = new Blether.Variable("_recv");
-			output += (index === array.length - 1 ? "return " : "") + each.visit(self) + ";\n";
+			return each;
 		});
 
-		output += "})(" + node.receiver.visit(this) + ")";
+		var sequence     = new Blether.Sequence([], statements);
+		var cascadeBlock = new Blether.Block(["_recv"], sequence);
+
+		var output = "(" + cascadeBlock.visit(self) + ")(" + node.receiver.visit(self) + ")";
 
 		return output;
 	};
@@ -467,7 +474,7 @@ var BletherTranslator = function() {
 
 	this.visitArray = function(node) {
 		var self = this;
-		return "[" + node.value.map(function(each) { return each.visit(self) }).join(",") + "]";
+		return "[" + node.value.map(function(each) { return each.visit(self) }).join(", ") + "]";
 	};
 
 	this.visitDynamicArray = function(node) {
@@ -476,17 +483,15 @@ var BletherTranslator = function() {
 	};
 
 	this.visitDynamicDictionary = function(node) {
-		var output = "{\n";
-
-		var values = [];
+		var output = "(function() {\n";
+		output += "var _dict = Object.create(null);\n";
 
 		for (var i = 0, j = 1; j < node.values.length; i += 2, j += 2) {
-			values.push(node.values[i].visit(this) + ": " + node.values[j].visit(this));
+			output += "_dict[" + node.values[i].visit(this) + "] = " + node.values[j].visit(this) + ";\n";
 		}
 
-		output += values.join(",\n");
-
-		output += "\n}";
+		output += "return _dict;\n";
+		output += "})()";
 
 		return output;
 	};
