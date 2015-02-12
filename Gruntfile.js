@@ -67,35 +67,30 @@ module.exports = function(grunt) {
 			}
 		},
 
-		// Configure the grunt-contrib-watch plugin
-		watch: {
-			scripts: {
-				files: "test/**/*.js",
-				tasks: ["jshint", "concat", "copy", "mochaTest" ]
-			},
-			tests: {
-				files: [ "src/test/**/*.js", "test/**/*.js", "test/**/*.st", "test/**/*.result" ],
-				tasks: [ "mochaTest" ]
-			},
-			grammar: {
-				files: [ "src/main/js/parser.pegjs" ],
-				tasks: [ "peg", "concat", "copy", "mochaTest" ]
-			},
-			build: {
-				files: [ "Gruntfile.js", ".jshintrc" ],
-				tasks: [ "default" ]
-			}
-		},
-
 		mochaTest: {
 			test: {
+				src: [ "test/**/*.js" ],
 				options: {
 					"reporter": "spec",
 					"captureFile": "results.txt",
 					"quiet": false,
 					"clearRequireCache": false
-				},
-				src: [ "test/**/*.js" ]
+				}
+			}
+		},
+
+		watch: {
+			sources: {
+				files: [ "src/**/*.js", "src/**/*.pegjs" ],
+				tasks: [ "build", "test" ]
+			},
+			tests: {
+				files: [ "test/**/*" ],
+				tasks: [ "jshint", "test" ]
+			},
+			project: {
+				files: [ "Gruntfile.js", ".jshintrc" ],
+				tasks: [ "default" ]
 			}
 		}
 	});
