@@ -1,0 +1,13 @@
+var Foobar = (function() {
+function Foobar() {
+};
+
+Foobar.prototype.sum = function() {
+var self = this;
+return new STNumber(1).plus$(new STNumber(2));
+};
+
+
+return Foobar;
+
+})();

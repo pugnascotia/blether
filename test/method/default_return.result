@@ -1,0 +1,14 @@
+var Foobar = (function() {
+function Foobar() {
+};
+
+Foobar.prototype.hello = function() {
+var self = this;
+Transcript.show(new STString("Hello, world!"));
+return self;
+};
+
+
+return Foobar;
+
+})();

@@ -1,0 +1,38 @@
+var Foobar = (function() {
+function Foobar() {
+};
+
+Foobar.prototype.compare_with$ = function(aList, anotherList) {
+var self = this;
+try {
+aList.forEach(function(each) {
+each === new STNumber(3) ? (function() {
+throw new STReturnValue(true);
+})() : null;
+each === new STNumber(4) ? (function() {
+throw new STReturnValue(true);
+})() : null;
+return each === new STNumber(5) ? (function() {
+return anotherList.forEach(function(other) {
+return other === new STString("fred") ? (function() {
+throw new STReturnValue(false);
+})() : null;
+});
+})() : null;
+});
+return false;
+}
+catch (e) {
+  if (e instanceof STReturnValue) {
+    return e.value;
+  }
+  else {
+    throw e;
+  }
+}
+};
+
+
+return Foobar;
+
+})();

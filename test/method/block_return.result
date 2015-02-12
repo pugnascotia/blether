@@ -1,0 +1,28 @@
+var Foobar = (function() {
+function Foobar() {
+};
+
+Foobar.prototype.search = function(aList) {
+var self = this;
+try {
+aList.forEach(function(each) {
+return each === new STNumber(3) ? (function() {
+throw new STReturnValue(true);
+})() : null;
+});
+return false;
+}
+catch (e) {
+  if (e instanceof STReturnValue) {
+    return e.value;
+  }
+  else {
+    throw e;
+  }
+}
+};
+
+
+return Foobar;
+
+})();

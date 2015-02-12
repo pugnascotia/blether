@@ -34,6 +34,10 @@ describe("Basic types", function(){
     it("Hexadecimal values should be translated as wrapped numbers", function(){
       testUtils.generateAndCompare("types/hex");
     });
+
+    it("should convert nil to null", function(){
+      testUtils.generateAndCompare("types/nil");
+    });
   });
 
   describe("Structures", function() {
