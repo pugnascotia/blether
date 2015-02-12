@@ -35,7 +35,7 @@ character = "$" char:. {
 
 symbol = "#" rest:bareSymbol {return rest;}
 
-bareSymbol = val:(selector / binarySelector / node:string {return node._value();}) {
+bareSymbol = val:(selector / binarySelector / node:string {return node.value;}) {
 	return new Blether.Symbol(val).at(line(), column(), text());
 }
 
