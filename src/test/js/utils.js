@@ -17,7 +17,7 @@ testUtils.getArtifacts = function(artifactPrefix) {
 	var testDir = path.join(path.dirname(utilsPath), "..", "..", "..", "test");
 
 	var source   = fs.readFileSync(path.join(testDir, artifactPrefix + ".st")).toString();
-	var expected = fs.readFileSync(path.join(testDir, artifactPrefix + ".result")).toString();
+	var expected = normalise(fs.readFileSync(path.join(testDir, artifactPrefix + ".result")).toString());
 
 	return { source: source, expected: expected};
 };
@@ -41,13 +41,21 @@ testUtils.generateAndCompare = function(artifactPrefix) {
 
 	// Do not prefix generated source with the required runtime
 	try {
-		actual = blether.translate(artifacts.source, { include_runtime: false });
+		actual = normalise(blether.translate(artifacts.source, { include_runtime: false }));
 	}
 	catch (e) {
-		actual = util.inspect(e, null, false);
+		actual = normalise(util.inspect(e, null, false));
 	}
 
-	assert.equal(normalise(artifacts.expected), normalise(actual));
+	try {
+		assert.equal(artifacts.expected, actual);
+	}
+	catch (err) {
+		err.expected = artifacts.expected;
+		err.actual = actual;
+		err.showDiff = true;
+		throw err;
+	}
 };
 
 testUtils.expectSyntaxError = function(artifactPrefix) {
