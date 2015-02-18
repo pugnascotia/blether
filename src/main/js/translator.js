@@ -19,6 +19,16 @@ var BletherTranslator = function() {
 "};\n\n" +
 "var _hasProp = {}.hasOwnProperty;\n\n";
 
+	function checkBlockMaxParamCount(block, max, selector) {
+		if (block.params.length > max) {
+			throw Blether.ParseError({
+				"line": block.line,
+				"column": block.column,
+				"msg": "Too many parameters specified in block argument to " + selector
+			});
+		}
+	}
+
 	this.visit = function(node) {
 		return node.visit(this);
 	};
@@ -527,13 +537,7 @@ var BletherTranslator = function() {
 	this.convertIfNotEmpty = function(receiver, node) {
 		var block = node.args[0];
 
-		if (block.params.length > 1) {
-			throw Blether.ParseError({
-				"line": block.line,
-				"column": block.column,
-				"msg": "Cannot supply more than one argument to an ifNotEmpty: block"
-			});
-		}
+		checkBlockMaxParamCount(block, 1, "ifNotEmpty:");
 
 		var output;
 		output  = "(function(_receiver$) {\n";
@@ -556,13 +560,7 @@ var BletherTranslator = function() {
 	this.convertIfNotNil = function(receiver, node) {
 		var block = node.args[0];
 
-		if (block.params.length > 1) {
-			throw Blether.ParseError({
-				"line": block.line,
-				"column": block.column,
-				"msg": "Cannot supply more than one argument to an ifNotNil: block"
-			});
-		}
+		checkBlockMaxParamCount(block, 1, "ifNotNil:");
 
 		var output;
 		output  = "(function(_receiver$) {\n";
@@ -574,40 +572,20 @@ var BletherTranslator = function() {
 		return output;
 	};
 
-	// FIXME: Collapse simple blocks into a ternary expression instead of
-	// using a function
 	this.convertIfNilIfNotNil = function(receiver, node) {
 
 		var ifNilBlock    = node.args[0];
 		var ifNotNilBlock = node.args[1];
 
-		if (ifNilBlock.params.length !== 0) {
-			throw Blether.ParseError({
-				"line": ifNilBlock.line,
-				"column": ifNilBlock.column,
-				"msg": "ifNil: block does not take parameters"
-			});
-		}
+		checkBlockMaxParamCount(ifNilBlock, 0, "ifNil:");
+		checkBlockMaxParamCount(ifNotNilBlock, 1, "ifNotNil:");
 
-		if (ifNotNilBlock.params.length > 1) {
-			throw Blether.ParseError({
-				"line": ifNotNilBlock.line,
-				"column": ifNotNilBlock.column,
-				"msg": "ifNotNil: block takes at most one parameters"
-			});
-		}
-
-		var output = "(function(_receiver) {\n";
-		output += "if (typeof _receiver === \"undefined\") {\n";
-		output += "return (" + ifNilBlock.visit(this) + ")();\n";
-		output += "}\n";
-		output += "else {\n";
-		output += "return (" + ifNotNilBlock.visit(this) + ")(";
-		if (ifNotNilBlock.params.length === 1) {
-			output += "_receiver";
-		}
+		var output = "(function(_receiver$) {\n";
+		output += "return (typeof _receiver$ === \"undefined\" || _receiver$ === null) ";
+		output += "? (" + ifNilBlock.visit(this) + ")() ";
+		output += ": (" + ifNotNilBlock.visit(this) + ")(";
+		output += ifNotNilBlock.params.length === 0 ? "" : "_receiver$";
 		output += ");\n";
-		output += "}\n";
 		output += "})(" + receiver + ")";
 
 		return output;
