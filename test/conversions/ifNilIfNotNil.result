@@ -1,0 +1,25 @@
+var foo;
+(function(_receiver) {
+if (typeof _receiver === "undefined") {
+return (function() {
+return new STString("fred");
+})();
+}
+else {
+return (function() {
+return new STString("barney");
+})();
+}
+})(foo.bar());
+(function(_receiver) {
+if (typeof _receiver === "undefined") {
+return (function() {
+return new STNumber(1).plus$(new STNumber(2));
+})();
+}
+else {
+return (function(aBar) {
+return aBar.barney();
+})(_receiver);
+}
+})(foo.bar());

@@ -20,12 +20,24 @@ describe("Sending conversions", function(){
       test.generateAndCompare("conversions/notEmpty");
     });
 
+    it("should be used for ifEmpty:", function(){
+      test.generateAndCompare("conversions/ifEmpty");
+    });
+
+    it("should be used for ifNotEmpty:", function(){
+      test.generateAndCompare("conversions/ifNotEmpty");
+    });
+
     it("should be used for ifNil:", function(){
       test.generateAndCompare("conversions/ifNil");
     });
 
     it("should be used for ifNotNil:", function(){
       test.generateAndCompare("conversions/ifNotNil");
+    });
+
+    it("should be used for ifNil:ifNotNil:", function(){
+      test.generateAndCompare("conversions/ifNilIfNotNil");
     });
   });
 

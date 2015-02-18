@@ -321,6 +321,14 @@ var BletherTranslator = function() {
 				output += "(" + receiver + ".length === 0)";
 				break;
 
+			case "ifEmpty:":
+				output += this.convertIfEmpty(receiver, node);
+				break;
+
+			case "ifNotEmpty:":
+				output += this.convertIfNotEmpty(receiver, node);
+				break;
+
 			case "notEmpty":
 				output += "(" + receiver + ".length > 0)";
 				break;
@@ -426,6 +434,8 @@ var BletherTranslator = function() {
 		return node.value.toString();
 	};
 
+	// FIXME: Collapse simple blocks into a ternary expression instead of
+	// using a function
 	this.visitBlock = function(node) {
 		var oldContext = this.context.returnContext;
 		this.context.returnContext = "block";
@@ -505,22 +515,44 @@ var BletherTranslator = function() {
 		}
 	};
 
-	// FIXME: Collapse simple blocks into a ternary expression instead of
-	// using a function
-	this.convertIfNil = function(receiver, node) {
+	this.convertIfEmpty = function(receiver, node) {
 		var block = node.args[0];
 		var output;
-		output  = "(function() {\n";
-		output += "var _receiver = " + receiver + ";\n";
-		output += "if (typeof _receiver === \"undefined\") {\n";
-		output += "return (" + block.visit(this) + ")();\n";
-		output += "}\n";
-		output += "})()";
+		output  = "(function(_receiver$) {\n";
+		output += "return (_receiver$.length === 0) ? (" + block.visit(this) + ")() : null;\n";
+		output += "})(" + receiver + ")";
 		return output;
 	};
 
-	// FIXME: Collapse simple blocks into a ternary expression instead of
-	// using a function
+	this.convertIfNotEmpty = function(receiver, node) {
+		var block = node.args[0];
+
+		if (block.params.length > 1) {
+			throw Blether.ParseError({
+				"line": block.line,
+				"column": block.column,
+				"msg": "Cannot supply more than one argument to an ifNotEmpty: block"
+			});
+		}
+
+		var output;
+		output  = "(function(_receiver$) {\n";
+		output += "return (_receiver$.length > 0) ? (" + block.visit(this);
+		output += ")(" + (block.params.length === 0 ? "" : "_receiver$") + ") : null;\n";
+		output += "})(" + receiver + ")";
+		return output;
+	};
+
+	this.convertIfNil = function(receiver, node) {
+		var block = node.args[0];
+		var output;
+		output  = "(function(_receiver$) {\n";
+		output += "return (typeof _receiver$ === \"undefined\" || _receiver$ === null) ";
+		output += "? (" + block.visit(this) + ")() : null;\n";
+		output += "})(" + receiver + ")";
+		return output;
+	};
+
 	this.convertIfNotNil = function(receiver, node) {
 		var block = node.args[0];
 
@@ -533,17 +565,12 @@ var BletherTranslator = function() {
 		}
 
 		var output;
-		output  = "(function() {\n";
-		output += "var _receiver = " + receiver + ";\n";
-		output += "if (typeof _receiver !== \"undefined\") {\n";
-
-		output += "return (" + block.visit(this) + ")(";
-		if (block.params.length === 1) {
-			output += "_receiver";
-		}
-		output += ");\n";
-		output += "}\n";
-		output += "})()";
+		output  = "(function(_receiver$) {\n";
+		output += "return (typeof _receiver$ !== \"undefined\" && _receiver$ !== null) ";
+		output += "? (" + block.visit(this) + ")(";
+		output += block.params.length === 0 ? "" : "_receiver$";
+		output += ") : null;\n";
+		output += "})(" + receiver + ")";
 		return output;
 	};
 
@@ -570,10 +597,9 @@ var BletherTranslator = function() {
 			});
 		}
 
-		var output = "(function() {";
-		output += "var _receiver = " + receiver + ";\n";
+		var output = "(function(_receiver) {\n";
 		output += "if (typeof _receiver === \"undefined\") {\n";
-		output += "return (" + ifNilBlock.visit(this) + ")();";
+		output += "return (" + ifNilBlock.visit(this) + ")();\n";
 		output += "}\n";
 		output += "else {\n";
 		output += "return (" + ifNotNilBlock.visit(this) + ")(";
@@ -582,7 +608,7 @@ var BletherTranslator = function() {
 		}
 		output += ");\n";
 		output += "}\n";
-		output += "})()\n";
+		output += "})(" + receiver + ")";
 
 		return output;
 	};

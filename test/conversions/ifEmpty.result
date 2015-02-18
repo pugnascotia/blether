@@ -1,0 +1,6 @@
+var foo;
+(function(_receiver$) {
+return (_receiver$.length === 0) ? (function() {
+return new STString("bar");
+})() : null;
+})(foo);

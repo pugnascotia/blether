@@ -1,9 +1,11 @@
 var foo;
-(function() {
-var _receiver = foo.bar();
-if (typeof _receiver !== "undefined") {
-return (function() {
+(function(_receiver$) {
+return (typeof _receiver$ !== "undefined" && _receiver$ !== null) ? (function() {
 return new STString("hello");
-})();
-}
-})();
+})() : null;
+})(foo.bar());
+(function(_receiver$) {
+return (typeof _receiver$ !== "undefined" && _receiver$ !== null) ? (function(fred) {
+return fred.hello();
+})(_receiver$) : null;
+})(foo.bar());
