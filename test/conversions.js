@@ -39,6 +39,19 @@ describe("Sending conversions", function(){
     it("should be used for ifNil:ifNotNil:", function(){
       test.generateAndCompare("conversions/ifNilIfNotNil");
     });
+
+    it("should be used for ifTrue:", function(){
+      test.generateAndCompare("conversions/ifTrue");
+    });
+
+    it("should be used for ifFalse:", function(){
+      test.generateAndCompare("conversions/ifFalse");
+    });
+
+    it("should be used for ifTrue:ifFalse:", function(){
+      test.generateAndCompare("conversions/ifTrueIfFalse");
+    });
+
   });
 
 });

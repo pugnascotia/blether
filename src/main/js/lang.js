@@ -38,6 +38,16 @@ Blether.Node.prototype.at = function(line, column, source) {
 	return this;
 };
 
+/**
+ * For most nodes, there is no different between visiting them and
+ * invoking them. However, Blocks for example might choose to simplify
+ * themselves if they know they going to be immediately invokes and are
+ * sufficiently simple.
+ */
+Blether.Node.prototype.invoke = function() {
+	return this.visit.apply(this, arguments);
+};
+
 //------------------------------------------------------------------------------
 
 Blether.String = function(string) {
@@ -227,6 +237,7 @@ Blether.Block = function(paramList, sequence) {
 
 Blether.Block.prototype = new Blether.Node();
 Blether.Block.prototype.visit = function(visitor) { return visitor.visitBlock(this); };
+Blether.Block.prototype.invoke = function(visitor) { return visitor.invokeBlock.apply(this, arguments); };
 
 //------------------------------------------------------------------------------
 

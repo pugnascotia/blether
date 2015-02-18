@@ -320,10 +320,12 @@ var BletherTranslator = function() {
 				break;
 
 			case "isNil":
+				// FIXME handle null
 				output += "(typeof (" + receiver + ") === \"undefined\")";
 				break;
 
 			case "notNil":
+				// FIXME handle null
 				output += "(typeof (" + receiver + ") !== \"undefined\")";
 				break;
 
@@ -444,6 +446,24 @@ var BletherTranslator = function() {
 		return node.value.toString();
 	};
 
+	this.invokeBlock = function(node) {
+		var output = "(" + node.visit(this) + ")(";
+
+		var i, blockArgs = [];
+
+		if (arguments.length > 1) {
+			for (i = 1; i < arguments.length; i++) {
+				blockArgs.push(arguments[i]);
+			}
+		}
+
+		output += blockArgs.join(", ");
+
+		output += ")";
+
+		return output;
+	};
+
 	// FIXME: Collapse simple blocks into a ternary expression instead of
 	// using a function
 	this.visitBlock = function(node) {
@@ -529,7 +549,7 @@ var BletherTranslator = function() {
 		var block = node.args[0];
 		var output;
 		output  = "(function(_receiver$) {\n";
-		output += "return (_receiver$.length === 0) ? (" + block.visit(this) + ")() : null;\n";
+		output += "return (_receiver$.length === 0) ? " + block.invoke(this) + " : null;\n";
 		output += "})(" + receiver + ")";
 		return output;
 	};
@@ -541,8 +561,9 @@ var BletherTranslator = function() {
 
 		var output;
 		output  = "(function(_receiver$) {\n";
-		output += "return (_receiver$.length > 0) ? (" + block.visit(this);
-		output += ")(" + (block.params.length === 0 ? "" : "_receiver$") + ") : null;\n";
+		output += "return (_receiver$.length > 0) ? ";
+		output += block.params.length === 0 ? block.invoke(this) : block.invoke(this, "_receiver$");
+		output += " : null;\n";
 		output += "})(" + receiver + ")";
 		return output;
 	};
@@ -552,7 +573,7 @@ var BletherTranslator = function() {
 		var output;
 		output  = "(function(_receiver$) {\n";
 		output += "return (typeof _receiver$ === \"undefined\" || _receiver$ === null) ";
-		output += "? (" + block.visit(this) + ")() : null;\n";
+		output += "? " + block.invoke(this) + " : null;\n";
 		output += "})(" + receiver + ")";
 		return output;
 	};
@@ -564,10 +585,9 @@ var BletherTranslator = function() {
 
 		var output;
 		output  = "(function(_receiver$) {\n";
-		output += "return (typeof _receiver$ !== \"undefined\" && _receiver$ !== null) ";
-		output += "? (" + block.visit(this) + ")(";
-		output += block.params.length === 0 ? "" : "_receiver$";
-		output += ") : null;\n";
+		output += "return (typeof _receiver$ !== \"undefined\" && _receiver$ !== null) ? ";
+		output += block.params.length === 0 ? block.invoke(this) : block.invoke(this, "_receiver$");
+		output += " : null;\n";
 		output += "})(" + receiver + ")";
 		return output;
 	};
@@ -581,11 +601,10 @@ var BletherTranslator = function() {
 		checkBlockMaxParamCount(ifNotNilBlock, 1, "ifNotNil:");
 
 		var output = "(function(_receiver$) {\n";
-		output += "return (typeof _receiver$ === \"undefined\" || _receiver$ === null) ";
-		output += "? (" + ifNilBlock.visit(this) + ")() ";
-		output += ": (" + ifNotNilBlock.visit(this) + ")(";
-		output += ifNotNilBlock.params.length === 0 ? "" : "_receiver$";
-		output += ");\n";
+		output += "return (typeof _receiver$ === \"undefined\" || _receiver$ === null)";
+		output += " ? " + ifNilBlock.invoke(this) + " : ";
+		output += ifNotNilBlock.params.length === 0 ? ifNotNilBlock.invoke(this) : ifNotNilBlock.invoke(this, "_receiver$");
+		output += ";\n";
 		output += "})(" + receiver + ")";
 
 		return output;
@@ -627,10 +646,10 @@ var BletherTranslator = function() {
 
 		var loopCondition;
 		var invert = node.selector === "whileFalse:" ? "!" : "";
-		loopCondition = invert + "(" + node.receiver.visit(this) + ")()";
+		loopCondition = invert + node.receiver.invoke(this);
 
 		var output = "while (" + loopCondition + ") {\n";
-		output += "(" + node.args[0].visit(this) + ")();\n";
+		output += node.args[0].invoke(this) + ";\n";
 		output += "}\n";
 
 		return output;
@@ -648,10 +667,10 @@ var BletherTranslator = function() {
 		var invert = node.selector === "ifFalse:" ? "!" : "";
 		
 		if (invert) {
-			return node.receiver.visit(this) + " ? null : (" + node.args[0].visit(this) + ")()";
+			return node.receiver.visit(this) + " ? null : " + node.args[0].invoke(this);
 		}
 		else {
-			return node.receiver.visit(this) + " ? (" + node.args[0].visit(this) + ")() : null";
+			return node.receiver.visit(this) + " ? " + node.args[0].invoke(this) + " : null";
 		}
 	};
 
@@ -664,14 +683,15 @@ var BletherTranslator = function() {
 			});
 		}
 
-		var invert = node.selector === "ifFalse:ifTrue:" ? "!" : "";
+		var truthyIndex = 0, falsyIndex = 1;
+		if (node.selector === "ifFalse:ifTrue:") {
+			truthyIndex = 1;
+			falsyIndex = 0;
+		}
 		
-		if (invert) {
-			return node.receiver.visit(this) + " ? (" + node.args[1].visit(this) + ")() : (" + node.args[0].visit(this) + ")()";
-		}
-		else {
-			return node.receiver.visit(this) + " ? (" + node.args[0].visit(this) + ")() : (" + node.args[1].visit(this) + ")()";
-		}
+		return node.receiver.visit(this) +
+			" ? " + node.args[truthyIndex].invoke(this) +
+			" : " + node.args[falsyIndex].invoke(this);
 	};
 };
 
