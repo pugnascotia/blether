@@ -52,7 +52,7 @@ describe("Sending conversions", function(){
       test.generateAndCompare("conversions/ifTrueIfFalse");
     });
 
-    it("should cope with nested ifNotNil: blocks and use unique receiver vars", function(){
+    it("correctly nest ifNotNil: blocks and use unique receiver vars", function(){
       test.generateAndCompare("conversions/nestedIfNotNil");
     });
   });

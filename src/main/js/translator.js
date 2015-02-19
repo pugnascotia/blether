@@ -441,10 +441,10 @@ var BletherTranslator = function() {
 			return "null";
 		}
 
-		var output, i, blockArgs = [];
+		var blockArgs = [];
 
 		if (arguments.length > 1) {
-			for (i = 1; i < arguments.length; i++) {
+			for (var i = 1; i < arguments.length; i++) {
 				blockArgs.push(arguments[i]);
 			}
 		}
@@ -474,20 +474,14 @@ var BletherTranslator = function() {
 
 			this.context.pushTemps(blockArgs);
 
-			output = node.sequence.statements[0].visit(this);
+			var output = node.sequence.statements[0].visit(this);
 
 			this.context.pop();
 
 			return output;
 		}
 
-		output = "(" + node.visit(this) + ")(";
-
-		output += blockArgs.join(", ");
-
-		output += ")";
-
-		return output;
+		return "(" + node.visit(this) + ")(" + blockArgs.join(", ") + ")";
 	};
 
 	this.visitBlock = function(node) {
