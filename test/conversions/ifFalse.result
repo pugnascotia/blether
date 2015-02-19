@@ -1,4 +1,2 @@
 var foo;
-foo ? null : (function() {
-return new STString("bar");
-})();
+foo ? null : new STString("bar");

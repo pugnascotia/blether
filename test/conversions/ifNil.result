@@ -1,6 +1,4 @@
 var foo;
-(function(_receiver$) {
-return (typeof _receiver$ === "undefined" || _receiver$ === null) ? (function() {
-return new STString("hello");
-})() : null;
+(function(_receiver1$) {
+return (typeof _receiver1$ === "undefined" || _receiver1$ === null) ? new STString("hello") : null;
 })(foo.bar());

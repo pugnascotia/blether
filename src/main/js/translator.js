@@ -36,11 +36,7 @@ var BletherTranslator = function() {
 	this.visitProgram = function(node) {
 		var self = this;
 
-		this.context = {
-			"instanceVars": [],
-			"temps": [],
-			"returnContext": "root"
-		};
+		this.context = new Blether.ContextMgr();
 
 		var output = "";
 
@@ -94,14 +90,7 @@ var BletherTranslator = function() {
 
 		output += "};\n\n";
 
-		var oldContext = this.context;
-
-		this.context = {
-			"currentClass": node.className.value,
-			"instanceVars": instanceNames.map(function(e) { return e.value }),
-			"temps": [],
-			"returnContext": "method"
-		};
+		this.context.pushClass(node.className.value, instanceNames.map(function(e) {return e.value}));
 
 		var methods = node.getMethods();
 		
@@ -111,7 +100,7 @@ var BletherTranslator = function() {
 			}
 		}
 
-		this.context = oldContext;
+		this.context.pop();
 
 		output += "\nreturn " + node.className + ";\n\n";
 
@@ -147,8 +136,7 @@ var BletherTranslator = function() {
 
 		var argumentNames = node.selector.visit(this)[1];
 
-		var oldTemps = this.context.temps;
-		this.context.temps = oldTemps.concat(argumentNames);
+		this.context.pushMethod(argumentNames);
 
 		var output = "function(" + argumentNames.join(", ") + ") {\n";
 
@@ -180,12 +168,7 @@ var BletherTranslator = function() {
 
 		var self = this;
 
-		var oldReturnContext = this.context.returnContext;
-		this.context.returnContext = "method";
-
 		output += node.sequence.visit(self);
-
-		this.context.returnContext = oldReturnContext;
 
 		if (hasReturnOperator) {
 			output += "}\n";
@@ -201,7 +184,7 @@ var BletherTranslator = function() {
 
 		output += "}";
 
-		this.context.temps = oldTemps;
+		this.context.pop();
 
 		return output;
 	};
@@ -219,8 +202,6 @@ var BletherTranslator = function() {
 		var keywords = node.pairs.map(function(p) { return p.key });
 		var params = node.pairs.map(function(p) { return p.arg });
 
-		debugger;
-
 		var argCounts = {};
 		params.forEach(function(p) {
 			argCounts[p] = (argCounts[p] || 0) + 1;
@@ -231,7 +212,7 @@ var BletherTranslator = function() {
 					"line": node.line,
 					"column": node.column,
 					"msg": "Argument name " + p + " repeats in method " +
-						self.context.currentClass + ">>" + node.selector
+						self.context.currentClass() + ">>" + node.selector
 				});
 			}
 		});
@@ -256,8 +237,7 @@ var BletherTranslator = function() {
 
 		var output = "";
 
-		var oldTemps = this.context.temps;
-		this.context.temps = [].concat(oldTemps, node.temps);
+		this.context.pushTemps(node.temps);
 
 		node.temps.forEach(function(each) {
 			output += "var " + each + ";\n";
@@ -267,7 +247,7 @@ var BletherTranslator = function() {
 
 		node.statements.forEach(function(each, index, array) {
 			if (index === array.length - 1) {
-				if (self.context.returnContext !== "method") {
+				if (self.context.returnContext() !== "method") {
 					if (each._type !== "Return") {
 						output += "return ";
 					}
@@ -284,11 +264,11 @@ var BletherTranslator = function() {
 			output += each.visit(self) + ";\n";
 		});
 
-		if (needsReturn && self.context.returnContext === "method") {
+		if (needsReturn && self.context.returnContext() === "method") {
 			output += "return self;\n";
 		}
 
-		this.context.temps = oldTemps;
+		this.context.pop();
 
 		return output;
 	};
@@ -413,14 +393,24 @@ var BletherTranslator = function() {
 			return "self";
 		}
 
-		for (i = 0; i < this.context.temps.length; i++) {
-			if (node.value === this.context.temps[i]) {
+		if (node.value === "STReturnValue") {
+			throw Blether.ParseError({
+				"line": node.line,
+				"column": node.column,
+				"msg": "Do not refer directly to STReturnValue - use the caret operator instead"
+			});
+		}
+
+		var temps = this.context.getTemps();
+		for (i = 0; i < temps.length; i++) {
+			if (node.value === temps[i]) {
 				return node.value;
 			}
 		}
 
-		for (i = 0; i < this.context.instanceVars.length; i++) {
-			if (node.value === this.context.instanceVars[i]) {
+		var instanceVars = this.context.getInstanceVars();
+		for (i = 0; i < instanceVars.length; i++) {
+			if (node.value === instanceVars[i]) {
 				return "self." + node.value;
 			}
 		}
@@ -447,15 +437,51 @@ var BletherTranslator = function() {
 	};
 
 	this.invokeBlock = function(node) {
-		var output = "(" + node.visit(this) + ")(";
+		if (node.sequence.statements.length === 0) {
+			return "null";
+		}
 
-		var i, blockArgs = [];
+		var output, i, blockArgs = [];
 
 		if (arguments.length > 1) {
 			for (i = 1; i < arguments.length; i++) {
 				blockArgs.push(arguments[i]);
 			}
 		}
+
+		if (node.params.length !== blockArgs.length) {
+			throw Blether.ParseError({
+				"line": node.line,
+				"column": node.column,
+				"msg": "Not enough parameters specified to block"
+			});
+		}
+
+		if (node.sequence.statements.length === 1 && node.sequence.temps.length === 0) {
+
+			var boundParameters = {};
+			blockArgs.forEach(function(arg, index) {
+				boundParameters[node.params[index]] = arg;
+			});
+
+			node.find(function(n) {
+				return n._type === "Variable";
+			}).forEach(function(n) {
+				if (boundParameters.hasOwnProperty(n.value)) {
+					n.value = boundParameters[n];
+				}
+			});
+
+			this.context.pushTemps(blockArgs);
+
+			output = node.sequence.statements[0].visit(this);
+
+			this.context.pop();
+
+			return output;
+		}
+
+		output = "(" + node.visit(this) + ")(";
 
 		output += blockArgs.join(", ");
 
@@ -464,23 +490,16 @@ var BletherTranslator = function() {
 		return output;
 	};
 
-	// FIXME: Collapse simple blocks into a ternary expression instead of
-	// using a function
 	this.visitBlock = function(node) {
-		var oldContext = this.context.returnContext;
-		this.context.returnContext = "block";
+
+		this.context.pushBlock(node.params);
+
 		var output = "function(" + node.params.join(", ") + ") {\n";
-
-		var oldTemps = this.context.temps;
-		this.context.temps = [].concat(oldTemps, node.params);
-
 		output += node.sequence.visit(this);
-
-		this.context.temps = oldTemps;
-
 		output += "}";
 
-		this.context.returnContext = oldContext;
+		this.context.pop();
+
 		return output;
 	};
 
@@ -489,15 +508,19 @@ var BletherTranslator = function() {
 
 		// Translate this cascade into a block, then visit that block
 
+		var receiverVar = this.context.pushReceiver();
+
 		var statements = node.messages.map(function(each) {
-			each.receiver = new Blether.Variable("_recv");
+			each.receiver = new Blether.Variable(receiverVar);
 			return each;
 		});
 
 		var sequence     = new Blether.Sequence([], statements);
-		var cascadeBlock = new Blether.Block(["_recv"], sequence);
+		var cascadeBlock = new Blether.Block([receiverVar], sequence);
 
 		var output = "(" + cascadeBlock.visit(self) + ")(" + node.receiver.visit(self) + ")";
+
+		this.context.popReceiver();
 
 		return output;
 	};
@@ -508,7 +531,7 @@ var BletherTranslator = function() {
 
 	// Highest-level variables i.e. global
 	this.visitVariableDeclaration = function(node) {
-		this.context.temps = this.context.temps.concat(node.variables);
+		this.context.pushTemps(node.variables);
 		return "var " + node.variables.join(", ") + ";\n";
 	};
 
@@ -537,7 +560,7 @@ var BletherTranslator = function() {
 	};
 
 	this.visitReturn = function(node) {
-		if (this.context.returnContext === "method" ) {
+		if (this.context.returnContext() === "method" ) {
 			return "return " + node.value.visit(this);
 		}
 		else {
@@ -547,10 +570,12 @@ var BletherTranslator = function() {
 
 	this.convertIfEmpty = function(receiver, node) {
 		var block = node.args[0];
+		var receiverVar = this.context.pushReceiver();
 		var output;
-		output  = "(function(_receiver$) {\n";
-		output += "return (_receiver$.length === 0) ? " + block.invoke(this) + " : null;\n";
+		output  = "(function(" + receiverVar + ") {\n";
+		output += "return (" + receiverVar + ".length === 0) ? " + block.invoke(this) + " : null;\n";
 		output += "})(" + receiver + ")";
+		this.context.popReceiver();
 		return output;
 	};
 
@@ -559,22 +584,31 @@ var BletherTranslator = function() {
 
 		checkBlockMaxParamCount(block, 1, "ifNotEmpty:");
 
+		var receiverVar = this.context.pushReceiver();
+
 		var output;
-		output  = "(function(_receiver$) {\n";
-		output += "return (_receiver$.length > 0) ? ";
-		output += block.params.length === 0 ? block.invoke(this) : block.invoke(this, "_receiver$");
+		output  = "(function(" + receiverVar + ") {\n";
+		output += "return (" + receiverVar + ".length > 0) ? ";
+		output += block.params.length === 0 ? block.invoke(this) : block.invoke(this, receiverVar);
 		output += " : null;\n";
 		output += "})(" + receiver + ")";
+
+		this.context.popReceiver();
+
 		return output;
 	};
 
 	this.convertIfNil = function(receiver, node) {
 		var block = node.args[0];
+		var receiverVar = this.context.pushReceiver();
 		var output;
-		output  = "(function(_receiver$) {\n";
-		output += "return (typeof _receiver$ === \"undefined\" || _receiver$ === null) ";
+		output  = "(function(" + receiverVar + ") {\n";
+		output += "return (typeof " + receiverVar + " === \"undefined\" || " + receiverVar + " === null) ";
 		output += "? " + block.invoke(this) + " : null;\n";
 		output += "})(" + receiver + ")";
+
+		this.context.popReceiver();
+
 		return output;
 	};
 
@@ -582,13 +616,17 @@ var BletherTranslator = function() {
 		var block = node.args[0];
 
 		checkBlockMaxParamCount(block, 1, "ifNotNil:");
+		var receiverVar = this.context.pushReceiver();
 
 		var output;
-		output  = "(function(_receiver$) {\n";
-		output += "return (typeof _receiver$ !== \"undefined\" && _receiver$ !== null) ? ";
-		output += block.params.length === 0 ? block.invoke(this) : block.invoke(this, "_receiver$");
+		output  = "(function(" + receiverVar + ") {\n";
+		output += "return (typeof " + receiverVar + " !== \"undefined\" && " + receiverVar + " !== null) ? ";
+		output += block.params.length === 0 ? block.invoke(this) : block.invoke(this, receiverVar);
 		output += " : null;\n";
 		output += "})(" + receiver + ")";
+
+		this.context.popReceiver();
+
 		return output;
 	};
 
@@ -600,12 +638,16 @@ var BletherTranslator = function() {
 		checkBlockMaxParamCount(ifNilBlock, 0, "ifNil:");
 		checkBlockMaxParamCount(ifNotNilBlock, 1, "ifNotNil:");
 
-		var output = "(function(_receiver$) {\n";
-		output += "return (typeof _receiver$ === \"undefined\" || _receiver$ === null)";
+		var receiverVar = this.context.pushReceiver();
+
+		var output = "(function(" + receiverVar + ") {\n";
+		output += "return (typeof " + receiverVar + " === \"undefined\" || " + receiverVar + " === null)";
 		output += " ? " + ifNilBlock.invoke(this) + " : ";
-		output += ifNotNilBlock.params.length === 0 ? ifNotNilBlock.invoke(this) : ifNotNilBlock.invoke(this, "_receiver$");
+		output += ifNotNilBlock.params.length === 0 ? ifNotNilBlock.invoke(this) : ifNotNilBlock.invoke(this, receiverVar);
 		output += ";\n";
 		output += "})(" + receiver + ")";
+
+		this.context.popReceiver();
 
 		return output;
 	};
@@ -616,8 +658,8 @@ var BletherTranslator = function() {
 
 	this.convertSuper = function(selector, node) {
 		var self = this;
-		if (typeof this.context.currentClass !== "undefined") {
-			var output = this.context.currentClass + ".__super__." + selector + ".call(self";
+		if (typeof this.context.currentClass() !== "undefined") {
+			var output = this.context.currentClass() + ".__super__." + selector + ".call(self";
 			if (node.args.length > 0) {
 				node.args.forEach(function(each) {
 					output += ", " + each.visit(self);

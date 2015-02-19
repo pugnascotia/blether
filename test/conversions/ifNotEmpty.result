@@ -1,11 +1,7 @@
 var foo;
-(function(_receiver$) {
-return (_receiver$.length > 0) ? (function() {
-return new STString("fred");
-})() : null;
+(function(_receiver1$) {
+return (_receiver1$.length > 0) ? new STString("fred") : null;
 })(foo.bar());
-(function(_receiver$) {
-return (_receiver$.length > 0) ? (function(aBar) {
-return aBar.barney();
-})(_receiver$) : null;
+(function(_receiver1$) {
+return (_receiver1$.length > 0) ? _receiver1$.barney() : null;
 })(foo.bar());

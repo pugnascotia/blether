@@ -1,15 +1,7 @@
 var foo;
-(function(_receiver$) {
-return (typeof _receiver$ === "undefined" || _receiver$ === null) ? (function() {
-return new STString("fred");
-})() : (function() {
-return new STString("barney");
-})();
+(function(_receiver1$) {
+return (typeof _receiver1$ === "undefined" || _receiver1$ === null) ? new STString("fred") : new STString("barney");
 })(foo.bar());
-(function(_receiver$) {
-return (typeof _receiver$ === "undefined" || _receiver$ === null) ? (function() {
-return new STNumber(1).plus$(new STNumber(2));
-})() : (function(aBar) {
-return aBar.barney();
-})(_receiver$);
+(function(_receiver1$) {
+return (typeof _receiver1$ === "undefined" || _receiver1$ === null) ? new STNumber(1).plus$(new STNumber(2)) : _receiver1$.barney();
 })(foo.bar());

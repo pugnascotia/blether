@@ -21,6 +21,102 @@ Blether.ParseError.prototype.toString = function() {
 	return this.message + ":" + this.line + ":" + this.column;
 };
 
+Blether.Context = function() {
+	this.currentClass = null;
+	this.instanceVars = [];
+	this.temps = [];
+	this.returnContext = null;
+};
+
+Blether.ContextMgr = function() {
+	var contextStack = [ new Blether.Context() ];
+	contextStack[0].returnContext = "root";
+
+	this.pushClass = function(className, instVars) {
+		var newContext = new Blether.Context();
+		newContext.className = className;
+		newContext.instanceVars = instVars;
+		this.push(newContext);
+	};
+
+	this.pushMethod = function(temps) {
+		var newContext = new Blether.Context();
+		newContext.returnContext = "method";
+		newContext.temps = temps;
+		this.push(newContext);
+	};
+
+	this.pushTemps = function(temps) {
+		var newContext = new Blether.Context();
+		newContext.temps = temps;
+		this.push(newContext);
+	};
+
+	this.pushBlock = function(temps) {
+		var newContext = new Blether.Context();
+		newContext.returnContext = "block";
+		newContext.temps = temps;
+		this.push(newContext);
+	};
+
+	this.push = function(context) {
+		contextStack.push(context);
+	};
+
+	this.pop = function() {
+		if (contextStack.length === 1) {
+			throw "Cannot pop the context beyond the initial state!";
+		}
+		contextStack.pop();
+	};
+
+	var receiverDepth = 0;
+
+	this.pushReceiver = function() {
+		receiverDepth++; // Not inlining in the next line for my sanity
+		return "_receiver" + receiverDepth + "$";
+	};
+
+	this.popReceiver = function() {
+		if (receiverDepth === 0) {
+			throw "receiverDepth is already zero and cannot be popped further";
+		}
+		receiverDepth--;
+	};
+
+	this.getTemps = function() {
+		return contextStack.reduceRight(function(prev, curr) {
+			return prev.concat(curr.temps);
+		}, []);
+	};
+
+	this.getInstanceVars = function() {
+		return contextStack.reduceRight(function(prev, curr) {
+			return prev.concat(curr.instanceVars);
+		}, []);
+	};
+
+	this.currentClass = function() {
+		for (var i = contextStack.length - 1; i >= 0; i--) {
+			if (contextStack[i].className !== null) {
+				return contextStack[i].className;
+			}
+		}
+
+		return null;
+	};
+
+	this.returnContext = function() {
+		for (var i = contextStack.length - 1; i >= 0; i--) {
+			if (contextStack[i].returnContext !== null) {
+				return contextStack[i].returnContext;
+			}
+		}
+
+		return null;
+	};
+};
+
 
 /* The language parts */
 
@@ -46,6 +142,10 @@ Blether.Node.prototype.at = function(line, column, source) {
  */
 Blether.Node.prototype.invoke = function() {
 	return this.visit.apply(this, arguments);
+};
+
+Blether.Node.prototype.find = function(fn) {
+	return fn(this) ? [this] : [];
 };
 
 //------------------------------------------------------------------------------
@@ -217,6 +317,17 @@ Blether.Sequence = function(temps, statements) {
 Blether.Sequence.prototype = new Blether.Node();
 Blether.Sequence.prototype.visit = function(visitor) { return visitor.visitSequence(this); };
 
+Blether.Sequence.prototype.find = function(fn) {
+	var ret = [];
+	if (fn(this)) {
+		ret.push(this);
+	}
+
+	return this.statements.reduce(function(prev, curr) {
+		return prev.concat(curr.find(fn));
+	}, ret);
+};
+
 //------------------------------------------------------------------------------
 
 Blether.Statement = function(expression) {
@@ -226,6 +337,15 @@ Blether.Statement = function(expression) {
 
 Blether.Statement.prototype = new Blether.Node();
 Blether.Statement.prototype.visit = function(visitor) { return visitor.visitStatement(this); };
+
+Blether.Statement.prototype.find = function(fn) {
+	var ret = [];
+	if (fn(this)) {
+		ret.push(this);
+	}
+
+	return ret.concat(this.expression.find(fn));
+};
 
 //------------------------------------------------------------------------------
 
@@ -237,7 +357,22 @@ Blether.Block = function(paramList, sequence) {
 
 Blether.Block.prototype = new Blether.Node();
 Blether.Block.prototype.visit = function(visitor) { return visitor.visitBlock(this); };
-Blether.Block.prototype.invoke = function(visitor) { return visitor.invokeBlock.apply(this, arguments); };
+Blether.Block.prototype.invoke = function(visitor) {
+	var invokeArgs = [this];
+	for (var i = 1; i < arguments.length; i++) {
+		invokeArgs.push(arguments[i]);
+	}
+	return visitor.invokeBlock.apply(visitor, invokeArgs);
+};
+
+Blether.Block.prototype.find = function(fn) {
+	var ret = [];
+	if (fn(this)) {
+		ret.push(this);
+	}
+
+	return ret.concat(this.sequence.find(fn));
+};
 
 //------------------------------------------------------------------------------
 
@@ -268,6 +403,15 @@ Blether.Send.prototype.setReceiver = function(anObject) {
 		this.receiver.setReceiver(anObject);
 	}
 	return this;
+};
+
+Blether.Send.prototype.find = function(fn) {
+	var ret = [];
+	if (fn(this)) {
+		ret.push(this);
+	}
+
+	return ret.concat(this.receiver.find(fn));
 };
 
 //------------------------------------------------------------------------------
@@ -302,6 +446,15 @@ Blether.Method = function(selector, sequence) {
 Blether.Method.prototype = new Blether.Node();
 Blether.Method.prototype.visit = function(visitor) { return visitor.visitMethod(this); };
 
+Blether.Method.prototype.find = function(fn) {
+	var ret = [];
+	if (fn(this)) {
+		ret.push(this);
+	}
+
+	return ret.concat(this.sequence.find(fn));
+};
+
 //------------------------------------------------------------------------------
 
 Blether.Comment = function(comment) {
@@ -332,6 +485,15 @@ Blether.MethodDeclaration.prototype.getClass = function() {
 	return this.context.classes[this.className];
 };
 
+Blether.MethodDeclaration.prototype.find = function(fn) {
+	var ret = [];
+	if (fn(this)) {
+		ret.push(this);
+	}
+
+	return ret.concat(this.body.find(fn));
+};
+
 //------------------------------------------------------------------------------
 
 Blether.ClassDeclaration = function(className, superClass, varNames) {
@@ -358,6 +520,17 @@ Blether.Program = function(elements) {
 
 Blether.Program.prototype = new Blether.Node();
 Blether.Program.prototype.visit = function(visitor) { return visitor.visitProgram(this); };
+
+Blether.Program.prototype.find = function(fn) {
+	var ret = [];
+	if (fn(this)) {
+		ret.push(this);
+	}
+
+	return this.elements.reduce(function(prev, curr) {
+		return prev.concat(curr.find(fn));
+	}, ret);
+};
 
 //------------------------------------------------------------------------------
 
