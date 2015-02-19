@@ -1,2 +1,2 @@
 var fred;
-fred[new STString("foo")];
+fred.foo;

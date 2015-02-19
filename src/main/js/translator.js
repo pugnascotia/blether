@@ -292,11 +292,11 @@ var BletherTranslator = function() {
 		switch (node.selector) {
 
 			case "at:":
-				output += receiver + "[" + node.args[0].visit(self) + "]";
+				output += this.convertAt(receiver, node.args[0]);
 				break;
 
 			case "at:put:":
-				output += receiver + "[" + node.args[0].visit(self) + "] = " + node.args[1].visit(self);
+				output += this.convertAtPut(receiver, node.args[0], node.args[1]);
 				break;
 
 			case "isNil":
@@ -728,6 +728,22 @@ var BletherTranslator = function() {
 		return node.receiver.visit(this) +
 			" ? " + node.args[truthyIndex].invoke(this) +
 			" : " + node.args[falsyIndex].invoke(this);
+	};
+
+	this.convertAt = function(receiver, argument) {
+		if (argument._type === "String" || argument._type === "Symbol") {
+			return receiver + "." + argument.value;
+		}
+
+		return receiver + "[" + argument.visit(this) + "]";
+	};
+
+	this.convertAtPut = function(receiver, key, value) {
+		if (key._type === "String" || key._type === "Symbol") {
+			return receiver + "." + key.value + " = " + value.visit(this);
+		}
+
+		return receiver + "[" + key.visit(this) + "] = " + value.visit(this);
 	};
 };
 

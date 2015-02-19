@@ -5,11 +5,12 @@ function Foobar() {
 Foobar.prototype.test = function() {
 var self = this;
 var fred;
-self[new STString("foo")] = new STString("bar");
-self[new STString("baz")] = fred.run();
-self[new STString("quux")] = new STNumber(1).plus$(new STNumber(2));
-self[new STString("schmee")] = fred.run(new STString("home"));
-self[new STString("bob")] = fred.run_with$(new STString("home"), new STString("Julia"));
+self.foo = new STString("bar");
+self.baz = fred.run();
+self.quux = new STNumber(1).plus$(new STNumber(2));
+self.schmee = fred.run(new STString("home"));
+self.bob = fred.run_with$(new STString("home"), new STString("Julia"));
+self[fred.key()] = null;
 return self;
 };
 

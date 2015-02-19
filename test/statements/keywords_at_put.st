@@ -7,4 +7,5 @@ Object subclass: #Foobar variables: #().
 	self at: #quux put: 1 + 2.
 	self at: #schmee put: (fred run: #home).
 	self at: #bob put: (fred run: #home with: #Julia).
+	self at: fred key put: nil.
 !.
