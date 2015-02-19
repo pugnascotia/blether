@@ -411,6 +411,10 @@ Blether.Send.prototype.find = function(fn) {
 		ret.push(this);
 	}
 
+	ret = this.args.reduce(function(prev, curr) {
+		return prev.concat(curr.find(fn));
+	}, ret);
+
 	return ret.concat(this.receiver.find(fn));
 };
 
