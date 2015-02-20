@@ -1,2 +1,2 @@
 var foo;
-(typeof (foo) === "undefined");
+(typeof (foo) === "undefined" || foo === null);

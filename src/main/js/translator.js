@@ -289,6 +289,13 @@ var BletherTranslator = function() {
 
 		var output = "";
 
+		if (node.selector === "value" || node.selector.match(/^(value:)+$/)) {
+			output = receiver + ".__value$(";
+			output += node.args.map(function(a) { return a.visit(self) }).join(", ");
+			output += ")";
+			return output;
+		}
+
 		switch (node.selector) {
 
 			case "at:":
@@ -300,13 +307,11 @@ var BletherTranslator = function() {
 				break;
 
 			case "isNil":
-				// FIXME handle null
-				output += "(typeof (" + receiver + ") === \"undefined\")";
+				output += "(typeof (" + receiver + ") === \"undefined\" || " + receiver + " === null)";
 				break;
 
 			case "notNil":
-				// FIXME handle null
-				output += "(typeof (" + receiver + ") !== \"undefined\")";
+				output += "(typeof (" + receiver + ") !== \"undefined\" && " + receiver + " !== null)";
 				break;
 
 			case "isEmpty":

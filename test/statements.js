@@ -71,9 +71,15 @@ describe("Sequences and Statements", function(){
   });
 
   describe("Cascades", function() {
-	  it("should be translated to an IIFE", function() {
-		  testUtils.generateAndCompare("statements/cascade");
-	  });
+    it("should be translated to an IIFE", function() {
+      testUtils.generateAndCompare("statements/cascade");
+    });
+  });
+
+  describe("Shims", function() {
+    it("should be be used for #value sends", function() {
+      testUtils.generateAndCompare("statements/value");
+    });
   });
 
 });

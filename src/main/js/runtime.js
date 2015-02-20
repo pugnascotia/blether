@@ -40,7 +40,7 @@ var Transcript = (function() {
 
 	var T = {};
 
-	T.show = function(s) { buffer += s; return this; },
+	T.show = function(s) { buffer += s; return this; };
 	T.nl = T.cr = function() { console.log(buffer); buffer = ""; return this; };
 	T.tab = function() { buffer += "\t"; return this; };
 

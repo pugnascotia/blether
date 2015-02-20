@@ -1,0 +1,8 @@
+1.__value$();
+"fred".__value$();
+(function() {
+return "hello";
+}).__value$();
+(function(foo, bar) {
+return "hello";
+}).__value$(1, 2);
