@@ -554,6 +554,11 @@ var BletherTranslator = function() {
 	};
 
 	this.visitDynamicDictionary = function(node) {
+
+		if (node.values.length === 0) {
+			return "Object.create(null)";
+		}
+
 		var output = "(function() {\n";
 		output += "var _dict = Object.create(null);\n";
 

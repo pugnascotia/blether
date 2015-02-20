@@ -52,6 +52,10 @@ describe("Basic types", function(){
     it("Dynamic dictionaries should be translated to native objects", function() {
       testUtils.generateAndCompare("types/dict");
     });
+
+    it("Dynamic dictionary with no keys are optimised", function() {
+      testUtils.generateAndCompare("types/dict_no_keys");
+    });
   });
 
 });

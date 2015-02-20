@@ -206,9 +206,9 @@ Blether.DynamicArray.prototype.visit = function(visitor) { return visitor.visitD
 
 //------------------------------------------------------------------------------
 
-Blether.DynamicDictionary = function(dict) {
+Blether.DynamicDictionary = function(array) {
 	this._type = "DynamicDictionary";
-	this.values = dict || {};
+	this.values = array || [];
 };
 
 Blether.DynamicDictionary.prototype = new Blether.Node();
