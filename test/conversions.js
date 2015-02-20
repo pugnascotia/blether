@@ -52,8 +52,16 @@ describe("Sending conversions", function(){
       test.generateAndCompare("conversions/ifTrueIfFalse");
     });
 
-    it("correctly nest ifNotNil: blocks and use unique receiver vars", function(){
+    it("should correctly nest ifNotNil: blocks and use unique receiver vars", function(){
       test.generateAndCompare("conversions/nestedIfNotNil");
+    });
+
+    it("should be used for and:", function() {
+      test.generateAndCompare("conversions/and");
+    });
+
+    it("should be used for or:", function() {
+      test.generateAndCompare("conversions/or");
     });
   });
 

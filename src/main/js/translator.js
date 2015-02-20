@@ -356,6 +356,11 @@ var BletherTranslator = function() {
 				output = this.convertIfTrueIfFalse(node);
 				break;
 
+			case "and:":
+			case "or:":
+				output = this.convertAndOr(receiver, node);
+				break;
+
 			case "==":
 				output = receiver + " === " + node.args[0].visit(self);
 				break;
@@ -744,6 +749,20 @@ var BletherTranslator = function() {
 		}
 
 		return receiver + "[" + key.visit(this) + "] = " + value.visit(this);
+	};
+
+	this.convertAndOr = function(receiver, node) {
+		if (node.args[0]._type !== "Block") {
+			throw Blether.ParseError({
+				"line": node.line,
+				"column": node.column,
+				"msg": node.selector + " accepts literal blocks only"
+			});
+		}
+
+		var operator = node.selector === "and:" ? " && " : " || ";
+
+		return receiver + operator + node.args[0].invoke(this);
 	};
 };
 
