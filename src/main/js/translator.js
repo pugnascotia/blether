@@ -513,22 +513,52 @@ var BletherTranslator = function() {
 
 	this.visitCascade = function(node) {
 		var self = this;
+		var output;
 
 		// Translate this cascade into a block, then visit that block
 
-		var receiverVar = this.context.pushReceiver();
+		// TODO: Add a method on the node objects e.g. isLiteral()
+		var deconstruct = false;
+		switch (node.receiver._type) {
+			case "Variable":
+			case "String":
+			case "Symbol":
+			case "Number":
+			case "Boolean":
+			case "UndefinedObject":
+				deconstruct = true;
+				break;
+		}
 
-		var statements = node.messages.map(function(each) {
-			each.receiver = new Blether.Variable(receiverVar);
-			return each;
-		});
+		var sequence, statements, cascadeBlock;
 
-		var sequence     = new Blether.Sequence([], statements);
-		var cascadeBlock = new Blether.Block([receiverVar], sequence);
+		if (deconstruct) {
 
-		var output = "(" + cascadeBlock.visit(self) + ")(" + node.receiver.visit(self) + ")";
+			statements = node.messages.map(function(each) {
+				each.receiver = node.receiver;
+				return each;
+			});
 
-		this.context.popReceiver();
+			sequence     = new Blether.Sequence([], statements);
+			cascadeBlock = new Blether.Block([], sequence);
+
+			output = "(" + cascadeBlock.visit(self) + ")()";
+		}
+		else {
+			var receiverVar = this.context.pushReceiver();
+
+			statements = node.messages.map(function(each) {
+				each.receiver = new Blether.Variable(receiverVar);
+				return each;
+			});
+
+			sequence     = new Blether.Sequence([], statements);
+			cascadeBlock = new Blether.Block([receiverVar], sequence);
+
+			output = "(" + cascadeBlock.visit(self) + ")(" + node.receiver.visit(self) + ")";
+
+			this.context.popReceiver();
+		}
 
 		return output;
 	};

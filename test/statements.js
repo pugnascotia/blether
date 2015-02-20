@@ -74,6 +74,10 @@ describe("Sequences and Statements", function(){
     it("should be translated to an IIFE", function() {
       testUtils.generateAndCompare("statements/cascade");
     });
+
+    it("should be deconstructed when the receiver is a variable", function() {
+      testUtils.generateAndCompare("statements/cascade_deconstruct");
+    });
   });
 
   describe("Shims", function() {

@@ -1,5 +1,5 @@
-Transcript
-	show: 'Hello';
-	show: ', ';
-	show: 'world!';
-	nl.
+| foo |
+foo bar
+	operationOne;
+	operationTwo;
+	operationThree.

@@ -1,0 +1,5 @@
+(function() {
+Transcript.show("foo");
+Transcript.show("bar");
+return Transcript.show("baz");
+})();

@@ -1,6 +1,6 @@
+var foo;
 (function(_receiver1$) {
-_receiver1$.show("Hello");
-_receiver1$.show(", ");
-_receiver1$.show("world!");
-return _receiver1$.nl();
-})(Transcript);
+_receiver1$.operationOne();
+_receiver1$.operationTwo();
+return _receiver1$.operationThree();
+})(foo.bar());
