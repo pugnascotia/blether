@@ -1,6 +1,6 @@
 var foo;
 (function(_receiver1$) {
-return (_receiver1$.length > 0) ? new STString("fred") : null;
+return (_receiver1$.length > 0) ? "fred" : null;
 })(foo.bar());
 (function(_receiver1$) {
 return (_receiver1$.length > 0) ? _receiver1$.barney() : null;

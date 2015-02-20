@@ -1,6 +1,6 @@
 (function(_receiver1$) {
-_receiver1$.show(new STString("Hello"));
-_receiver1$.show(new STString(", "));
-_receiver1$.show(new STString("world!"));
+_receiver1$.show("Hello");
+_receiver1$.show(", ");
+_receiver1$.show("world!");
 return _receiver1$.nl();
 })(Transcript);

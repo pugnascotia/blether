@@ -1,2 +1,2 @@
 var foo;
-foo ? null : new STString("bar");
+foo ? null : "bar";

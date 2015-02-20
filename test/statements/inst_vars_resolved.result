@@ -5,7 +5,7 @@ this.fred = _fred;
 
 Foobar.prototype.test = function() {
 var self = this;
-self.fred = new STString("hello");
+self.fred = "hello";
 return self;
 };
 

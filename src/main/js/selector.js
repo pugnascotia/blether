@@ -29,7 +29,7 @@ function convertSelector(selector) {
 	}
 
 	if (selector.match(/[\\+*/=><,@%~|&-]/)) {
-		return selector.split("").map(function(e) { return mapping[e]; }).join("_") + "$";
+		return "__" + selector.split("").map(function(e) { return mapping[e]; }).join("_") + "$";
 	}
 
 	if (selector.match(/:/)) {

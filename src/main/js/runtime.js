@@ -1,76 +1,41 @@
-/* exported STString, STNumber, Transcript, STReturnValue */
-var STString = (function() {
-	function STString(s) {
-		this.value = s || "";
-		Object.defineProperty(this, "length", {
-			get: function () {
-				return this.value.length;
-			}
-		}); 
-	}
+/* exported Smalltalk, Transcript, STReturnValue */
+/*jshint -W121 */
 
-	STString.prototype = Object.create(String.prototype);
-
-	STString.prototype.toString = STString.prototype.valueOf = function() { return this.value };
-
-	STString.prototype.equals$ = function(other) {
-		return this.value === other;
-	};
-
-	STString.prototype.concat = function() {
-		var ret = this.value;
-
-		for (var i = 0; i < arguments.length; i++) {
-			ret += arguments[i].toString();
+var Smalltalk = (function() {
+	return {
+		"require": function(lib) {
+			return require(lib);
 		}
-
-		return new STString(ret);
 	};
-
-	STString.prototype.asJQuery = function() {
-		return jQuery(this.valueOf());
-	};
-
-	return STString;
 })();
 
-var STNumber = (function() {
-	function STNumber(n) {
-		this.value = n;
-	}
+String.prototype.__equals$   = function(arg) { return this === arg };
+String.prototype.__asJQuery$ = function()    { return jQuery(this) };
+String.prototype.__concat$ = function() {
+	return Array.reduce(arguments, function(prev, curr) { prev + curr }, this);
+};
 
-	STNumber.prototype = Object.create(Number.prototype);
+String.prototype.__value$ = function() { return this };
 
-	STNumber.prototype.valueOf = function() { return this.value };
+Number.prototype.__equals$   = function(arg) { return this === arg };
+Number.prototype.__plus$     = function(arg) { return this + arg };
+Number.prototype.__multiply$ = function(arg) { return this * arg };
+Number.prototype.__divide$   = function(arg) { return this / arg };
+Number.prototype.__minus$    = function(arg) { return this - arg };
+Number.prototype.__modulo$   = function(arg) { return this % arg };
+/* jshint bitwise:false */
+Number.prototype.__or$       = function(arg) { return this | arg };
+Number.prototype.__and$      = function(arg) { return this & arg };
+/* jshint bitwise:true */
+Number.prototype.__value$ = function() { return this };
 
-	STNumber.prototype.equals$ = function(other) {
-		return this.value === other;
-	};
+// Logical operators
+Number.prototype.__greater_than$ = function(arg) { return this > arg };
+Number.prototype.__less_than$    = function(arg) { return this < arg };
 
-	STNumber.prototype.toString = function() { return this.value.toString() };
-
-	// Arithmetic operators
-	STNumber.prototype.plus$ = function(arg) { return new STNumber(this.value + arg) };
-	STNumber.prototype.multiply$ = function(arg) { return new STNumber(this.value * arg) };
-	STNumber.prototype.divide$ = function(arg) { return new STNumber(this.value / arg) };
-	STNumber.prototype.minus$ = function(arg) { return new STNumber(this.value - arg) };
-	STNumber.prototype.modulo$ = function(arg) { return new STNumber(this.value % arg) };
-
-	// Binary operators
-	/* jshint bitwise:false */
-	STNumber.prototype.or$ = function(arg) { return new STNumber(this.value | arg) };
-	STNumber.prototype.and$ = function(arg) { return new STNumber(this.value & arg) };
-	/* jshint bitwise:true */
-
-	// Logical operators
-	STNumber.prototype.greater_than$ = function(arg) { return this.value > arg };
-	STNumber.prototype.less_than$ = function(arg) { return this.value < arg };
-
-	return STNumber;
-})();
+Function.prototype.__value$ = function() { return this.apply(this, arguments) };
 
 var Transcript = (function() {
-
 	var buffer = "";
 
 	var T = {};

@@ -1,1 +1,1 @@
-[new STString("foo"), new STString("bar"), new STString("baz")];
+["foo", "bar", "baz"];

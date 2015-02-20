@@ -1,6 +1,6 @@
 (function() {
 var _dict = Object.create(null);
-_dict[new STString("foo")] = new STNumber(1);
-_dict[new STString("bar")] = new STNumber(2).toString();
+_dict["foo"] = 1;
+_dict["bar"] = 2.toString();
 return _dict;
 })();

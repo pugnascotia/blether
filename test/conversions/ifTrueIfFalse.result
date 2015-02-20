@@ -1,2 +1,2 @@
 var foo;
-foo ? new STString("fred") : new STString("barney");
+foo ? "fred" : "barney";

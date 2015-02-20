@@ -129,7 +129,7 @@ var BletherTranslator = function() {
 	};
 
 	this.visitString = function(node) {
-		return "new STString(\"" + node.value.replace(/"/g, "\\\"") + "\")";
+		return "\"" + node.value.replace(/"/g, "\\\"") + "\"";
 	};
 
 	this.visitMethod = function(node) {
@@ -388,7 +388,7 @@ var BletherTranslator = function() {
 	};
 
 	this.visitNumber = function(node) {
-		return "new STNumber(" + node.value.toString() + ")";
+		return node.value.toString();
 	};
 
 	this.visitVariable = function(node) {
