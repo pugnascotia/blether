@@ -1,6 +1,8 @@
+var fred;
 (function() {
 var _dict = Object.create(null);
-_dict["foo"] = 1;
-_dict["bar"] = 2.toString();
+_dict.foo = 1;
+_dict.bar = 2.toString();
+_dict[fred.barney()] = 3;
 return _dict;
 })();

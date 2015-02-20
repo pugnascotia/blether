@@ -549,7 +549,12 @@ var BletherTranslator = function() {
 		output += "var _dict = Object.create(null);\n";
 
 		for (var i = 0, j = 1; j < node.values.length; i += 2, j += 2) {
-			output += "_dict[" + node.values[i].visit(this) + "] = " + node.values[j].visit(this) + ";\n";
+			if (node.values[i]._type === "String" || node.values[i]._type === "Symbol") {
+				output += "_dict." + node.values[i].value + " = " + node.values[j].visit(this) + ";\n";
+			}
+			else {
+				output += "_dict[" + node.values[i].visit(this) + "] = " + node.values[j].visit(this) + ";\n";
+			}
 		}
 
 		output += "return _dict;\n";
