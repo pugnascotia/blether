@@ -10,7 +10,6 @@ var Smalltalk = (function() {
 })();
 
 String.prototype.__equals$   = function(arg) { return this === arg };
-String.prototype.__asJQuery$ = function()    { return jQuery(this) };
 String.prototype.__concat$ = function() {
 	return Array.reduce(arguments, function(prev, curr) { prev + curr }, this);
 };

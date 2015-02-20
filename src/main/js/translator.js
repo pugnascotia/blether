@@ -378,6 +378,10 @@ var BletherTranslator = function() {
 				output = "!(" + receiver + ".equals$(" + node.args[0].visit(self) + "))";
 				break;
 
+			case "asJQuery":
+				output = "jQuery(" + receiver + ")";
+				break;
+
 			default:
 				output = receiver + "." + convertSelector(node.selector) + "(";
 				output += node.args.map(function(each) { return each.visit(self) }).join(", ");
