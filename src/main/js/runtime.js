@@ -1,13 +1,11 @@
 /* exported Smalltalk, Transcript, STReturnValue */
 /*jshint -W121 */
 
-var Smalltalk = (function() {
-	return {
-		"require": function(lib) {
-			return require(lib);
-		}
-	};
-})();
+var Smalltalk = {
+	"require": function(lib) {
+		return require(lib);
+	}
+};
 
 String.prototype.__equals$   = function(arg) { return this === arg };
 String.prototype.__concat$ = function() {

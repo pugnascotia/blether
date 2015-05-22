@@ -10,10 +10,12 @@ module.exports = function(grunt) {
 	// Force use of Unix newlines
 	grunt.util.linefeed = "\n";
 
-	// 1. All configuration goes here 
+	// 1. All configuration goes here
 	grunt.initConfig({
 		pkg: grunt.file.readJSON("package.json"),
-		
+
+        clean: [ "target" ],
+
 		peg: {
 			grammer: {
 				src: "src/main/js/parser.pegjs",
@@ -104,10 +106,11 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks("grunt-contrib-watch");
 	grunt.loadNpmTasks("grunt-contrib-copy");
 	grunt.loadNpmTasks("grunt-mocha-test");
+	grunt.loadNpmTasks("grunt-contrib-clean");
 
 	grunt.registerTask("build", [ "jshint", "peg", "concat", "copy" ]);
 
-	grunt.registerTask("test", [ "mochaTest" ]);
+	grunt.registerTask("test", [ "build", "mochaTest" ]);
 
 	// Tell Grunt what to do when we type "grunt" into the terminal.
 	grunt.registerTask("default", [ "build", "test", "uglify" ]);
