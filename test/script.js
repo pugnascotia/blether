@@ -1,4 +1,4 @@
-var testUtils = require("../src/test/js/utils.js");
+var testUtils = require("../lib/test/utils.js");
 
 describe("Scripting", function(){
   describe("Declaring temps", function(){

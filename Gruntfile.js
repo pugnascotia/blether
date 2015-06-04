@@ -11,19 +11,19 @@ module.exports = function(grunt) {
 	grunt.initConfig({
 		pkg: grunt.file.readJSON("package.json"),
 
-        clean: [ "lib" ],
+        clean: [ "build" ],
 
 		peg: {
 			grammer: {
-				src: "src/main/js/parser.pegjs",
-				dest: "lib/parser.js",
+				src: "lib/parser.pegjs",
+				dest: "build/parser.js",
 				options: { exportVar: "var BletherParser" }
 			}
 		},
 
 		// Configure the grunt-contrib-jshint plugin
 		jshint: {
-			files: [ "src/**/*.js", "test/**/*.js", "Gruntfile.js" ],
+			files: [ "lib/**/*.js", "test/**/*.js", "Gruntfile.js" ],
 			options: {
 				jshintrc: ".jshintrc"
 			}
@@ -33,21 +33,21 @@ module.exports = function(grunt) {
 		concat: {
 			dist: {
 				src: [
-					"src/main/js/lang.js",
-					"lib/parser.js",
-					"src/main/js/selector.js",
-					"src/main/js/tree_modifier.js",
-					"src/main/js/return_operator_visitor.js",
-					"src/main/js/translator.js",
+					"lib/lang.js",
+					"build/parser.js",
+					"lib/selector.js",
+					"lib/tree_modifier.js",
+					"lib/return_operator_visitor.js",
+					"lib/translator.js",
 				],
-				dest: "lib/blether.js"
+				dest: "build/blether.js"
 			}
 		},
 
 		copy: {
 			runtime: {
-				src: "src/main/js/runtime.js",
-				dest: "lib/runtime.js"
+				src: "lib/runtime.js",
+				dest: "build/runtime.js"
 			}
 		},
 
@@ -57,12 +57,12 @@ module.exports = function(grunt) {
 				banner: "/*! <%= pkg.name %> <%= grunt.template.today(\"dd-mm-yyyy\") %> */\n"
 			},
 			blether: {
-				src: "lib/blether.js",
-				dest: "lib/blether.min.js"
+				src: "build/blether.js",
+				dest: "build/blether.min.js"
 			},
 			runtime: {
-				src: "lib/runtime.js",
-				dest: "lib/runtime.min.js"
+				src: "build/runtime.js",
+				dest: "build/runtime.min.js"
 			}
 		},
 
@@ -80,7 +80,7 @@ module.exports = function(grunt) {
 
 		watch: {
 			sources: {
-				files: [ "src/**/*.js", "src/**/*.pegjs" ],
+				files: [ "lib/**/*.js", "lib/**/*.pegjs" ],
 				tasks: [ "build", "test" ]
 			},
 			tests: {

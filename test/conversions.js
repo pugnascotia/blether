@@ -1,5 +1,5 @@
 // vim: ts=2 sw=2 sts=2 et:
-var test = require("../src/test/js/utils.js");
+var test = require("../lib/test/utils.js");
 
 describe("Sending conversions", function(){
 

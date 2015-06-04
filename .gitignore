@@ -1,6 +1,6 @@
-parser.js
-node_modules
 *.swp
-lib
-target
+*.bak
+
+node_modules
+build
 results.txt
