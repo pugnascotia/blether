@@ -1,5 +1,6 @@
 parser.js
 node_modules
 *.swp
+lib
 target
 results.txt

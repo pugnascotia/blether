@@ -2,14 +2,23 @@
   "name": "blether",
   "version": "0.1.0",
   "description": "Yet another Smalltalk to JavaScript compiler",
-  "main": "index.js",
+  "bin": {
+    "blether": "./bin/blether"
+  },
+  "files": [
+    "lib/blether.js"
+  ],
+  "preferGlobal": true,
   "scripts": {
     "test": "grunt test"
   },
   "keywords": [
     "smalltalk",
     "javascript",
-    "pegjs"
+    "pegjs",
+    "compiler",
+    "javascript",
+    "language"
   ],
   "author": "Rory Hunter <roryhunter2@gmail.com>",
   "license": "GPL2",
@@ -27,5 +36,8 @@
     "mocha": "~2.1.0",
     "pegjs": "~0.8.0",
     "time-grunt": "~1.0.0"
+  },
+  "dependencies": {
+    "minimist": "^1.1.1"
   }
 }

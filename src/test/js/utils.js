@@ -1,7 +1,7 @@
 var assert = require("assert");
 var util = require("util");
 
-var blether = require("../../../target/blether.js");
+var blether = require("../../../lib/blether.js");
 
 var testUtils = {};
 

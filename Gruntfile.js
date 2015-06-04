@@ -4,9 +4,6 @@ module.exports = function(grunt) {
 	// Time our tasks in a spangly way
 	require("time-grunt")(grunt);
 
-	// Auto-load only required tasks
-	// require("jit-grunt")(grunt);
-
 	// Force use of Unix newlines
 	grunt.util.linefeed = "\n";
 
@@ -14,12 +11,12 @@ module.exports = function(grunt) {
 	grunt.initConfig({
 		pkg: grunt.file.readJSON("package.json"),
 
-        clean: [ "target" ],
+        clean: [ "lib" ],
 
 		peg: {
 			grammer: {
 				src: "src/main/js/parser.pegjs",
-				dest: "target/parser.js",
+				dest: "lib/parser.js",
 				options: { exportVar: "var BletherParser" }
 			}
 		},
@@ -37,20 +34,20 @@ module.exports = function(grunt) {
 			dist: {
 				src: [
 					"src/main/js/lang.js",
-					"target/parser.js",
+					"lib/parser.js",
 					"src/main/js/selector.js",
 					"src/main/js/tree_modifier.js",
 					"src/main/js/return_operator_visitor.js",
 					"src/main/js/translator.js",
 				],
-				dest: "target/blether.js"
+				dest: "lib/blether.js"
 			}
 		},
 
 		copy: {
 			runtime: {
 				src: "src/main/js/runtime.js",
-				dest: "target/runtime.js"
+				dest: "lib/runtime.js"
 			}
 		},
 
@@ -60,12 +57,12 @@ module.exports = function(grunt) {
 				banner: "/*! <%= pkg.name %> <%= grunt.template.today(\"dd-mm-yyyy\") %> */\n"
 			},
 			blether: {
-				src: "target/blether.js",
-				dest: "target/blether.min.js"
+				src: "lib/blether.js",
+				dest: "lib/blether.min.js"
 			},
 			runtime: {
-				src: "target/runtime.js",
-				dest: "target/runtime.min.js"
+				src: "lib/runtime.js",
+				dest: "lib/runtime.min.js"
 			}
 		},
 
@@ -97,8 +94,6 @@ module.exports = function(grunt) {
 		}
 	});
 
-	// Usually we"d tell Grunt what plugins we plan to use as follows, but
-	// jit-grunt (see above) does away with this.
 	grunt.loadNpmTasks("grunt-contrib-concat");
 	grunt.loadNpmTasks("grunt-contrib-jshint");
 	grunt.loadNpmTasks("grunt-contrib-uglify");

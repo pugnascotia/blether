@@ -1,0 +1,31 @@
+#!/usr/bin/env node
+
+// Chrome debugging, IIRC
+if (global.v8debug) {
+	global.v8debug.Debug.setBreakOnException(); // speaks for itself
+}
+
+var path = require('path');
+var fs   = require('fs');
+var lib  = path.join(path.dirname(fs.realpathSync(__filename)), '../lib');
+
+var argv = require('minimist')(process.argv.slice(2), { '--': true });
+
+var blether = require(lib + "/blether.min.js");
+
+// require(lib + '/coffee-script/command').run();
+
+argv._.forEach(function(eachArg) {
+
+    var text = fs.readFileSync(eachArg).toString();
+
+    try {
+        var js = blether.translate(text);
+        console.log(js);
+    }
+    catch (e) {
+        console.log("Failed at line [" + e.line + "], column [" + e.column + "]: " + e);
+        console.log(e);
+        process.exit();
+    }
+});
