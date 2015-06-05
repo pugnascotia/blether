@@ -5,9 +5,7 @@
   "bin": {
     "blether": "./bin/blether"
   },
-  "files": [
-    "lib/blether.js"
-  ],
+  "main": "build/blether.min.js",
   "preferGlobal": true,
   "scripts": {
     "test": "grunt test"
@@ -38,6 +36,7 @@
     "time-grunt": "~1.0.0"
   },
   "dependencies": {
+    "eval": "^0.1.0",
     "minimist": "^1.1.1"
   }
 }
