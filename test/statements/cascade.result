@@ -1,4 +1,17 @@
 var foo;
+foo = Object.create(null);
+foo.bar = function() {
+return (function() {
+var _dict = Object.create(null);
+_dict.operationOne = function() {
+};
+_dict.operationTwo = function() {
+};
+_dict.operationThree = function() {
+};
+return _dict;
+})();
+};
 (function(_receiver1$) {
 _receiver1$.operationOne();
 _receiver1$.operationTwo();

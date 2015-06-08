@@ -1,2 +1,9 @@
 var foo;
+foo = Object.create(null);
+foo.bar = function() {
+return (1);
+};
+foo.baz = function() {
+return (2);
+};
 [foo.bar(), foo.baz()];

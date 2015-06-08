@@ -7,7 +7,7 @@ var self = this;
 var fred;
 self.foo = "bar";
 self.baz = fred.run();
-self.quux = 1.__plus$(2);
+self.quux = (1).__plus$((2));
 self.schmee = fred.run("home");
 self.bob = fred.run_with$("home", "Julia");
 self[fred.key()] = null;

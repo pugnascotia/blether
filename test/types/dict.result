@@ -1,8 +1,13 @@
 var fred;
+fred = (function() {
+var _dict = Object.create(null);
+_dict.barney = "wilma";
+return _dict;
+})();
 (function() {
 var _dict = Object.create(null);
-_dict.foo = 1;
-_dict.bar = 2.toString();
-_dict[fred.barney()] = 3;
+_dict.foo = (1);
+_dict.bar = (2).toString();
+_dict[fred.barney] = (3);
 return _dict;
 })();

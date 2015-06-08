@@ -3,5 +3,5 @@ foo || bar;
 foo || (function() {
 var tmp;
 tmp = bar.baz();
-return tmp.__greater_than$(2);
+return tmp.__greater_than$((2));
 })();

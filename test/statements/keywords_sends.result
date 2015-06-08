@@ -6,8 +6,8 @@ Foobar.prototype.test = function() {
 var self = this;
 var fred;
 self.foo("bar");
-self.foo_baz$("bar", 1.__plus$(1));
-self.foo_baz_quux$("bar", 1.__plus$(1), fred.run().for().it());
+self.foo_baz$("bar", (1).__plus$((1)));
+self.foo_baz_quux$("bar", (1).__plus$((1)), fred.run().for().it());
 return self;
 };
 

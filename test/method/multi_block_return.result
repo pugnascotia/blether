@@ -6,9 +6,9 @@ Foobar.prototype.compare_with$ = function(aList, anotherList) {
 var self = this;
 try {
 aList.forEach(function(each) {
-each === 3 ? throw new STReturnValue(true) : null;
-each === 4 ? throw new STReturnValue(true) : null;
-return each === 5 ? anotherList.forEach(function(other) {
+each === (3) ? throw new STReturnValue(true) : null;
+each === (4) ? throw new STReturnValue(true) : null;
+return each === (5) ? anotherList.forEach(function(other) {
 return other === "fred" ? throw new STReturnValue(false) : null;
 }) : null;
 });

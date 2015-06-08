@@ -4,7 +4,7 @@ function Foobar() {
 
 Foobar.prototype.sum = function() {
 var self = this;
-return 1.__plus$(2);
+return (1).__plus$((2));
 };
 
 

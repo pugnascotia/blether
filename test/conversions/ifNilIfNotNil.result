@@ -3,5 +3,5 @@ var foo;
 return (typeof _receiver1$ === "undefined" || _receiver1$ === null) ? "fred" : "barney";
 })(foo.bar());
 (function(_receiver1$) {
-return (typeof _receiver1$ === "undefined" || _receiver1$ === null) ? 1.__plus$(2) : _receiver1$.barney();
+return (typeof _receiver1$ === "undefined" || _receiver1$ === null) ? (1).__plus$((2)) : _receiver1$.barney();
 })(foo.bar());
