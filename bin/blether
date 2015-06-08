@@ -1,5 +1,26 @@
 #!/usr/bin/env node
 
+/* Attempt to load the core library. We prefer the minimised one for
+ * performance, however that won't exist when we first build the library,
+ * and this entrypoint is called by the unit tests. So, fall back to the
+ * unminified one if necessary */
+function require_blether() {
+    var lib  = path.join(path.dirname(fs.realpathSync(__filename)), '../build');
+
+    try {
+        return require(lib + "/blether.min.js");
+    }
+    catch (e) {
+        try {
+            return require(lib + '/blether.js');
+        }
+        catch (e2) {
+            console.error("Failed to find blether.min.js or blether.js under " + lib);
+            process.exit(2);
+        }
+    }
+}
+
 // Chrome debugging, IIRC
 if (global.v8debug) {
 	global.v8debug.Debug.setBreakOnException(); // speaks for itself
@@ -7,49 +28,56 @@ if (global.v8debug) {
 
 var path = require('path');
 var fs   = require('fs');
-var lib  = path.join(path.dirname(fs.realpathSync(__filename)), '../build');
+var blether = require_blether();
 var _eval = require("eval");
 
 var argv = require('minimist')(process.argv.slice(2), {
-    'boolean': [ 'x' ],
+    'boolean': [ 'x', 'runtime' ],
+    'default': {
+        "runtime": true
+    },
     '--': true
 });
 
-var blether = require(lib + "/blether.min.js");
+var blether_opts = {
+    runtime: argv.runtime
+};
+
+// console.dir(argv);
+// console.dir(blether_opts);
+
+function translate(source) {
+    var text = fs.readFileSync(source).toString();
+
+    if (/^#!/.test(text)) {
+        text = text.replace(/^#!.*$/m, '');
+    }
+
+    return blether.translate(text, blether_opts);
+}
 
 if (argv.x && argv._) {
-
-    var translate = function(aFile) {
-        var text = fs.readFileSync(aFile).toString();
-        if (/^#!/.test(text)) {
-            text = text.replace(/^#!.*$/m, '');
-        }
-        return blether.translate(text);
-    };
-
     try {
         var javascript = argv._.map(translate).join();
         _eval(javascript, "<argv>", null, true);
     }
     catch (e) {
-        console.log("Failed at line [" + e.line + "], column [" + e.column + "]: " + e);
-        console.log(e);
-        process.exit();
+        console.error("Failed at line [" + e.line + "], column [" + e.column + "]: " + e);
+        console.error(e);
+        process.exit(1);
     }
 }
 else {
     argv._.forEach(function(eachArg) {
 
-        var text = fs.readFileSync(eachArg).toString();
-
         try {
-            var js = blether.translate(text);
+            var js = translate(eachArg);
             console.log(js);
         }
         catch (e) {
-            console.log("Failed at line [" + e.line + "], column [" + e.column + "]: " + e);
-            console.log(e);
-            process.exit();
+            console.error("Failed at line [" + e.line + "], column [" + e.column + "]: " + e);
+            console.error(e);
+            process.exit(1);
         }
     });
 }
