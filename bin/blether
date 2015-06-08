@@ -8,22 +8,27 @@ if (global.v8debug) {
 var path = require('path');
 var fs   = require('fs');
 var lib  = path.join(path.dirname(fs.realpathSync(__filename)), '../build');
+var _eval = require("eval");
 
-var argv = require('minimist')(process.argv.slice(2), { 'boolean': [ 'x' ], '--': true });
+var argv = require('minimist')(process.argv.slice(2), {
+    'boolean': [ 'x' ],
+    '--': true
+});
 
 var blether = require(lib + "/blether.min.js");
 
 if (argv.x && argv._) {
 
-    try {
-        var javascript = argv._.
-            map(function(eachFile) {
-                var text = fs.readFileSync(eachFile).toString();
-                return blether.translate(text);
-            }).
-            join();
+    var translate = function(aFile) {
+        var text = fs.readFileSync(aFile).toString();
+        if (/^#!/.test(text)) {
+            text = text.replace(/^#!.*$/m, '');
+        }
+        return blether.translate(text);
+    };
 
-        var _eval = require("eval");
+    try {
+        var javascript = argv._.map(translate).join();
         _eval(javascript, "<argv>", null, true);
     }
     catch (e) {

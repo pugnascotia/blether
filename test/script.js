@@ -9,6 +9,11 @@ describe("Scripting", function(){
 	it("should fail if the temps are not first", function() {
 		testUtils.expectSyntaxError("script/temps_not_first");
 	});
+  });
 
+  describe("Shebang lines", function() {
+      it("should be ignored", function() {
+          testUtils.executeBlether("script/shebang");
+      });
   });
 });
