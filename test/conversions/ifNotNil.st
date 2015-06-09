@@ -1,6 +1,6 @@
 | foo |
 " No block parameter "
-foo bar ifNotNil: [ 'hello' ].
+foo ifNotNil: [ 'hello' ].
 
 " With block parameter "
-foo bar ifNotNil: [ :fred | fred hello ].
+foo ifNotNil: [ :fred | fred hello ].

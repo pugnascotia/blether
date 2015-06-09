@@ -1,2 +1,2 @@
 | foo |
-foo bar ifNil: [ 'hello' ].
+foo ifNil: [ 'hello' ].

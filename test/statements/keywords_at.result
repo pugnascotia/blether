@@ -1,2 +1,7 @@
 var fred;
+fred = (function() {
+var _dict = Object.create(null);
+_dict.foo = "bar";
+return _dict;
+})();
 fred.foo;

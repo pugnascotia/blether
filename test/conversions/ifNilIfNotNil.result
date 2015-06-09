@@ -1,4 +1,10 @@
 var foo;
+foo = (function() {
+var _dict = Object.create(null);
+_dict.bar = function() {
+};
+return _dict;
+})();
 (function(_receiver1$) {
 return (typeof _receiver1$ === "undefined" || _receiver1$ === null) ? "fred" : "barney";
 })(foo.bar());

@@ -6,7 +6,7 @@ Foobar.prototype.search = function(aList) {
 var self = this;
 try {
 aList.forEach(function(each) {
-return each === (3) ? throw new STReturnValue(true) : null;
+return each === (3) ? stReturn(true) : null;
 });
 return false;
 }

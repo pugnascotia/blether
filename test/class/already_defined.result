@@ -1,4 +1,0 @@
-{ name: 'Blether Parse Error',
-  message: 'Class Foobar already defined',
-  line: 2,
-  column: 1 }

@@ -1,5 +1,7 @@
 Object subclass: #Foobar variables: #().
 
 !Foobar hello
-	<This isn't valid JavaScript but the translater doesn't know that>
+	<var foo = ['bar'];
+    var baz = { quux: 'schmee' };
+    return foo ? foo : bazz;>
 !.

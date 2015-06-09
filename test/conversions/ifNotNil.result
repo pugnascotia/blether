@@ -1,7 +1,7 @@
 var foo;
 (function(_receiver1$) {
 return (typeof _receiver1$ !== "undefined" && _receiver1$ !== null) ? "hello" : null;
-})(foo.bar());
+})(foo);
 (function(_receiver1$) {
 return (typeof _receiver1$ !== "undefined" && _receiver1$ !== null) ? _receiver1$.hello() : null;
-})(foo.bar());
+})(foo);

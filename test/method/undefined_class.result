@@ -1,4 +1,0 @@
-{ name: 'Blether Parse Error',
-  message: 'Unknown class Fooba',
-  line: 4,
-  column: 1 }

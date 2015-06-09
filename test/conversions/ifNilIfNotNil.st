@@ -1,4 +1,6 @@
 | foo |
+foo := #{ #bar -> [] }.
+
 " No argument to ifNotNil: block "
 foo bar ifNil: [ 'fred' ] ifNotNil: [ 'barney' ].
 

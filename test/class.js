@@ -22,11 +22,11 @@ describe("Class creation", function(){
 
   describe("Extending a class", function() {
     it("should fail if the superclass is not defined", function(){
-		testUtils.generateAndCompare("class/undefined_superclass");
+		testUtils.expectParseError("class/undefined_superclass", "Super-class Foo not defined");
     });
 
     it("should fail if the class is already defined", function(){
-		testUtils.generateAndCompare("class/already_defined");
+		testUtils.expectParseError("class/already_defined", "Class Foobar already defined");
     });
 
 	it("should configure the super-class correctly", function() {

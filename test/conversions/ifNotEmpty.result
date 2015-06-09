@@ -1,7 +1,8 @@
 var foo;
+foo = "bobbins";
 (function(_receiver1$) {
 return (_receiver1$.length > 0) ? "fred" : null;
-})(foo.bar());
+})(foo);
 (function(_receiver1$) {
-return (_receiver1$.length > 0) ? _receiver1$.barney() : null;
-})(foo.bar());
+return (_receiver1$.length > 0) ? _receiver1$.concat(" baz") : null;
+})(foo);

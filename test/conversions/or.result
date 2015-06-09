@@ -1,4 +1,11 @@
 var foo, bar;
+bar = (function() {
+var _dict = Object.create(null);
+_dict.baz = function() {
+return (1);
+};
+return _dict;
+})();
 foo || bar;
 foo || (function() {
 var tmp;

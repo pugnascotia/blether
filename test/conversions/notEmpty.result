@@ -1,2 +1,3 @@
 var foo;
+foo = "foo";
 (foo.length > 0);

@@ -4,15 +4,15 @@ describe("Methods", function(){
 
   describe("Validation", function(){
     it("checks that class is defined", function() {
-      testUtils.generateAndCompare("method/undefined_class");
+      testUtils.expectParseError("method/undefined_class", "Unknown class Fooba");
     });
 
     it("checks that the method is not already is defined", function() {
-      testUtils.generateAndCompare("method/already_defined");
+      testUtils.expectParseError("method/already_defined", "Method hello already defined on class Foobar");
     });
 
     it("checks that keyword methods do not list the same argument name more than once", function() {
-      testUtils.generateAndCompare("method/unique_keyword_arg_names");
+      testUtils.expectParseError("method/unique_keyword_arg_names", "Argument name argOne repeats in method Foobar>>#one:two:");
     });
   });
 
