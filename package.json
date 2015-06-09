@@ -5,7 +5,7 @@
   "bin": {
     "blether": "./bin/blether"
   },
-  "main": "build/blether.min.js",
+  "main": "dist/blether.min.js",
   "preferGlobal": true,
   "scripts": {
     "test": "grunt test"

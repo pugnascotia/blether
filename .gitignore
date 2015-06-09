@@ -1,6 +1,4 @@
 *.swp
 *.bak
-
 node_modules
-build
 results.txt

@@ -11,12 +11,12 @@ module.exports = function(grunt) {
 	grunt.initConfig({
 		pkg: grunt.file.readJSON("package.json"),
 
-        clean: [ "build" ],
+        clean: [ "dist" ],
 
 		peg: {
 			grammer: {
 				src: "lib/parser.pegjs",
-				dest: "build/parser.js",
+				dest: "dist/parser.js",
 				options: { exportVar: "var BletherParser" }
 			}
 		},
@@ -34,20 +34,20 @@ module.exports = function(grunt) {
 			dist: {
 				src: [
 					"lib/lang.js",
-					"build/parser.js",
+					"dist/parser.js",
 					"lib/selector.js",
 					"lib/tree_modifier.js",
 					"lib/return_operator_visitor.js",
 					"lib/translator.js",
 				],
-				dest: "build/blether.js"
+				dest: "dist/blether.js"
 			}
 		},
 
 		copy: {
 			runtime: {
 				src: "lib/runtime.js",
-				dest: "build/runtime.js"
+				dest: "dist/runtime.js"
 			}
 		},
 
@@ -57,12 +57,12 @@ module.exports = function(grunt) {
 				banner: "/*! <%= pkg.name %> <%= grunt.template.today(\"dd-mm-yyyy\") %> */\n"
 			},
 			blether: {
-				src: "build/blether.js",
-				dest: "build/blether.min.js"
+				src: "dist/blether.js",
+				dest: "dist/blether.min.js"
 			},
 			runtime: {
-				src: "build/runtime.js",
-				dest: "build/runtime.min.js"
+				src: "dist/runtime.js",
+				dest: "dist/runtime.min.js"
 			}
 		},
 

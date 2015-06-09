@@ -5,7 +5,7 @@
  * and this entrypoint is called by the unit tests. So, fall back to the
  * unminified one if necessary */
 function require_blether() {
-    var lib  = path.join(path.dirname(fs.realpathSync(__filename)), '../build');
+    var lib  = path.join(path.dirname(fs.realpathSync(__filename)), '../dist');
 
     try {
         return require(lib + "/blether.min.js");
