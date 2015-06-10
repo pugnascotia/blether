@@ -53,4 +53,14 @@ describe("Methods", function(){
     });
   });
 
+  describe("Class methods", function() {
+    it("should be defined on the class object", function() {
+      testUtils.generateAndCompare("method/class_method");
+    });
+
+    it("can be defined on Object", function() {
+      testUtils.generateAndCompare("method/object_class_method");
+    });
+  });
+
 });

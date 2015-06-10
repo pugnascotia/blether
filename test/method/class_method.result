@@ -1,0 +1,15 @@
+var Foo = (function() {
+function Foo() {
+};
+
+Foo.bar = function() {
+var self = this;
+return "Hello, world!";
+};
+
+
+return Foo;
+
+})();
+
+Foo.bar();

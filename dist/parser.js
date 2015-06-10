@@ -343,7 +343,9 @@ var BletherParser = (function() {
         },
         peg$c160 = "!",
         peg$c161 = { type: "literal", value: "!", description: "\"!\"" },
-        peg$c162 = function(className, body) {
+        peg$c162 = "class",
+        peg$c163 = { type: "literal", value: "class", description: "\"class\"" },
+        peg$c164 = function(className, classMethod, body) {
         	if (className !== "Object" && !Blether.classes[className]) {
         		throw Blether.ParseError({
         			"line": line(),
@@ -351,6 +353,19 @@ var BletherParser = (function() {
         			"msg": "Unknown class " + className
         		});
         	}
+
+            if (classMethod) {
+                if (Blether.classes[className].classMethods[body.selector]) {
+                    throw Blether.ParseError({
+                        "line": line(),
+                        "column": column(),
+                        "msg": "Class method " + body.selector + " already defined on class " + className
+                    });
+                }
+
+                return Blether.classes[className].classMethods[body.selector] =
+                    new Blether.ClassMethodDeclaration(className, body).at(line(), column(), text());
+            }
 
         	if (Blether.classes[className].methods[body.selector]) {
         		throw Blether.ParseError({
@@ -363,11 +378,11 @@ var BletherParser = (function() {
         	return Blether.classes[className].methods[body.selector] =
         		new Blether.MethodDeclaration(className, body).at(line(), column(), text());
         },
-        peg$c163 = function(element) {
+        peg$c165 = function(element) {
         	return element
         },
-        peg$c164 = function(decl) { return new Blether.VariableDeclaration(decl); },
-        peg$c165 = function(first, others) {
+        peg$c166 = function(decl) { return new Blether.VariableDeclaration(decl); },
+        peg$c167 = function(first, others) {
         	return new Blether.Program([first].concat(others)).at(line(), column(), text());
         },
 
@@ -3615,7 +3630,7 @@ var BletherParser = (function() {
     }
 
     function peg$parseclassAndMethod() {
-      var s0, s1, s2, s3, s4, s5, s6, s7;
+      var s0, s1, s2, s3, s4, s5, s6, s7, s8;
 
       s0 = peg$currPos;
       if (input.charCodeAt(peg$currPos) === 33) {
@@ -3630,32 +3645,61 @@ var BletherParser = (function() {
         if (s2 !== peg$FAILED) {
           s3 = peg$parsews();
           if (s3 !== peg$FAILED) {
-            s4 = peg$parsemethod();
-            if (s4 !== peg$FAILED) {
-              if (input.charCodeAt(peg$currPos) === 33) {
-                s5 = peg$c160;
-                peg$currPos++;
+            s4 = peg$currPos;
+            if (input.substr(peg$currPos, 5) === peg$c162) {
+              s5 = peg$c162;
+              peg$currPos += 5;
+            } else {
+              s5 = peg$FAILED;
+              if (peg$silentFails === 0) { peg$fail(peg$c163); }
+            }
+            if (s5 !== peg$FAILED) {
+              s6 = peg$parsews();
+              if (s6 !== peg$FAILED) {
+                s5 = [s5, s6];
+                s4 = s5;
               } else {
-                s5 = peg$FAILED;
-                if (peg$silentFails === 0) { peg$fail(peg$c161); }
+                peg$currPos = s4;
+                s4 = peg$c1;
               }
+            } else {
+              peg$currPos = s4;
+              s4 = peg$c1;
+            }
+            if (s4 === peg$FAILED) {
+              s4 = peg$c45;
+            }
+            if (s4 !== peg$FAILED) {
+              s5 = peg$parsemethod();
               if (s5 !== peg$FAILED) {
-                s6 = peg$parsews();
-                if (s6 === peg$FAILED) {
-                  s6 = peg$c45;
+                if (input.charCodeAt(peg$currPos) === 33) {
+                  s6 = peg$c160;
+                  peg$currPos++;
+                } else {
+                  s6 = peg$FAILED;
+                  if (peg$silentFails === 0) { peg$fail(peg$c161); }
                 }
                 if (s6 !== peg$FAILED) {
-                  if (input.charCodeAt(peg$currPos) === 46) {
-                    s7 = peg$c55;
-                    peg$currPos++;
-                  } else {
-                    s7 = peg$FAILED;
-                    if (peg$silentFails === 0) { peg$fail(peg$c56); }
+                  s7 = peg$parsews();
+                  if (s7 === peg$FAILED) {
+                    s7 = peg$c45;
                   }
                   if (s7 !== peg$FAILED) {
-                    peg$reportedPos = s0;
-                    s1 = peg$c162(s2, s4);
-                    s0 = s1;
+                    if (input.charCodeAt(peg$currPos) === 46) {
+                      s8 = peg$c55;
+                      peg$currPos++;
+                    } else {
+                      s8 = peg$FAILED;
+                      if (peg$silentFails === 0) { peg$fail(peg$c56); }
+                    }
+                    if (s8 !== peg$FAILED) {
+                      peg$reportedPos = s0;
+                      s1 = peg$c164(s2, s4, s5);
+                      s0 = s1;
+                    } else {
+                      peg$currPos = s0;
+                      s0 = peg$c1;
+                    }
                   } else {
                     peg$currPos = s0;
                     s0 = peg$c1;
@@ -3711,7 +3755,7 @@ var BletherParser = (function() {
           }
           if (s3 !== peg$FAILED) {
             peg$reportedPos = s0;
-            s1 = peg$c163(s2);
+            s1 = peg$c165(s2);
             s0 = s1;
           } else {
             peg$currPos = s0;
@@ -3747,7 +3791,7 @@ var BletherParser = (function() {
           }
           if (s4 !== peg$FAILED) {
             peg$reportedPos = s1;
-            s2 = peg$c164(s3);
+            s2 = peg$c166(s3);
             s1 = s2;
           } else {
             peg$currPos = s1;
@@ -3773,7 +3817,7 @@ var BletherParser = (function() {
         }
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c165(s1, s2);
+          s1 = peg$c167(s1, s2);
           s0 = s1;
         } else {
           peg$currPos = s0;
@@ -3791,6 +3835,7 @@ var BletherParser = (function() {
     /* Reinitiase global data */
     Blether.classes = {
     	"Object": {
+            "classMethods": {},
     		"methods": {}
     	}
     }

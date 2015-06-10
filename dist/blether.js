@@ -2,6 +2,7 @@
 var Blether = {
 	"classes": {
 		"Object": {
+            "classMethods": {},
 			"methods": {}
 		}
 	}
@@ -147,6 +148,8 @@ Blether.Node.prototype.invoke = function() {
 Blether.Node.prototype.find = function(fn) {
 	return fn(this) ? [this] : [];
 };
+
+Blether.Node.prototype.isMethod = function() { return false; };
 
 //------------------------------------------------------------------------------
 
@@ -498,6 +501,39 @@ Blether.MethodDeclaration.prototype.find = function(fn) {
 	return ret.concat(this.body.find(fn));
 };
 
+Blether.MethodDeclaration.prototype.isMethod = function() { return true; };
+
+//------------------------------------------------------------------------------
+
+Blether.ClassMethodDeclaration = function(className, body) {
+	this._type = "ClassMethodDeclaration";
+	this.className = className;
+	this.body = body;
+	this.context = Blether;
+
+	this.context.classes[className].classMethods[body.selector] = this;
+};
+
+Blether.ClassMethodDeclaration.prototype = new Blether.Node();
+Blether.ClassMethodDeclaration.prototype.visit = function(visitor) {
+	return visitor.visitClassMethodDeclaration(this);
+};
+
+Blether.ClassMethodDeclaration.prototype.getClass = function() {
+	return this.context.classes[this.className];
+};
+
+Blether.ClassMethodDeclaration.prototype.find = function(fn) {
+	var ret = [];
+	if (fn(this)) {
+		ret.push(this);
+	}
+
+	return ret.concat(this.body.find(fn));
+};
+
+Blether.ClassMethodDeclaration.prototype.isMethod = function() { return true; };
+
 //------------------------------------------------------------------------------
 
 Blether.ClassDeclaration = function(className, superClass, varNames) {
@@ -505,6 +541,7 @@ Blether.ClassDeclaration = function(className, superClass, varNames) {
 	this.className = className;
 	this.superClass = superClass;
 	this.varNames = varNames;
+	this.classMethods = {};
 	this.methods = {};
 	this.context = Blether;
 };
@@ -513,6 +550,9 @@ Blether.ClassDeclaration.prototype = new Blether.Node();
 Blether.ClassDeclaration.prototype.visit = function(visitor) { return visitor.visitClassDeclaration(this); };
 Blether.ClassDeclaration.prototype.getMethods = function() {
 	return this.context.classes[this.className].methods;
+};
+Blether.ClassDeclaration.prototype.getClassMethods = function() {
+	return this.context.classes[this.className].classMethods;
 };
 
 //------------------------------------------------------------------------------
@@ -893,7 +933,9 @@ var BletherParser = (function() {
         },
         peg$c160 = "!",
         peg$c161 = { type: "literal", value: "!", description: "\"!\"" },
-        peg$c162 = function(className, body) {
+        peg$c162 = "class",
+        peg$c163 = { type: "literal", value: "class", description: "\"class\"" },
+        peg$c164 = function(className, classMethod, body) {
         	if (className !== "Object" && !Blether.classes[className]) {
         		throw Blether.ParseError({
         			"line": line(),
@@ -901,6 +943,19 @@ var BletherParser = (function() {
         			"msg": "Unknown class " + className
         		});
         	}
+
+            if (classMethod) {
+                if (Blether.classes[className].classMethods[body.selector]) {
+                    throw Blether.ParseError({
+                        "line": line(),
+                        "column": column(),
+                        "msg": "Class method " + body.selector + " already defined on class " + className
+                    });
+                }
+
+                return Blether.classes[className].classMethods[body.selector] =
+                    new Blether.ClassMethodDeclaration(className, body).at(line(), column(), text());
+            }
 
         	if (Blether.classes[className].methods[body.selector]) {
         		throw Blether.ParseError({
@@ -913,11 +968,11 @@ var BletherParser = (function() {
         	return Blether.classes[className].methods[body.selector] =
         		new Blether.MethodDeclaration(className, body).at(line(), column(), text());
         },
-        peg$c163 = function(element) {
+        peg$c165 = function(element) {
         	return element
         },
-        peg$c164 = function(decl) { return new Blether.VariableDeclaration(decl); },
-        peg$c165 = function(first, others) {
+        peg$c166 = function(decl) { return new Blether.VariableDeclaration(decl); },
+        peg$c167 = function(first, others) {
         	return new Blether.Program([first].concat(others)).at(line(), column(), text());
         },
 
@@ -4165,7 +4220,7 @@ var BletherParser = (function() {
     }
 
     function peg$parseclassAndMethod() {
-      var s0, s1, s2, s3, s4, s5, s6, s7;
+      var s0, s1, s2, s3, s4, s5, s6, s7, s8;
 
       s0 = peg$currPos;
       if (input.charCodeAt(peg$currPos) === 33) {
@@ -4180,32 +4235,61 @@ var BletherParser = (function() {
         if (s2 !== peg$FAILED) {
           s3 = peg$parsews();
           if (s3 !== peg$FAILED) {
-            s4 = peg$parsemethod();
-            if (s4 !== peg$FAILED) {
-              if (input.charCodeAt(peg$currPos) === 33) {
-                s5 = peg$c160;
-                peg$currPos++;
+            s4 = peg$currPos;
+            if (input.substr(peg$currPos, 5) === peg$c162) {
+              s5 = peg$c162;
+              peg$currPos += 5;
+            } else {
+              s5 = peg$FAILED;
+              if (peg$silentFails === 0) { peg$fail(peg$c163); }
+            }
+            if (s5 !== peg$FAILED) {
+              s6 = peg$parsews();
+              if (s6 !== peg$FAILED) {
+                s5 = [s5, s6];
+                s4 = s5;
               } else {
-                s5 = peg$FAILED;
-                if (peg$silentFails === 0) { peg$fail(peg$c161); }
+                peg$currPos = s4;
+                s4 = peg$c1;
               }
+            } else {
+              peg$currPos = s4;
+              s4 = peg$c1;
+            }
+            if (s4 === peg$FAILED) {
+              s4 = peg$c45;
+            }
+            if (s4 !== peg$FAILED) {
+              s5 = peg$parsemethod();
               if (s5 !== peg$FAILED) {
-                s6 = peg$parsews();
-                if (s6 === peg$FAILED) {
-                  s6 = peg$c45;
+                if (input.charCodeAt(peg$currPos) === 33) {
+                  s6 = peg$c160;
+                  peg$currPos++;
+                } else {
+                  s6 = peg$FAILED;
+                  if (peg$silentFails === 0) { peg$fail(peg$c161); }
                 }
                 if (s6 !== peg$FAILED) {
-                  if (input.charCodeAt(peg$currPos) === 46) {
-                    s7 = peg$c55;
-                    peg$currPos++;
-                  } else {
-                    s7 = peg$FAILED;
-                    if (peg$silentFails === 0) { peg$fail(peg$c56); }
+                  s7 = peg$parsews();
+                  if (s7 === peg$FAILED) {
+                    s7 = peg$c45;
                   }
                   if (s7 !== peg$FAILED) {
-                    peg$reportedPos = s0;
-                    s1 = peg$c162(s2, s4);
-                    s0 = s1;
+                    if (input.charCodeAt(peg$currPos) === 46) {
+                      s8 = peg$c55;
+                      peg$currPos++;
+                    } else {
+                      s8 = peg$FAILED;
+                      if (peg$silentFails === 0) { peg$fail(peg$c56); }
+                    }
+                    if (s8 !== peg$FAILED) {
+                      peg$reportedPos = s0;
+                      s1 = peg$c164(s2, s4, s5);
+                      s0 = s1;
+                    } else {
+                      peg$currPos = s0;
+                      s0 = peg$c1;
+                    }
                   } else {
                     peg$currPos = s0;
                     s0 = peg$c1;
@@ -4261,7 +4345,7 @@ var BletherParser = (function() {
           }
           if (s3 !== peg$FAILED) {
             peg$reportedPos = s0;
-            s1 = peg$c163(s2);
+            s1 = peg$c165(s2);
             s0 = s1;
           } else {
             peg$currPos = s0;
@@ -4297,7 +4381,7 @@ var BletherParser = (function() {
           }
           if (s4 !== peg$FAILED) {
             peg$reportedPos = s1;
-            s2 = peg$c164(s3);
+            s2 = peg$c166(s3);
             s1 = s2;
           } else {
             peg$currPos = s1;
@@ -4323,7 +4407,7 @@ var BletherParser = (function() {
         }
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c165(s1, s2);
+          s1 = peg$c167(s1, s2);
           s0 = s1;
         } else {
           peg$currPos = s0;
@@ -4341,6 +4425,7 @@ var BletherParser = (function() {
     /* Reinitiase global data */
     Blether.classes = {
     	"Object": {
+            "classMethods": {},
     		"methods": {}
     	}
     }
@@ -4595,9 +4680,14 @@ var BletherTranslator = function() {
 
 		node.elements.forEach(function(childNode) {
 			// Skip methods since these are visited inside classes
-			if (childNode._type !== "MethodDeclaration" || typeof childNode.getClass().superClass === "undefined") {
-				output += childNode.visit(self);
-			}
+            if (childNode._type === "ClassMethodDeclaration" || childNode._type === "MethodDeclaration") {
+                // Unless they're defined on Object
+                if (typeof childNode.getClass().superClass !== "undefined") {
+                    return;
+                }
+            }
+
+            output += childNode.visit(self);
 		});
 
 		return output;
@@ -4653,6 +4743,14 @@ var BletherTranslator = function() {
 			}
 		}
 
+		var classMethods = node.getClassMethods();
+
+		for (var clProp in classMethods) {
+			if (classMethods.hasOwnProperty(clProp)) {
+				output += classMethods[clProp].visit(self);
+			}
+		}
+
 		this.context.pop();
 
 		output += "\nreturn " + node.className + ";\n\n";
@@ -4673,6 +4771,19 @@ var BletherTranslator = function() {
 		var methodName = node.body.selector.visit(this)[0];
 
 		var output = node.className + ".prototype." + methodName + " = ";
+
+		output += node.body.visit(this);
+
+		output += ";\n\n";
+
+		return output;
+	};
+
+	this.visitClassMethodDeclaration = function(node) {
+
+		var methodName = node.body.selector.visit(this)[0];
+
+		var output = node.className + "." + methodName + " = ";
 
 		output += node.body.visit(this);
 

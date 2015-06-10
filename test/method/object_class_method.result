@@ -1,0 +1,6 @@
+Object.bar = function() {
+var self = this;
+return "Hello, world!";
+};
+
+Object.bar();
