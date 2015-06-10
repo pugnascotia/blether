@@ -1,4 +1,4 @@
 var foo;
 (function(_receiver1$) {
-return (typeof _receiver1$ === "undefined" || _receiver1$ === null) ? "hello" : null;
+return (typeof _receiver1$ === "undefined" || _receiver1$ === null) ? "hello" : _receiver1$;
 })(foo);

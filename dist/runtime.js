@@ -1,4 +1,4 @@
-/* exported Smalltalk, Transcript, STReturnValue, stReturn */
+/* exported Smalltalk, Transcript, STReturnValue, stReturn, Module */
 /* global document */
 /*jshint -W121 */
 
@@ -15,6 +15,12 @@ var Smalltalk = {
     },
     "document": function() {
         return document;
+    }
+};
+
+var Module = {
+    "at_put$": function(key, fn) {
+        module.exports[key] = fn;
     }
 };
 

@@ -4,8 +4,7 @@ function Foobar() {
 
 Foobar.prototype.singleBinaries = function() {
 var self = this;
-var fred;
-var jim;
+var fred, jim;
 fred.__backslash$(jim);
 fred.__plus$(jim);
 fred.__multiply$(jim);
@@ -24,8 +23,7 @@ return self;
 
 Foobar.prototype.doubleBinaries = function() {
 var self = this;
-var fred;
-var jim;
+var fred, jim;
 fred.__backslash_backslash$(jim);
 fred.__plus_plus$(jim);
 fred.__multiply_multiply$(jim);
@@ -42,8 +40,7 @@ return self;
 
 Foobar.prototype.tripleBinaries = function() {
 var self = this;
-var fred;
-var jim;
+var fred, jim;
 fred.__backslash_backslash_backslash$(jim);
 fred.__plus_plus_plus$(jim);
 fred.__multiply_multiply_multiply$(jim);
