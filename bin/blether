@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+"use strict";
 
 /* Attempt to load the core library. We prefer the minimised one for
  * performance, however that won't exist when we first build the library,
@@ -31,6 +32,28 @@ function translate(source) {
     return blether.translate(text, blether_opts);
 }
 
+function destPath(srcPath, output_arg) {
+    var newPath;
+
+    if (output_arg) {
+        if (fs.existsSync(output_arg)) {
+            if (!fs.statSync(output_arg).isDirectory()) {
+                throw new Error(output_arg  + " is not a directory");
+            }
+        }
+        else {
+            fs.mkdirSync(output_arg);
+        }
+
+        newPath = path.join(output_arg, path.basename(srcPath, path.extname(srcPath)) + ".js");
+    }
+    else {
+        newPath = srcPath.replace(/\.\w+$/, ".js");
+    }
+
+    return newPath;
+}
+
 //------------------------------------------------------------------------------
 
 // Chrome debugging, IIRC
@@ -45,8 +68,10 @@ var _eval = require("eval");
 
 var argv = require('minimist')(process.argv.slice(2), {
     'boolean': [ 'c', 'x', 'runtime' ],
+    'string': [ 'o' ],
     'default': {
-        "runtime": true
+        "runtime": true,
+        "x": false,
     },
     '--': true
 });
@@ -71,15 +96,13 @@ if (argv.x && argv._) {
 }
 else {
     argv._.forEach(function(srcPath) {
-        var destPath;
-
         try {
-            var js = translate(srcPath);
+            console.log("Translating " + srcPath);
+            var js = "/* " + srcPath + "*/\n" + translate(srcPath);
 
             if (argv.c) {
-                destPath = srcPath.replace(/\.\w+$/, ".js");
-
-                fs.writeFileSync(destPath, js);
+                console.log("Writing to " + destPath(srcPath, argv.o));
+                fs.writeFileSync(destPath(srcPath, argv.o), js);
             }
             else {
                 process.stdout.write(js);
@@ -88,7 +111,7 @@ else {
         }
         catch (e) {
             console.error("Failed at line [" + e.line + "], column [" + e.column + "]: " + e);
-            console.error(e);
+            console.error(e.stack);
             process.exit(1);
         }
     });

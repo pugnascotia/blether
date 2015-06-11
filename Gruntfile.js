@@ -8,7 +8,16 @@ module.exports = function(grunt) {
 	grunt.util.linefeed = "\n";
 
     grunt.registerMultiTask("blether", "Run the blether compiler", function() {
-        require("child_process").spawnSync("./bin/blether", ["-c"].concat(this.filesSrc));
+        var args = [ "--runtime=false", "-o", "./dist/runtime", "-c"].concat(this.filesSrc);
+
+        var result = require("child_process").spawnSync("./bin/blether", args);
+
+        console.log(result.stdout.toString());
+        console.log(result.stderr.toString());
+
+        if (result.status !== 0) {
+            throw new Error("blether invocation failed");
+        }
     });
 
 	// 1. All configuration goes here
@@ -17,6 +26,7 @@ module.exports = function(grunt) {
 
         clean: [ "dist" ],
 
+		// Configure the grunt-peg plugin
 		peg: {
 			grammer: {
 				src: "lib/parser.pegjs",
@@ -37,7 +47,6 @@ module.exports = function(grunt) {
             files: "lib/runtime/*.st"
         },
 
-		// Configure the grunt-peg plugin
 		concat: {
 			dist: {
 				src: [
@@ -52,7 +61,7 @@ module.exports = function(grunt) {
 			},
             runtime: {
                 src: [
-                    "lib/runtime/*.js",
+                    "dist/runtime/*.js",
                     "lib/runtime.js"
                 ],
                 dest: "dist/runtime.js"
@@ -112,7 +121,7 @@ module.exports = function(grunt) {
 
 	grunt.registerTask("build", [ "jshint", "peg", "blether", "concat"]);
 
-	grunt.registerTask("test", [ "build", "mochaTest" ]);
+	grunt.registerTask("test", [ "mochaTest" ]);
 
 	// Tell Grunt what to do when we type "grunt" into the terminal.
 	grunt.registerTask("default", [ "build", "test", "uglify" ]);

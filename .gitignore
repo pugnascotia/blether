@@ -2,4 +2,3 @@
 *.bak
 node_modules
 results.txt
-lib/runtime/*.js
