@@ -7,6 +7,10 @@ module.exports = function(grunt) {
 	// Force use of Unix newlines
 	grunt.util.linefeed = "\n";
 
+    grunt.registerMultiTask("blether", "Run the blether compiler", function() {
+        require("child_process").spawnSync("./bin/blether", ["-c"].concat(this.filesSrc));
+    });
+
 	// 1. All configuration goes here
 	grunt.initConfig({
 		pkg: grunt.file.readJSON("package.json"),
@@ -23,11 +27,15 @@ module.exports = function(grunt) {
 
 		// Configure the grunt-contrib-jshint plugin
 		jshint: {
-			files: [ "lib/**/*.js", "test/**/*.js", "Gruntfile.js" ],
+			files: [ "lib/*.js", "lib/test/*.js", "test/**/*.js", "Gruntfile.js" ],
 			options: {
 				jshintrc: ".jshintrc"
 			}
 		},
+
+        blether: {
+            files: "lib/runtime/*.st"
+        },
 
 		// Configure the grunt-peg plugin
 		concat: {
@@ -41,14 +49,14 @@ module.exports = function(grunt) {
 					"lib/translator.js",
 				],
 				dest: "dist/blether.js"
-			}
-		},
-
-		copy: {
-			runtime: {
-				src: "lib/runtime.js",
-				dest: "dist/runtime.js"
-			}
+			},
+            runtime: {
+                src: [
+                    "lib/runtime/*.js",
+                    "lib/runtime.js"
+                ],
+                dest: "dist/runtime.js"
+            }
 		},
 
 		// Configure the grunt-contrib-uglify plugin
@@ -99,11 +107,10 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks("grunt-contrib-uglify");
 	grunt.loadNpmTasks("grunt-peg");
 	grunt.loadNpmTasks("grunt-contrib-watch");
-	grunt.loadNpmTasks("grunt-contrib-copy");
 	grunt.loadNpmTasks("grunt-mocha-test");
 	grunt.loadNpmTasks("grunt-contrib-clean");
 
-	grunt.registerTask("build", [ "jshint", "peg", "concat", "copy" ]);
+	grunt.registerTask("build", [ "jshint", "peg", "blether", "concat"]);
 
 	grunt.registerTask("test", [ "build", "mochaTest" ]);
 

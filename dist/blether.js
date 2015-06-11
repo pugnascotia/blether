@@ -4949,6 +4949,9 @@ var BletherTranslator = function() {
 		switch (receiver) {
 			case "super":
 				return this.convertSuper(convertSelector(node.selector), node);
+
+			case "NodeJS":
+				return this.convertNodeJS(node);
 		}
 
 		var output = "";
@@ -5478,6 +5481,28 @@ var BletherTranslator = function() {
 		var operator = node.selector === "and:" ? " && " : " || ";
 
 		return receiver + operator + node.args[0].invoke(this);
+	};
+
+	this.convertNodeJS = function(node) {
+		var self = this;
+
+		switch (node.selector) {
+			case "filename":
+				return "__filename";
+
+			case "dirname":
+				return "__dirname";
+
+			case "require:":
+				return "require(" + node.args[0].visit(self) + ")";
+
+			default:
+				throw Blether.ParseError({
+					"line": node.line,
+					"column": node.column,
+					"msg": "Unknown selector [" + node.selector + "]"
+				});
+		}
 	};
 };
 

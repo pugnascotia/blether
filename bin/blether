@@ -21,6 +21,18 @@ function require_blether() {
     }
 }
 
+function translate(source) {
+    var text = fs.readFileSync(source).toString();
+
+    if (/^#!/.test(text)) {
+        text = text.replace(/^#!.*$/m, '');
+    }
+
+    return blether.translate(text, blether_opts);
+}
+
+//------------------------------------------------------------------------------
+
 // Chrome debugging, IIRC
 if (global.v8debug) {
 	global.v8debug.Debug.setBreakOnException(); // speaks for itself
@@ -32,7 +44,7 @@ var blether = require_blether();
 var _eval = require("eval");
 
 var argv = require('minimist')(process.argv.slice(2), {
-    'boolean': [ 'x', 'runtime' ],
+    'boolean': [ 'c', 'x', 'runtime' ],
     'default': {
         "runtime": true
     },
@@ -46,16 +58,6 @@ var blether_opts = {
 // console.dir(argv);
 // console.dir(blether_opts);
 
-function translate(source) {
-    var text = fs.readFileSync(source).toString();
-
-    if (/^#!/.test(text)) {
-        text = text.replace(/^#!.*$/m, '');
-    }
-
-    return blether.translate(text, blether_opts);
-}
-
 if (argv.x && argv._) {
     try {
         var javascript = argv._.map(translate).join();
@@ -68,11 +70,21 @@ if (argv.x && argv._) {
     }
 }
 else {
-    argv._.forEach(function(eachArg) {
+    argv._.forEach(function(srcPath) {
+        var destPath;
 
         try {
-            var js = translate(eachArg);
-            console.log(js);
+            var js = translate(srcPath);
+
+            if (argv.c) {
+                destPath = srcPath.replace(/\.\w+$/, ".js");
+
+                fs.writeFileSync(destPath, js);
+            }
+            else {
+                process.stdout.write(js);
+                process.stdout.write("\n");
+            }
         }
         catch (e) {
             console.error("Failed at line [" + e.line + "], column [" + e.column + "]: " + e);
