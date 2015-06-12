@@ -8,6 +8,6 @@ return _dict;
 (function(_receiver1$) {
 return (typeof _receiver1$ === "undefined" || _receiver1$ === null) ? "fred" : "barney";
 })(foo.bar());
-(function(_receiver1$) {
-return (typeof _receiver1$ === "undefined" || _receiver1$ === null) ? (1).__plus$((2)) : _receiver1$.barney();
+(function(aBar) {
+return (typeof aBar === "undefined" || aBar === null) ? (1).__plus$((2)) : aBar.barney();
 })(foo.bar());

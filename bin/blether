@@ -89,8 +89,8 @@ if (argv.x && argv._) {
         _eval(javascript, "<argv>", null, true);
     }
     catch (e) {
-        console.error("Failed at line [" + e.line + "], column [" + e.column + "]: " + e);
-        console.error(e);
+        console.error("Failed at line [" + e.line + "], column [" + e.column + "]: " + e.message);
+        console.error("Stack: " + e.stack);
         process.exit(1);
     }
 }
@@ -110,8 +110,8 @@ else {
             }
         }
         catch (e) {
-            console.error("Failed at line [" + e.line + "], column [" + e.column + "]: " + e);
-            console.error(e.stack);
+            console.error("Failed at line [" + e.line + "], column [" + e.column + "]: " + e.message);
+            console.error("Stack: " + e.stack);
             process.exit(1);
         }
     });

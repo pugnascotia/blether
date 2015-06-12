@@ -1,5 +1,5 @@
 Object subclass: #Module variables: #().
 
-!Module class at: key put: value
+!Module class export: key as: value
 	<exports[key] = value;>
 !.

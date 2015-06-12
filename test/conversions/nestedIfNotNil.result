@@ -6,8 +6,8 @@ return null;
 };
 return _dict;
 })();
-(function(_receiver1$) {
-return (typeof _receiver1$ !== "undefined" && _receiver1$ !== null) ? (function(_receiver2$) {
-return (typeof _receiver2$ !== "undefined" && _receiver2$ !== null) ? Transcript.show(_receiver1$.concat(" -> ").concat(_receiver2$)) : null;
-})(_receiver1$.baz()) : null;
+(function(aBar) {
+return (typeof aBar !== "undefined" && aBar !== null) ? (function(aBaz) {
+return (typeof aBaz !== "undefined" && aBaz !== null) ? Transcript.show(aBar.concat(" -> ").concat(aBaz)) : null;
+})(aBar.baz()) : null;
 })(foo.bar());

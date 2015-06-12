@@ -3,7 +3,7 @@ var Module = (function() {
 function Module() {
 };
 
-Module.at_put$ = function(key, value) {
+Module.export_as$ = function(key, value) {
 exports[key] = value;
 };
 
@@ -28,14 +28,26 @@ return Process;
 })();
 
 
-/* exported Smalltalk, Transcript, STReturnValue, stReturn, */
-/* global document */
+/* lib/runtime/Smalltalk.st*/
+var Smalltalk = (function() {
+function Smalltalk() {
+};
+
+Smalltalk.document = function() {
+return document;
+};
+
+
+return Smalltalk;
+
+})();
+
+
+/* exported Transcript, STReturnValue, stReturn, */
 /*jshint -W121 */
 
-var Smalltalk = {
-    "document": function() {
-        return document;
-    }
+Array.prototype.reduceRight_startingWith$ = function(block, start) {
+    return this.reduceRight.call(block, start);
 };
 
 String.prototype.__equals$   = function(arg) { return this === arg };

@@ -3,7 +3,7 @@ var Module = (function() {
 function Module() {
 };
 
-Module.at_put$ = function(key, value) {
+Module.export_as$ = function(key, value) {
 exports[key] = value;
 };
 

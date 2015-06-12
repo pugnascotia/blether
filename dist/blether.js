@@ -4244,7 +4244,16 @@ var BletherParser = (function() {
               if (peg$silentFails === 0) { peg$fail(peg$c163); }
             }
             if (s5 !== peg$FAILED) {
-              s6 = peg$parsews();
+              s6 = [];
+              s7 = peg$parseseparator();
+              if (s7 !== peg$FAILED) {
+                while (s7 !== peg$FAILED) {
+                  s6.push(s7);
+                  s7 = peg$parseseparator();
+                }
+              } else {
+                s6 = peg$c1;
+              }
               if (s6 !== peg$FAILED) {
                 s5 = [s5, s6];
                 s4 = s5;
@@ -4632,8 +4641,8 @@ var BletherReturnOperatorVisitor = function() {
 };
 
 function truthy(value) {
-    return (typeof value === "boolean" && value) ||
-        (typeof value === "string" && value === "true");
+	return (typeof value === "boolean" && value) ||
+		(typeof value === "string" && value === "true");
 }
 
 var BletherTranslator = function() {
@@ -4680,14 +4689,14 @@ var BletherTranslator = function() {
 
 		node.elements.forEach(function(childNode) {
 			// Skip methods since these are visited inside classes
-            if (childNode._type === "ClassMethodDeclaration" || childNode._type === "MethodDeclaration") {
-                // Unless they're defined on Object
-                if (typeof childNode.getClass().superClass !== "undefined") {
-                    return;
-                }
-            }
+			if (childNode._type === "ClassMethodDeclaration" || childNode._type === "MethodDeclaration") {
+				// Unless they're defined on Object
+				if (typeof childNode.getClass().superClass !== "undefined") {
+					return;
+				}
+			}
 
-            output += childNode.visit(self);
+			output += childNode.visit(self);
 		});
 
 		return output;
@@ -5064,8 +5073,8 @@ var BletherTranslator = function() {
 	};
 
 	this.visitNumber = function(node) {
-        // Wrap in parentheses in order to make method calls work on
-        // literals.
+		// Wrap in parentheses in order to make method calls work on
+		// literals.
 		return "(" + node.value.toString() + ")";
 	};
 
@@ -5333,7 +5342,9 @@ var BletherTranslator = function() {
 		var block = node.args[0];
 
 		checkBlockMaxParamCount(block, 1, "ifNotNil:");
-		var receiverVar = this.context.pushReceiver();
+
+        var hasParam = block.params.length === 1;
+		var receiverVar = hasParam ? block.params[0] : this.context.pushReceiver();
 
 		var output;
 		output  = "(function(" + receiverVar + ") {\n";
@@ -5342,7 +5353,9 @@ var BletherTranslator = function() {
 		output += " : null;\n";
 		output += "})(" + receiver + ")";
 
-		this.context.popReceiver();
+		if (!hasParam) {
+			this.context.popReceiver();
+		}
 
 		return output;
 	};
@@ -5355,7 +5368,8 @@ var BletherTranslator = function() {
 		checkBlockMaxParamCount(ifNilBlock, 0, "ifNil:");
 		checkBlockMaxParamCount(ifNotNilBlock, 1, "ifNotNil:");
 
-		var receiverVar = this.context.pushReceiver();
+        var hasParam = ifNotNilBlock.params.length === 1;
+		var receiverVar = hasParam ? ifNotNilBlock.params[0] : this.context.pushReceiver();
 
 		var output = "(function(" + receiverVar + ") {\n";
 		output += "return (typeof " + receiverVar + " === \"undefined\" || " + receiverVar + " === null)";
@@ -5364,7 +5378,9 @@ var BletherTranslator = function() {
 		output += ";\n";
 		output += "})(" + receiver + ")";
 
-		this.context.popReceiver();
+		if (!hasParam) {
+			this.context.popReceiver();
+		}
 
 		return output;
 	};
@@ -5512,8 +5528,6 @@ module.exports = {
 		var opts = _opts || { runtime: true };
 
 		var ast = BletherParser.parse(text);
-
-        //console.dir(ast, { depth: null });
 
 		var runtime = "";
 

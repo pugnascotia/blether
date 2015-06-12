@@ -3654,7 +3654,16 @@ var BletherParser = (function() {
               if (peg$silentFails === 0) { peg$fail(peg$c163); }
             }
             if (s5 !== peg$FAILED) {
-              s6 = peg$parsews();
+              s6 = [];
+              s7 = peg$parseseparator();
+              if (s7 !== peg$FAILED) {
+                while (s7 !== peg$FAILED) {
+                  s6.push(s7);
+                  s7 = peg$parseseparator();
+                }
+              } else {
+                s6 = peg$c1;
+              }
               if (s6 !== peg$FAILED) {
                 s5 = [s5, s6];
                 s4 = s5;
