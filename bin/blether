@@ -97,11 +97,11 @@ if (argv.x && argv._) {
 else {
     argv._.forEach(function(srcPath) {
         try {
-            console.log("Translating " + srcPath);
+            console.warn("Translating " + srcPath);
             var js = "/* " + srcPath + "*/\n" + translate(srcPath);
 
             if (argv.c) {
-                console.log("Writing to " + destPath(srcPath, argv.o));
+                console.warn("Writing to " + destPath(srcPath, argv.o));
                 fs.writeFileSync(destPath(srcPath, argv.o), js);
             }
             else {

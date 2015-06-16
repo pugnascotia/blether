@@ -320,6 +320,7 @@ var BletherParser = (function() {
         		});
         	}
 
+        	/*
         	if (!Blether.classes[superClass]) {
         		throw Blether.ParseError({
         			"line": line(),
@@ -327,6 +328,7 @@ var BletherParser = (function() {
         			"msg": "Super-class " + superClass + " not defined"
         		});
         	}
+        	*/
 
         	if (Blether.classes[className]) {
         		throw Blether.ParseError({
@@ -346,6 +348,7 @@ var BletherParser = (function() {
         peg$c162 = "class",
         peg$c163 = { type: "literal", value: "class", description: "\"class\"" },
         peg$c164 = function(className, classMethod, body) {
+
         	if (className !== "Object" && !Blether.classes[className]) {
         		throw Blether.ParseError({
         			"line": line(),
@@ -355,7 +358,7 @@ var BletherParser = (function() {
         	}
 
             if (classMethod) {
-                if (Blether.classes[className].classMethods[body.selector]) {
+                if (Blether.classes[className].classMethods.hasOwnProperty(body.selector)) {
                     throw Blether.ParseError({
                         "line": line(),
                         "column": column(),
@@ -367,7 +370,7 @@ var BletherParser = (function() {
                     new Blether.ClassMethodDeclaration(className, body).at(line(), column(), text());
             }
 
-        	if (Blether.classes[className].methods[body.selector]) {
+        	if (Blether.classes[className].methods.hasOwnProperty(body.selector)) {
         		throw Blether.ParseError({
         			"line": line(),
         			"column": column(),

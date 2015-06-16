@@ -124,7 +124,7 @@ Blether.ContextMgr = function() {
 Blether.Node = function() {
 	this.line = null;
 	this.column = null;
-	this.text = null;
+	this.source = null;
 };
 
 Blether.Node.prototype.at = function(line, column, source) {
@@ -910,6 +910,7 @@ var BletherParser = (function() {
         		});
         	}
 
+        	/*
         	if (!Blether.classes[superClass]) {
         		throw Blether.ParseError({
         			"line": line(),
@@ -917,6 +918,7 @@ var BletherParser = (function() {
         			"msg": "Super-class " + superClass + " not defined"
         		});
         	}
+        	*/
 
         	if (Blether.classes[className]) {
         		throw Blether.ParseError({
@@ -936,6 +938,7 @@ var BletherParser = (function() {
         peg$c162 = "class",
         peg$c163 = { type: "literal", value: "class", description: "\"class\"" },
         peg$c164 = function(className, classMethod, body) {
+
         	if (className !== "Object" && !Blether.classes[className]) {
         		throw Blether.ParseError({
         			"line": line(),
@@ -945,7 +948,7 @@ var BletherParser = (function() {
         	}
 
             if (classMethod) {
-                if (Blether.classes[className].classMethods[body.selector]) {
+                if (Blether.classes[className].classMethods.hasOwnProperty(body.selector)) {
                     throw Blether.ParseError({
                         "line": line(),
                         "column": column(),
@@ -957,7 +960,7 @@ var BletherParser = (function() {
                     new Blether.ClassMethodDeclaration(className, body).at(line(), column(), text());
             }
 
-        	if (Blether.classes[className].methods[body.selector]) {
+        	if (Blether.classes[className].methods.hasOwnProperty(body.selector)) {
         		throw Blether.ParseError({
         			"line": line(),
         			"column": column(),
@@ -4648,24 +4651,6 @@ function truthy(value) {
 var BletherTranslator = function() {
 	"use strict";
 
-	this.printedClassPrerequisites = false;
-
-	var classPrerequisites =
-"var _extends = function(child, parent) {\n" +
-"	for (var key in parent) {\n" +
-"		if (_hasProp.call(parent, key)) child[key] = parent[key];\n" +
-"	}\n" +
-"\n" +
-"	function ctor() {\n" +
-"		this.constructor = child;\n" +
-"	}\n" +
-"	ctor.prototype = parent.prototype;\n" +
-"	child.prototype = new ctor();\n" +
-"	child.__super__ = parent.prototype;\n" +
-"	return child;\n" +
-"};\n\n" +
-"var _hasProp = {}.hasOwnProperty;\n\n";
-
 	function checkBlockMaxParamCount(block, max, selector) {
 		if (block.params.length > max) {
 			throw Blether.ParseError({
@@ -4707,11 +4692,6 @@ var BletherTranslator = function() {
 		var output = "";
 
 		var hasSuper = node.superClass !== "Object";
-
-		if (!this.printedClassPrerequisites && hasSuper) {
-			output += classPrerequisites;
-			this.printedClassPrerequisites = true;
-		}
 
 		output += "var " + node.className.value + " = (function(";
 
