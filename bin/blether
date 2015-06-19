@@ -98,20 +98,23 @@ else if(argv._.length) {
 	}
 
     argv._.forEach(function(srcPath) {
+		var destination;
+
         try {
-			if (argv.verbose) {
-				console.warn("Translating " + srcPath);
-			}
             var js = "/* " + srcPath + "*/\n" + translate(srcPath);
 
             if (argv.c) {
+				destination = destPath(srcPath, argv.o);
 				if (argv.verbose) {
-					console.warn("Writing to " + destPath(srcPath, argv.o));
+					console.warn(srcPath + " -> " + destination);
 				}
 
-                fs.writeFileSync(destPath(srcPath, argv.o), js);
+                fs.writeFileSync(destination, js);
             }
             else {
+				if (argv.verbose) {
+					console.warn("Translating " + srcPath);
+				}
                 process.stdout.write(js);
                 process.stdout.write("\n");
             }
