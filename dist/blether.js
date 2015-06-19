@@ -100,9 +100,6 @@ function stReturn(value) {
 }
 
 
-
-// ARSE
-
 /* lib/lang/BletherArray.st*/
 function BletherArray(_values) {
 this.values = _values;
