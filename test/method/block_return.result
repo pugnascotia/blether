@@ -1,4 +1,3 @@
-var Foobar = (function() {
 function Foobar() {
 };
 
@@ -19,8 +18,3 @@ catch (e) {
   }
 }
 };
-
-
-return Foobar;
-
-})();

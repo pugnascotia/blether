@@ -4643,11 +4643,6 @@ var BletherReturnOperatorVisitor = function() {
     this.visitVariable = returnFalse;
 };
 
-function truthy(value) {
-	return (typeof value === "boolean" && value) ||
-		(typeof value === "string" && value === "true");
-}
-
 var BletherTranslator = function() {
 	"use strict";
 
@@ -4693,27 +4688,11 @@ var BletherTranslator = function() {
 
 		var hasSuper = node.superClass !== "Object";
 
-		output += "var " + node.className.value + " = (function(";
-
-		if (hasSuper) {
-			output += "_super";
-		}
-
-		output += ") {\n";
-
-		if (hasSuper) {
-			output += "_extends(" + node.className + ", _super);\n\n";
-		}
-
 		var instanceNames = node.varNames.value;
 
 		output += "function " + node.className + "(";
 		output += instanceNames.map(function(each) { return "_" + each.value }).join(", ");
 		output += ") {\n";
-
-		if (hasSuper) {
-			output += "    return " + node.className + ".__super__.constructor.apply(this, arguments);\n";
-		}
 
 		instanceNames.forEach(function(each) {
 			var name = each.value;
@@ -4721,6 +4700,11 @@ var BletherTranslator = function() {
 		});
 
 		output += "};\n\n";
+
+		if (hasSuper) {
+			output += node.className + ".prototype = Object.create(" + node.superClass + ".prototype);\n";
+			output += node.className + ".prototype.constructor = " + node.superClass + ";\n\n";
+		}
 
 		this.context.pushClass(node.className.value, instanceNames.map(function(e) {return e.value}));
 
@@ -4741,16 +4725,6 @@ var BletherTranslator = function() {
 		}
 
 		this.context.pop();
-
-		output += "\nreturn " + node.className + ";\n\n";
-
-		output += "})(";
-
-		if (hasSuper) {
-			output += node.superClass;
-		}
-
-		output += ");\n\n";
 
 		return output;
 	};
@@ -5504,23 +5478,19 @@ var BletherTranslator = function() {
 
 
 module.exports = {
-	"translate": function(text, _opts) {
-		var opts = _opts || { runtime: true };
-
+	"translate": function(text) {
 		var ast = BletherParser.parse(text);
-
-		var runtime = "";
-
-		if (truthy(opts.runtime)) {
-			var path = require("path");
-			var fs   = require("fs");
-
-			var runtimePath = path.join(path.dirname(fs.realpathSync(__filename)), "runtime.js");
-			runtime = fs.readFileSync(runtimePath).toString();
-		}
 
 		var translation = new BletherTranslator().visit(ast);
 
-		return runtime + translation;
+		return translation;
+	},
+
+	"runtime": function() {
+		var path = require("path");
+		var fs   = require("fs");
+
+		var runtimePath = path.join(path.dirname(fs.realpathSync(__filename)), "runtime.js");
+		return fs.readFileSync(runtimePath).toString();
 	}
 };

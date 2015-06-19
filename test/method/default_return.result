@@ -1,4 +1,3 @@
-var Foobar = (function() {
 function Foobar() {
 };
 
@@ -7,8 +6,3 @@ var self = this;
 Transcript.show("Hello, world!");
 return self;
 };
-
-
-return Foobar;
-
-})();

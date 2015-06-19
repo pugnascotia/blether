@@ -1,5 +1,4 @@
 /* lib/runtime/Module.st*/
-var Module = (function() {
 function Module() {
 };
 
@@ -8,13 +7,7 @@ exports[key] = value;
 };
 
 
-return Module;
-
-})();
-
-
 /* lib/runtime/Process.st*/
-var Process = (function() {
 function Process() {
 };
 
@@ -23,24 +16,13 @@ return process.argv;
 };
 
 
-return Process;
-
-})();
-
-
 /* lib/runtime/Smalltalk.st*/
-var Smalltalk = (function() {
 function Smalltalk() {
 };
 
 Smalltalk.document = function() {
 return document;
 };
-
-
-return Smalltalk;
-
-})();
 
 
 /* exported Transcript, STReturnValue, stReturn, _extends, _hasProp */
@@ -116,22 +98,4 @@ var STReturnValue = function(_value) {
 function stReturn(value) {
     throw new STReturnValue(value);
 }
-
-var _extends = function(child, parent) {
-    for (var key in parent) {
-        if (_hasProp.call(parent, key)) {
-			child[key] = parent[key];
-		}
-    }
-
-    function Ctor() {
-        this.constructor = child;
-    }
-    Ctor.prototype = parent.prototype;
-    child.prototype = new Ctor();
-    child.__super__ = parent.prototype;
-    return child;
-};
-
-var _hasProp = {}.hasOwnProperty;
 

@@ -1,4 +1,3 @@
-var Foobar = (function() {
 function Foobar() {
 };
 
@@ -56,8 +55,3 @@ fred.__and_and_and$(jim);
 fred.__minus_minus_minus$(jim);
 return self;
 };
-
-
-return Foobar;
-
-})();

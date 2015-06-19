@@ -1,4 +1,3 @@
-var Foobar = (function() {
 function Foobar() {
 };
 
@@ -10,8 +9,3 @@ self.foo_baz$("bar", (1).__plus$((1)));
 self.foo_baz_quux$("bar", (1).__plus$((1)), fred.run().for().it());
 return self;
 };
-
-
-return Foobar;
-
-})();

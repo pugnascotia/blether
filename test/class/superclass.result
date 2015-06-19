@@ -1,20 +1,8 @@
-var Foo = (function() {
 function Foo() {
 };
 
-
-return Foo;
-
-})();
-
-var Bar = (function(_super) {
-_extends(Bar, _super);
-
 function Bar() {
-    return Bar.__super__.constructor.apply(this, arguments);
 };
 
-
-return Bar;
-
-})(Foo);
+Bar.prototype = Object.create(Foo.prototype);
+Bar.prototype.constructor = Foo;

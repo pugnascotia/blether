@@ -1,8 +1,2 @@
-var Foobar = (function() {
 function Foobar() {
 };
-
-
-return Foobar;
-
-})();

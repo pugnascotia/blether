@@ -1,4 +1,3 @@
-var Foobar = (function() {
 function Foobar(_fred) {
 this.fred = _fred;
 };
@@ -9,8 +8,3 @@ var fred;
 fred = "hello";
 return self;
 };
-
-
-return Foobar;
-
-})();

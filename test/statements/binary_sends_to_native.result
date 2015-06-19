@@ -1,4 +1,3 @@
-var Foobar = (function() {
 function Foobar() {
 };
 
@@ -9,8 +8,3 @@ fred === jim;
 fred !== jim;
 return self;
 };
-
-
-return Foobar;
-
-})();

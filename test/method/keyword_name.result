@@ -1,4 +1,3 @@
-var Foobar = (function() {
 function Foobar() {
 };
 
@@ -16,8 +15,3 @@ Foobar.prototype.one_two_three$ = function(argOne, argTwo, argThree) {
 var self = this;
 return self;
 };
-
-
-return Foobar;
-
-})();

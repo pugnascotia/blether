@@ -1,4 +1,3 @@
-var Foobar = (function() {
 function Foobar() {
 };
 
@@ -10,8 +9,3 @@ fred.skip().jump();
 fred.dont().stop().moving();
 return self;
 };
-
-
-return Foobar;
-
-})();
