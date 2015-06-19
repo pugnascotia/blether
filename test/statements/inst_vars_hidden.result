@@ -1,6 +1,6 @@
 function Foobar(_fred) {
 this.fred = _fred;
-};
+}
 
 Foobar.prototype.test = function() {
 var self = this;

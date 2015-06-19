@@ -3,7 +3,7 @@ function BletherNode(_line, _column, _source) {
 this.line = _line;
 this.column = _column;
 this.source = _source;
-};
+}
 
 BletherNode.prototype.setLine_column_source$ = function(aLine, aColumn, aSource) {
 var self = this;

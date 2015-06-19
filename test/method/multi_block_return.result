@@ -1,5 +1,5 @@
 function Foobar() {
-};
+}
 
 Foobar.prototype.compare_with$ = function(aList, anotherList) {
 var self = this;

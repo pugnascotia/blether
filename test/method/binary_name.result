@@ -1,6 +1,6 @@
 function Foobar(_value) {
 this.value = _value;
-};
+}
 
 Foobar.prototype.__backslash$ = function(arg) {
 var self = this;

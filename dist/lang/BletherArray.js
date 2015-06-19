@@ -1,7 +1,7 @@
 /* lib/lang/BletherArray.st*/
 function BletherArray(_values) {
 this.values = _values;
-};
+}
 
 BletherArray.prototype = Object.create(BletherNode.prototype);
 BletherArray.prototype.constructor = BletherNode;

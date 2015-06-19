@@ -1,7 +1,7 @@
 /* lib/lang/BletherArray.st*/
 function BletherArray(_values) {
 this.values = _values;
-};
+}
 
 BletherArray.prototype = Object.create(BletherNode.prototype);
 BletherArray.prototype.constructor = BletherNode;
@@ -22,7 +22,7 @@ return aVisitor.visitArray(self);
 /* lib/lang/BletherDynamicArray.st*/
 function BletherDynamicArray(_values) {
 this.values = _values;
-};
+}
 
 BletherDynamicArray.prototype = Object.create(BletherArray.prototype);
 BletherDynamicArray.prototype.constructor = BletherArray;
@@ -36,7 +36,7 @@ return aVisitor.visitDynamicArray(self);
 /* lib/lang/BletherDynamicDictionary.st*/
 function BletherDynamicDictionary(_values) {
 this.values = _values;
-};
+}
 
 BletherDynamicDictionary.prototype = Object.create(BletherNode.prototype);
 BletherDynamicDictionary.prototype.constructor = BletherNode;
@@ -52,7 +52,7 @@ function BletherNode(_line, _column, _source) {
 this.line = _line;
 this.column = _column;
 this.source = _source;
-};
+}
 
 BletherNode.prototype.setLine_column_source$ = function(aLine, aColumn, aSource) {
 var self = this;
@@ -80,7 +80,7 @@ return false;
 /* lib/lang/BletherNumber.st*/
 function BletherNumber(_value) {
 this.value = _value;
-};
+}
 
 BletherNumber.prototype = Object.create(BletherNode.prototype);
 BletherNumber.prototype.constructor = BletherNode;
@@ -99,7 +99,7 @@ return aVisitor.visitNumber(self);
 /* lib/lang/BletherString.st*/
 function BletherString(_value) {
 this.value = _value;
-};
+}
 
 BletherString.prototype = Object.create(BletherNode.prototype);
 BletherString.prototype.constructor = BletherNode;
@@ -118,7 +118,7 @@ return aVisitor.visitString(self);
 /* lib/lang/BletherSymbol.st*/
 function BletherSymbol(_value) {
 this.value = _value;
-};
+}
 
 BletherSymbol.prototype = Object.create(BletherNode.prototype);
 BletherSymbol.prototype.constructor = BletherNode;
@@ -308,6 +308,17 @@ Blether.Symbol = function(string) {
 Blether.Symbol.prototype = new Blether.Node();
 Blether.Symbol.prototype.toString = function() { return this.value; };
 Blether.Symbol.prototype.visit = function(visitor) { return visitor.visitSymbol(this); };
+
+//------------------------------------------------------------------------------
+
+Blether.ClassName = function(string) {
+	this._type = "ClassName";
+	this.value = string;
+};
+
+Blether.ClassName.prototype = new Blether.Node();
+Blether.ClassName.prototype.toString = function() { return this.value; };
+Blether.ClassName.prototype.visit = function(visitor) { return visitor.visitClassName(this) };
 
 //------------------------------------------------------------------------------
 
@@ -690,6 +701,9 @@ Blether.ClassDeclaration.prototype.getMethods = function() {
 Blether.ClassDeclaration.prototype.getClassMethods = function() {
 	return this.context.classes[this.className].classMethods;
 };
+Blether.ClassDeclaration.prototype.isNamespaced = function() {
+	return this.className.value.indexOf(".") !== -1;
+};
 
 //------------------------------------------------------------------------------
 
@@ -784,90 +798,92 @@ var BletherParser = (function() {
         peg$c21 = function(first, others) {return first + others.join("");},
         peg$c22 = /^[A-Z]/,
         peg$c23 = { type: "class", value: "[A-Z]", description: "[A-Z]" },
-        peg$c24 = "'",
-        peg$c25 = { type: "literal", value: "'", description: "\"'\"" },
-        peg$c26 = "''",
-        peg$c27 = { type: "literal", value: "''", description: "\"''\"" },
-        peg$c28 = function() {return "'";},
-        peg$c29 = /^[^']/,
-        peg$c30 = { type: "class", value: "[^']", description: "[^']" },
-        peg$c31 = function(val) {
+        peg$c24 = ".",
+        peg$c25 = { type: "literal", value: ".", description: "\".\"" },
+        peg$c26 = function(className) { return className; },
+        peg$c27 = function(first, others) { return [first].concat(others).join("."); },
+        peg$c28 = "'",
+        peg$c29 = { type: "literal", value: "'", description: "\"'\"" },
+        peg$c30 = "''",
+        peg$c31 = { type: "literal", value: "''", description: "\"''\"" },
+        peg$c32 = function() {return "'";},
+        peg$c33 = /^[^']/,
+        peg$c34 = { type: "class", value: "[^']", description: "[^']" },
+        peg$c35 = function(val) {
         	return new Blether.String(val.join("")).at(line(), column(), text());
         },
-        peg$c32 = "$",
-        peg$c33 = { type: "literal", value: "$", description: "\"$\"" },
-        peg$c34 = { type: "any", description: "any character" },
-        peg$c35 = function(char) {
+        peg$c36 = "$",
+        peg$c37 = { type: "literal", value: "$", description: "\"$\"" },
+        peg$c38 = { type: "any", description: "any character" },
+        peg$c39 = function(char) {
         	return new Blether.String(char).at(line(), column(), text());
         },
-        peg$c36 = "#",
-        peg$c37 = { type: "literal", value: "#", description: "\"#\"" },
-        peg$c38 = function(rest) {return rest;},
-        peg$c39 = function(node) {return node.value;},
-        peg$c40 = function(val) {
+        peg$c40 = "#",
+        peg$c41 = { type: "literal", value: "#", description: "\"#\"" },
+        peg$c42 = function(rest) {return rest;},
+        peg$c43 = function(node) {return node.value;},
+        peg$c44 = function(val) {
         	return new Blether.Symbol(val).at(line(), column(), text());
         },
-        peg$c41 = function(val) {
+        peg$c45 = function(val) {
         	return new Blether.Number(val).at(line(), column(), text());
         },
-        peg$c42 = "e",
-        peg$c43 = { type: "literal", value: "e", description: "\"e\"" },
-        peg$c44 = function(n) {return parseFloat(n.join(""));},
-        peg$c45 = null,
-        peg$c46 = "-",
-        peg$c47 = { type: "literal", value: "-", description: "\"-\"" },
-        peg$c48 = "16r",
-        peg$c49 = { type: "literal", value: "16r", description: "\"16r\"" },
-        peg$c50 = /^[0-9a-fA-F]/,
-        peg$c51 = { type: "class", value: "[0-9a-fA-F]", description: "[0-9a-fA-F]" },
-        peg$c52 = function(neg, num) {return parseInt(((neg || '') + num.join("")), 16);},
-        peg$c53 = /^[0-9]/,
-        peg$c54 = { type: "class", value: "[0-9]", description: "[0-9]" },
-        peg$c55 = ".",
-        peg$c56 = { type: "literal", value: ".", description: "\".\"" },
-        peg$c57 = function(neg, digits, dec) {return parseFloat(((neg || '') + digits.join("") + "." + dec.join("")), 10);},
-        peg$c58 = function(neg, digits) {return (parseInt((neg || '') + digits.join(""), 10));},
-        peg$c59 = "#(",
-        peg$c60 = { type: "literal", value: "#(", description: "\"#(\"" },
-        peg$c61 = "(",
-        peg$c62 = { type: "literal", value: "(", description: "\"(\"" },
-        peg$c63 = function(lit) {return lit; },
-        peg$c64 = ")",
-        peg$c65 = { type: "literal", value: ")", description: "\")\"" },
-        peg$c66 = function(lits) {
+        peg$c46 = "e",
+        peg$c47 = { type: "literal", value: "e", description: "\"e\"" },
+        peg$c48 = function(n) {return parseFloat(n.join(""));},
+        peg$c49 = null,
+        peg$c50 = "-",
+        peg$c51 = { type: "literal", value: "-", description: "\"-\"" },
+        peg$c52 = "16r",
+        peg$c53 = { type: "literal", value: "16r", description: "\"16r\"" },
+        peg$c54 = /^[0-9a-fA-F]/,
+        peg$c55 = { type: "class", value: "[0-9a-fA-F]", description: "[0-9a-fA-F]" },
+        peg$c56 = function(neg, num) {return parseInt(((neg || '') + num.join("")), 16);},
+        peg$c57 = /^[0-9]/,
+        peg$c58 = { type: "class", value: "[0-9]", description: "[0-9]" },
+        peg$c59 = function(neg, digits, dec) {return parseFloat(((neg || '') + digits.join("") + "." + dec.join("")), 10);},
+        peg$c60 = function(neg, digits) {return (parseInt((neg || '') + digits.join(""), 10));},
+        peg$c61 = "#(",
+        peg$c62 = { type: "literal", value: "#(", description: "\"#(\"" },
+        peg$c63 = "(",
+        peg$c64 = { type: "literal", value: "(", description: "\"(\"" },
+        peg$c65 = function(lit) {return lit; },
+        peg$c66 = ")",
+        peg$c67 = { type: "literal", value: ")", description: "\")\"" },
+        peg$c68 = function(lits) {
         	return new Blether.Array(lits).at(line(), column(), text());
         },
-        peg$c67 = function(sym) { return sym; },
-        peg$c68 = function(syms) {
+        peg$c69 = function(sym) { return sym; },
+        peg$c70 = function(syms) {
         	return new Blether.Array(syms).at(line(), column(), text());
         },
-        peg$c69 = "{",
-        peg$c70 = { type: "literal", value: "{", description: "\"{\"" },
-        peg$c71 = "}",
-        peg$c72 = { type: "literal", value: "}", description: "\"}\"" },
-        peg$c73 = function(expressions) {
+        peg$c71 = "{",
+        peg$c72 = { type: "literal", value: "{", description: "\"{\"" },
+        peg$c73 = "}",
+        peg$c74 = { type: "literal", value: "}", description: "\"}\"" },
+        peg$c75 = function(expressions) {
         	return new Blether.DynamicArray(expressions).at(line(), column(), text());
         },
-        peg$c74 = "#{",
-        peg$c75 = { type: "literal", value: "#{", description: "\"#{\"" },
-        peg$c76 = function(expressions) {
+        peg$c76 = "#{",
+        peg$c77 = { type: "literal", value: "#{", description: "\"#{\"" },
+        peg$c78 = function(expressions) {
         	return new Blether.DynamicDictionary(expressions).at(line(), column(), text());
         },
-        peg$c77 = "true",
-        peg$c78 = { type: "literal", value: "true", description: "\"true\"" },
-        peg$c79 = function() {return true;},
-        peg$c80 = "false",
-        peg$c81 = { type: "literal", value: "false", description: "\"false\"" },
-        peg$c82 = function() {return false;},
-        peg$c83 = function(val) {
+        peg$c79 = "true",
+        peg$c80 = { type: "literal", value: "true", description: "\"true\"" },
+        peg$c81 = function() {return true;},
+        peg$c82 = "false",
+        peg$c83 = { type: "literal", value: "false", description: "\"false\"" },
+        peg$c84 = function() {return false;},
+        peg$c85 = function(val) {
         	return new Blether.Boolean(val).at(line(), column(), text());
         },
-        peg$c84 = "nil",
-        peg$c85 = { type: "literal", value: "nil", description: "\"nil\"" },
-        peg$c86 = function(val) {
+        peg$c86 = "nil",
+        peg$c87 = { type: "literal", value: "nil", description: "\"nil\"" },
+        peg$c88 = function(val) {
         	return new Blether.UndefinedObject().at(line(), column(), text());
         },
-        peg$c87 = function(identifier) {
+        peg$c89 = function(identifier) {
         	if (identifier === "this") {
         		throw Blether.ParseError({
         			"line": line(),
@@ -878,21 +894,21 @@ var BletherParser = (function() {
 
         	return new Blether.Variable(identifier).at(line(), column(), text());
         },
-        peg$c88 = function(key, arg) {return {key:key, arg:arg};},
-        peg$c89 = /^[\\+*\/=><,@%~|&\-]/,
-        peg$c90 = { type: "class", value: "[\\\\+*\\/=><,@%~|&\\-]", description: "[\\\\+*\\/=><,@%~|&\\-]" },
-        peg$c91 = function(bin) { return bin.join(""); },
-        peg$c92 = function(pairs) {
+        peg$c90 = function(key, arg) {return {key:key, arg:arg};},
+        peg$c91 = /^[\\+*\/=><,@%~|&\-]/,
+        peg$c92 = { type: "class", value: "[\\\\+*\\/=><,@%~|&\\-]", description: "[\\\\+*\\/=><,@%~|&\\-]" },
+        peg$c93 = function(bin) { return bin.join(""); },
+        peg$c94 = function(pairs) {
         	return new Blether.KeywordPattern(pairs).at(line(), column(), text());
         },
-        peg$c93 = function(selector, arg) {
+        peg$c95 = function(selector, arg) {
         	return new Blether.BinaryPattern(selector, arg).at(line(), column(), text());
         },
-        peg$c94 = function(selector) {
+        peg$c96 = function(selector) {
         	return new Blether.UnaryPattern(selector).at(line(), column(), text());
         },
-        peg$c95 = function(chain) { return chain },
-        peg$c96 = function(message) {
+        peg$c97 = function(chain) { return chain },
+        peg$c98 = function(message) {
         	if (chain) {
         		return chain.setReceiver(message);
         	}
@@ -900,8 +916,8 @@ var BletherParser = (function() {
         		return new Blether.send(message).at(line(), column(), text());
         	}
         },
-        peg$c97 = function(mess) { return mess },
-        peg$c98 = function(send, message) {
+        peg$c99 = function(mess) { return mess },
+        peg$c100 = function(send, message) {
         	if (message) {
         		return message.setReceiver(send);
         	}
@@ -909,22 +925,22 @@ var BletherParser = (function() {
         		return send;
         	}
         },
-        peg$c99 = function(expression) {return expression;},
-        peg$c100 = function(first, others) { return [first].concat(others); },
-        peg$c101 = ":=",
-        peg$c102 = { type: "literal", value: ":=", description: "\":=\"" },
-        peg$c103 = function(variable, expression) {
+        peg$c101 = function(expression) {return expression;},
+        peg$c102 = function(first, others) { return [first].concat(others); },
+        peg$c103 = ":=",
+        peg$c104 = { type: "literal", value: ":=", description: "\":=\"" },
+        peg$c105 = function(variable, expression) {
         	return new Blether.Assignment(variable, expression).at(line(), column(), text());
         },
-        peg$c104 = "^",
-        peg$c105 = { type: "literal", value: "^", description: "\"^\"" },
-        peg$c106 = function(expression) {
+        peg$c106 = "^",
+        peg$c107 = { type: "literal", value: "^", description: "\"^\"" },
+        peg$c108 = function(expression) {
         	return new Blether.Return(expression).at(line(), column(), text());
         },
-        peg$c107 = "|",
-        peg$c108 = { type: "literal", value: "|", description: "\"|\"" },
-        peg$c109 = function(variable) {return variable;},
-        peg$c110 = function(vars) {
+        peg$c109 = "|",
+        peg$c110 = { type: "literal", value: "|", description: "\"|\"" },
+        peg$c111 = function(variable) {return variable;},
+        peg$c112 = function(vars) {
 
         	vars.forEach(function(each) {
         		if (each === "self" || each === "this") {
@@ -938,36 +954,37 @@ var BletherParser = (function() {
 
         	return vars;
         },
-        peg$c111 = function(param) {return param;},
-        peg$c112 = function(params) {return params;},
-        peg$c113 = function(ret) {return [ret];},
-        peg$c114 = function(exps, ret) {
+        peg$c113 = function(param) {return param;},
+        peg$c114 = function(params) {return params;},
+        peg$c115 = function(ret) {return [ret];},
+        peg$c116 = function(exps, ret) {
         	var expressions = exps;
         	expressions.push(ret);
         	return expressions;
         },
-        peg$c115 = function(expressions) {
+        peg$c117 = function(expressions) {
         	return expressions || [];
         },
-        peg$c116 = function(e) { return e },
-        peg$c117 = function(expr) {
+        peg$c118 = function(e) { return e },
+        peg$c119 = function(expr) {
         	return new Blether.Statement(expr).at(line(), column(), text());
         },
-        peg$c118 = function(temps, statements) {
+        peg$c120 = function(temps, statements) {
         	return new Blether.Sequence(temps, statements).at(line(), column(), text());
         },
-        peg$c119 = "[",
-        peg$c120 = { type: "literal", value: "[", description: "\"[\"" },
-        peg$c121 = "]",
-        peg$c122 = { type: "literal", value: "]", description: "\"]\"" },
-        peg$c123 = function(params, sequence) {
+        peg$c121 = "[",
+        peg$c122 = { type: "literal", value: "[", description: "\"[\"" },
+        peg$c123 = "]",
+        peg$c124 = { type: "literal", value: "]", description: "\"]\"" },
+        peg$c125 = function(params, sequence) {
         	return new Blether.Block(params, sequence).at(line(), column(), text());
         },
-        peg$c124 = void 0,
-        peg$c125 = function(selector) {
+        peg$c126 = function(className) { return new Blether.ClassName(className).at(line(), column(), text()); },
+        peg$c127 = void 0,
+        peg$c128 = function(selector) {
         	return new Blether.Send(selector).at(line(), column(), text());
         },
-        peg$c126 = function(message, tail) {
+        peg$c129 = function(message, tail) {
         	if (tail) {
         		return tail.setReceiver(message);
         	}
@@ -975,7 +992,7 @@ var BletherParser = (function() {
         		return message;
         	}
         },
-        peg$c127 = function(receiver, tail) {
+        peg$c130 = function(receiver, tail) {
         	if (tail) {
         		return tail.setReceiver(receiver);
         	}
@@ -983,10 +1000,10 @@ var BletherParser = (function() {
         		return receiver;
         	}
         },
-        peg$c128 = function(selector, arg) {
+        peg$c131 = function(selector, arg) {
         	return new Blether.Send(selector, [arg]).at(line(), column(), text());
         },
-        peg$c129 = function(pairs) {
+        peg$c132 = function(pairs) {
         	var selector = [];
         	var args = [];
         	for(var i = 0; i < pairs.length; i++) {
@@ -996,48 +1013,48 @@ var BletherParser = (function() {
 
         	return new Blether.Send(selector.join(""), args).at(line(), column(), text());
         },
-        peg$c130 = function(receiver, tail) {
+        peg$c133 = function(receiver, tail) {
         	return tail.setReceiver(receiver);
         },
-        peg$c131 = ";",
-        peg$c132 = { type: "literal", value: ";", description: "\";\"" },
-        peg$c133 = function(mess) {return mess;},
-        peg$c134 = function(send, cascade) {
+        peg$c134 = ";",
+        peg$c135 = { type: "literal", value: ";", description: "\";\"" },
+        peg$c136 = function(mess) {return mess;},
+        peg$c137 = function(send, cascade) {
         	return new Blether.Cascade(send.receiver, [send].concat(cascade)).at(line(), column(), text());
         },
-        peg$c135 = "<",
-        peg$c136 = { type: "literal", value: "<", description: "\"<\"" },
-        peg$c137 = ">>",
-        peg$c138 = { type: "literal", value: ">>", description: "\">>\"" },
-        peg$c139 = function() {return ">";},
-        peg$c140 = /^[^>]/,
-        peg$c141 = { type: "class", value: "[^>]", description: "[^>]" },
-        peg$c142 = ">",
-        peg$c143 = { type: "literal", value: ">", description: "\">\"" },
-        peg$c144 = function(val) {
+        peg$c138 = "<",
+        peg$c139 = { type: "literal", value: "<", description: "\"<\"" },
+        peg$c140 = ">>",
+        peg$c141 = { type: "literal", value: ">>", description: "\">>\"" },
+        peg$c142 = function() {return ">";},
+        peg$c143 = /^[^>]/,
+        peg$c144 = { type: "class", value: "[^>]", description: "[^>]" },
+        peg$c145 = ">",
+        peg$c146 = { type: "literal", value: ">", description: "\">\"" },
+        peg$c147 = function(val) {
         	return new Blether.JsStatement(val.join("")).at(line(), column(), text());
         },
-        peg$c145 = function(pattern, sequence) {
+        peg$c148 = function(pattern, sequence) {
         	return new Blether.Method(pattern, sequence).at(line(), column(), text());
         },
-        peg$c146 = function(send) { return send.selector === "->" },
-        peg$c147 = function(send) {
+        peg$c149 = function(send) { return send.selector === "->" },
+        peg$c150 = function(send) {
         	return [send.receiver, send.args[0]];
         },
-        peg$c148 = function(first, others) {
+        peg$c151 = function(first, others) {
         	return first.concat.apply(first, others);
         },
-        peg$c149 = "subclass:",
-        peg$c150 = { type: "literal", value: "subclass:", description: "\"subclass:\"" },
-        peg$c151 = "variables:",
-        peg$c152 = { type: "literal", value: "variables:", description: "\"variables:\"" },
-        peg$c153 = "instanceVariableNames:",
-        peg$c154 = { type: "literal", value: "instanceVariableNames:", description: "\"instanceVariableNames:\"" },
-        peg$c155 = "classVariableNames:",
-        peg$c156 = { type: "literal", value: "classVariableNames:", description: "\"classVariableNames:\"" },
-        peg$c157 = "poolDictionaries:",
-        peg$c158 = { type: "literal", value: "poolDictionaries:", description: "\"poolDictionaries:\"" },
-        peg$c159 = function(superClass, className, varNames) {
+        peg$c152 = "subclass:",
+        peg$c153 = { type: "literal", value: "subclass:", description: "\"subclass:\"" },
+        peg$c154 = "variables:",
+        peg$c155 = { type: "literal", value: "variables:", description: "\"variables:\"" },
+        peg$c156 = "instanceVariableNames:",
+        peg$c157 = { type: "literal", value: "instanceVariableNames:", description: "\"instanceVariableNames:\"" },
+        peg$c158 = "classVariableNames:",
+        peg$c159 = { type: "literal", value: "classVariableNames:", description: "\"classVariableNames:\"" },
+        peg$c160 = "poolDictionaries:",
+        peg$c161 = { type: "literal", value: "poolDictionaries:", description: "\"poolDictionaries:\"" },
+        peg$c162 = function(superClass, className, varNames) {
         	if (!className.value.match(/^[A-Z]/)) {
         		throw Blether.ParseError({
         			"line": line(),
@@ -1069,11 +1086,11 @@ var BletherParser = (function() {
         		superClass,
         		varNames).at(line(), column(), text());
         },
-        peg$c160 = "!",
-        peg$c161 = { type: "literal", value: "!", description: "\"!\"" },
-        peg$c162 = "class",
-        peg$c163 = { type: "literal", value: "class", description: "\"class\"" },
-        peg$c164 = function(className, classMethod, body) {
+        peg$c163 = "!",
+        peg$c164 = { type: "literal", value: "!", description: "\"!\"" },
+        peg$c165 = "class",
+        peg$c166 = { type: "literal", value: "class", description: "\"class\"" },
+        peg$c167 = function(className, classMethod, body) {
 
         	if (className !== "Object" && !Blether.classes[className]) {
         		throw Blether.ParseError({
@@ -1107,11 +1124,11 @@ var BletherParser = (function() {
         	return Blether.classes[className].methods[body.selector] =
         		new Blether.MethodDeclaration(className, body).at(line(), column(), text());
         },
-        peg$c165 = function(element) {
+        peg$c168 = function(element) {
         	return element
         },
-        peg$c166 = function(decl) { return new Blether.VariableDeclaration(decl); },
-        peg$c167 = function(first, others) {
+        peg$c169 = function(decl) { return new Blether.VariableDeclaration(decl); },
+        peg$c170 = function(first, others) {
         	return new Blether.Program([first].concat(others)).at(line(), column(), text());
         },
 
@@ -1545,7 +1562,7 @@ var BletherParser = (function() {
       return s0;
     }
 
-    function peg$parseclassName() {
+    function peg$parseclassNameComponent() {
       var s0, s1, s2, s3;
 
       s0 = peg$currPos;
@@ -1591,11 +1608,11 @@ var BletherParser = (function() {
       return s0;
     }
 
-    function peg$parsestring() {
-      var s0, s1, s2, s3, s4;
+    function peg$parseclassNameList() {
+      var s0, s1, s2;
 
       s0 = peg$currPos;
-      if (input.charCodeAt(peg$currPos) === 39) {
+      if (input.charCodeAt(peg$currPos) === 46) {
         s1 = peg$c24;
         peg$currPos++;
       } else {
@@ -1603,65 +1620,122 @@ var BletherParser = (function() {
         if (peg$silentFails === 0) { peg$fail(peg$c25); }
       }
       if (s1 !== peg$FAILED) {
+        s2 = peg$parseclassNameComponent();
+        if (s2 !== peg$FAILED) {
+          peg$reportedPos = s0;
+          s1 = peg$c26(s2);
+          s0 = s1;
+        } else {
+          peg$currPos = s0;
+          s0 = peg$c1;
+        }
+      } else {
+        peg$currPos = s0;
+        s0 = peg$c1;
+      }
+
+      return s0;
+    }
+
+    function peg$parseclassName() {
+      var s0, s1, s2, s3;
+
+      s0 = peg$currPos;
+      s1 = peg$parseclassNameComponent();
+      if (s1 !== peg$FAILED) {
+        s2 = [];
+        s3 = peg$parseclassNameList();
+        while (s3 !== peg$FAILED) {
+          s2.push(s3);
+          s3 = peg$parseclassNameList();
+        }
+        if (s2 !== peg$FAILED) {
+          peg$reportedPos = s0;
+          s1 = peg$c27(s1, s2);
+          s0 = s1;
+        } else {
+          peg$currPos = s0;
+          s0 = peg$c1;
+        }
+      } else {
+        peg$currPos = s0;
+        s0 = peg$c1;
+      }
+
+      return s0;
+    }
+
+    function peg$parsestring() {
+      var s0, s1, s2, s3, s4;
+
+      s0 = peg$currPos;
+      if (input.charCodeAt(peg$currPos) === 39) {
+        s1 = peg$c28;
+        peg$currPos++;
+      } else {
+        s1 = peg$FAILED;
+        if (peg$silentFails === 0) { peg$fail(peg$c29); }
+      }
+      if (s1 !== peg$FAILED) {
         s2 = [];
         s3 = peg$currPos;
-        if (input.substr(peg$currPos, 2) === peg$c26) {
-          s4 = peg$c26;
+        if (input.substr(peg$currPos, 2) === peg$c30) {
+          s4 = peg$c30;
           peg$currPos += 2;
         } else {
           s4 = peg$FAILED;
-          if (peg$silentFails === 0) { peg$fail(peg$c27); }
+          if (peg$silentFails === 0) { peg$fail(peg$c31); }
         }
         if (s4 !== peg$FAILED) {
           peg$reportedPos = s3;
-          s4 = peg$c28();
+          s4 = peg$c32();
         }
         s3 = s4;
         if (s3 === peg$FAILED) {
-          if (peg$c29.test(input.charAt(peg$currPos))) {
+          if (peg$c33.test(input.charAt(peg$currPos))) {
             s3 = input.charAt(peg$currPos);
             peg$currPos++;
           } else {
             s3 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c30); }
+            if (peg$silentFails === 0) { peg$fail(peg$c34); }
           }
         }
         while (s3 !== peg$FAILED) {
           s2.push(s3);
           s3 = peg$currPos;
-          if (input.substr(peg$currPos, 2) === peg$c26) {
-            s4 = peg$c26;
+          if (input.substr(peg$currPos, 2) === peg$c30) {
+            s4 = peg$c30;
             peg$currPos += 2;
           } else {
             s4 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c27); }
+            if (peg$silentFails === 0) { peg$fail(peg$c31); }
           }
           if (s4 !== peg$FAILED) {
             peg$reportedPos = s3;
-            s4 = peg$c28();
+            s4 = peg$c32();
           }
           s3 = s4;
           if (s3 === peg$FAILED) {
-            if (peg$c29.test(input.charAt(peg$currPos))) {
+            if (peg$c33.test(input.charAt(peg$currPos))) {
               s3 = input.charAt(peg$currPos);
               peg$currPos++;
             } else {
               s3 = peg$FAILED;
-              if (peg$silentFails === 0) { peg$fail(peg$c30); }
+              if (peg$silentFails === 0) { peg$fail(peg$c34); }
             }
           }
         }
         if (s2 !== peg$FAILED) {
           if (input.charCodeAt(peg$currPos) === 39) {
-            s3 = peg$c24;
+            s3 = peg$c28;
             peg$currPos++;
           } else {
             s3 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c25); }
+            if (peg$silentFails === 0) { peg$fail(peg$c29); }
           }
           if (s3 !== peg$FAILED) {
             peg$reportedPos = s0;
-            s1 = peg$c31(s2);
+            s1 = peg$c35(s2);
             s0 = s1;
           } else {
             peg$currPos = s0;
@@ -1684,11 +1758,11 @@ var BletherParser = (function() {
 
       s0 = peg$currPos;
       if (input.charCodeAt(peg$currPos) === 36) {
-        s1 = peg$c32;
+        s1 = peg$c36;
         peg$currPos++;
       } else {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c33); }
+        if (peg$silentFails === 0) { peg$fail(peg$c37); }
       }
       if (s1 !== peg$FAILED) {
         if (input.length > peg$currPos) {
@@ -1696,11 +1770,11 @@ var BletherParser = (function() {
           peg$currPos++;
         } else {
           s2 = peg$FAILED;
-          if (peg$silentFails === 0) { peg$fail(peg$c34); }
+          if (peg$silentFails === 0) { peg$fail(peg$c38); }
         }
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c35(s2);
+          s1 = peg$c39(s2);
           s0 = s1;
         } else {
           peg$currPos = s0;
@@ -1719,17 +1793,17 @@ var BletherParser = (function() {
 
       s0 = peg$currPos;
       if (input.charCodeAt(peg$currPos) === 35) {
-        s1 = peg$c36;
+        s1 = peg$c40;
         peg$currPos++;
       } else {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c37); }
+        if (peg$silentFails === 0) { peg$fail(peg$c41); }
       }
       if (s1 !== peg$FAILED) {
         s2 = peg$parsebareSymbol();
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c38(s2);
+          s1 = peg$c42(s2);
           s0 = s1;
         } else {
           peg$currPos = s0;
@@ -1755,14 +1829,14 @@ var BletherParser = (function() {
           s2 = peg$parsestring();
           if (s2 !== peg$FAILED) {
             peg$reportedPos = s1;
-            s2 = peg$c39(s2);
+            s2 = peg$c43(s2);
           }
           s1 = s2;
         }
       }
       if (s1 !== peg$FAILED) {
         peg$reportedPos = s0;
-        s1 = peg$c40(s1);
+        s1 = peg$c44(s1);
       }
       s0 = s1;
 
@@ -1785,7 +1859,7 @@ var BletherParser = (function() {
       }
       if (s1 !== peg$FAILED) {
         peg$reportedPos = s0;
-        s1 = peg$c41(s1);
+        s1 = peg$c45(s1);
       }
       s0 = s1;
 
@@ -1803,11 +1877,11 @@ var BletherParser = (function() {
       }
       if (s2 !== peg$FAILED) {
         if (input.charCodeAt(peg$currPos) === 101) {
-          s3 = peg$c42;
+          s3 = peg$c46;
           peg$currPos++;
         } else {
           s3 = peg$FAILED;
-          if (peg$silentFails === 0) { peg$fail(peg$c43); }
+          if (peg$silentFails === 0) { peg$fail(peg$c47); }
         }
         if (s3 !== peg$FAILED) {
           s4 = peg$parseinteger();
@@ -1828,7 +1902,7 @@ var BletherParser = (function() {
       }
       if (s1 !== peg$FAILED) {
         peg$reportedPos = s0;
-        s1 = peg$c44(s1);
+        s1 = peg$c48(s1);
       }
       s0 = s1;
 
@@ -1840,41 +1914,41 @@ var BletherParser = (function() {
 
       s0 = peg$currPos;
       if (input.charCodeAt(peg$currPos) === 45) {
-        s1 = peg$c46;
+        s1 = peg$c50;
         peg$currPos++;
       } else {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c47); }
+        if (peg$silentFails === 0) { peg$fail(peg$c51); }
       }
       if (s1 === peg$FAILED) {
-        s1 = peg$c45;
+        s1 = peg$c49;
       }
       if (s1 !== peg$FAILED) {
-        if (input.substr(peg$currPos, 3) === peg$c48) {
-          s2 = peg$c48;
+        if (input.substr(peg$currPos, 3) === peg$c52) {
+          s2 = peg$c52;
           peg$currPos += 3;
         } else {
           s2 = peg$FAILED;
-          if (peg$silentFails === 0) { peg$fail(peg$c49); }
+          if (peg$silentFails === 0) { peg$fail(peg$c53); }
         }
         if (s2 !== peg$FAILED) {
           s3 = [];
-          if (peg$c50.test(input.charAt(peg$currPos))) {
+          if (peg$c54.test(input.charAt(peg$currPos))) {
             s4 = input.charAt(peg$currPos);
             peg$currPos++;
           } else {
             s4 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c51); }
+            if (peg$silentFails === 0) { peg$fail(peg$c55); }
           }
           if (s4 !== peg$FAILED) {
             while (s4 !== peg$FAILED) {
               s3.push(s4);
-              if (peg$c50.test(input.charAt(peg$currPos))) {
+              if (peg$c54.test(input.charAt(peg$currPos))) {
                 s4 = input.charAt(peg$currPos);
                 peg$currPos++;
               } else {
                 s4 = peg$FAILED;
-                if (peg$silentFails === 0) { peg$fail(peg$c51); }
+                if (peg$silentFails === 0) { peg$fail(peg$c55); }
               }
             }
           } else {
@@ -1882,7 +1956,7 @@ var BletherParser = (function() {
           }
           if (s3 !== peg$FAILED) {
             peg$reportedPos = s0;
-            s1 = peg$c52(s1, s3);
+            s1 = peg$c56(s1, s3);
             s0 = s1;
           } else {
             peg$currPos = s0;
@@ -1905,33 +1979,33 @@ var BletherParser = (function() {
 
       s0 = peg$currPos;
       if (input.charCodeAt(peg$currPos) === 45) {
-        s1 = peg$c46;
+        s1 = peg$c50;
         peg$currPos++;
       } else {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c47); }
+        if (peg$silentFails === 0) { peg$fail(peg$c51); }
       }
       if (s1 === peg$FAILED) {
-        s1 = peg$c45;
+        s1 = peg$c49;
       }
       if (s1 !== peg$FAILED) {
         s2 = [];
-        if (peg$c53.test(input.charAt(peg$currPos))) {
+        if (peg$c57.test(input.charAt(peg$currPos))) {
           s3 = input.charAt(peg$currPos);
           peg$currPos++;
         } else {
           s3 = peg$FAILED;
-          if (peg$silentFails === 0) { peg$fail(peg$c54); }
+          if (peg$silentFails === 0) { peg$fail(peg$c58); }
         }
         if (s3 !== peg$FAILED) {
           while (s3 !== peg$FAILED) {
             s2.push(s3);
-            if (peg$c53.test(input.charAt(peg$currPos))) {
+            if (peg$c57.test(input.charAt(peg$currPos))) {
               s3 = input.charAt(peg$currPos);
               peg$currPos++;
             } else {
               s3 = peg$FAILED;
-              if (peg$silentFails === 0) { peg$fail(peg$c54); }
+              if (peg$silentFails === 0) { peg$fail(peg$c58); }
             }
           }
         } else {
@@ -1939,30 +2013,30 @@ var BletherParser = (function() {
         }
         if (s2 !== peg$FAILED) {
           if (input.charCodeAt(peg$currPos) === 46) {
-            s3 = peg$c55;
+            s3 = peg$c24;
             peg$currPos++;
           } else {
             s3 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c56); }
+            if (peg$silentFails === 0) { peg$fail(peg$c25); }
           }
           if (s3 !== peg$FAILED) {
             s4 = [];
-            if (peg$c53.test(input.charAt(peg$currPos))) {
+            if (peg$c57.test(input.charAt(peg$currPos))) {
               s5 = input.charAt(peg$currPos);
               peg$currPos++;
             } else {
               s5 = peg$FAILED;
-              if (peg$silentFails === 0) { peg$fail(peg$c54); }
+              if (peg$silentFails === 0) { peg$fail(peg$c58); }
             }
             if (s5 !== peg$FAILED) {
               while (s5 !== peg$FAILED) {
                 s4.push(s5);
-                if (peg$c53.test(input.charAt(peg$currPos))) {
+                if (peg$c57.test(input.charAt(peg$currPos))) {
                   s5 = input.charAt(peg$currPos);
                   peg$currPos++;
                 } else {
                   s5 = peg$FAILED;
-                  if (peg$silentFails === 0) { peg$fail(peg$c54); }
+                  if (peg$silentFails === 0) { peg$fail(peg$c58); }
                 }
               }
             } else {
@@ -1970,7 +2044,7 @@ var BletherParser = (function() {
             }
             if (s4 !== peg$FAILED) {
               peg$reportedPos = s0;
-              s1 = peg$c57(s1, s2, s4);
+              s1 = peg$c59(s1, s2, s4);
               s0 = s1;
             } else {
               peg$currPos = s0;
@@ -1997,33 +2071,33 @@ var BletherParser = (function() {
 
       s0 = peg$currPos;
       if (input.charCodeAt(peg$currPos) === 45) {
-        s1 = peg$c46;
+        s1 = peg$c50;
         peg$currPos++;
       } else {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c47); }
+        if (peg$silentFails === 0) { peg$fail(peg$c51); }
       }
       if (s1 === peg$FAILED) {
-        s1 = peg$c45;
+        s1 = peg$c49;
       }
       if (s1 !== peg$FAILED) {
         s2 = [];
-        if (peg$c53.test(input.charAt(peg$currPos))) {
+        if (peg$c57.test(input.charAt(peg$currPos))) {
           s3 = input.charAt(peg$currPos);
           peg$currPos++;
         } else {
           s3 = peg$FAILED;
-          if (peg$silentFails === 0) { peg$fail(peg$c54); }
+          if (peg$silentFails === 0) { peg$fail(peg$c58); }
         }
         if (s3 !== peg$FAILED) {
           while (s3 !== peg$FAILED) {
             s2.push(s3);
-            if (peg$c53.test(input.charAt(peg$currPos))) {
+            if (peg$c57.test(input.charAt(peg$currPos))) {
               s3 = input.charAt(peg$currPos);
               peg$currPos++;
             } else {
               s3 = peg$FAILED;
-              if (peg$silentFails === 0) { peg$fail(peg$c54); }
+              if (peg$silentFails === 0) { peg$fail(peg$c58); }
             }
           }
         } else {
@@ -2031,7 +2105,7 @@ var BletherParser = (function() {
         }
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c58(s1, s2);
+          s1 = peg$c60(s1, s2);
           s0 = s1;
         } else {
           peg$currPos = s0;
@@ -2049,18 +2123,18 @@ var BletherParser = (function() {
       var s0, s1, s2;
 
       s0 = peg$currPos;
-      if (input.substr(peg$currPos, 2) === peg$c59) {
-        s1 = peg$c59;
+      if (input.substr(peg$currPos, 2) === peg$c61) {
+        s1 = peg$c61;
         peg$currPos += 2;
       } else {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c60); }
+        if (peg$silentFails === 0) { peg$fail(peg$c62); }
       }
       if (s1 !== peg$FAILED) {
         s2 = peg$parseliteralArrayRest();
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c38(s2);
+          s1 = peg$c42(s2);
           s0 = s1;
         } else {
           peg$currPos = s0;
@@ -2079,17 +2153,17 @@ var BletherParser = (function() {
 
       s0 = peg$currPos;
       if (input.charCodeAt(peg$currPos) === 40) {
-        s1 = peg$c61;
+        s1 = peg$c63;
         peg$currPos++;
       } else {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c62); }
+        if (peg$silentFails === 0) { peg$fail(peg$c64); }
       }
       if (s1 !== peg$FAILED) {
         s2 = peg$parseliteralArrayRest();
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c38(s2);
+          s1 = peg$c42(s2);
           s0 = s1;
         } else {
           peg$currPos = s0;
@@ -2120,7 +2194,7 @@ var BletherParser = (function() {
         }
         if (s4 !== peg$FAILED) {
           peg$reportedPos = s2;
-          s3 = peg$c63(s4);
+          s3 = peg$c65(s4);
           s2 = s3;
         } else {
           peg$currPos = s2;
@@ -2144,7 +2218,7 @@ var BletherParser = (function() {
           }
           if (s4 !== peg$FAILED) {
             peg$reportedPos = s2;
-            s3 = peg$c63(s4);
+            s3 = peg$c65(s4);
             s2 = s3;
           } else {
             peg$currPos = s2;
@@ -2159,15 +2233,15 @@ var BletherParser = (function() {
         s2 = peg$parsews();
         if (s2 !== peg$FAILED) {
           if (input.charCodeAt(peg$currPos) === 41) {
-            s3 = peg$c64;
+            s3 = peg$c66;
             peg$currPos++;
           } else {
             s3 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c65); }
+            if (peg$silentFails === 0) { peg$fail(peg$c67); }
           }
           if (s3 !== peg$FAILED) {
             peg$reportedPos = s0;
-            s1 = peg$c66(s1);
+            s1 = peg$c68(s1);
             s0 = s1;
           } else {
             peg$currPos = s0;
@@ -2189,12 +2263,12 @@ var BletherParser = (function() {
       var s0, s1, s2, s3, s4, s5;
 
       s0 = peg$currPos;
-      if (input.substr(peg$currPos, 2) === peg$c59) {
-        s1 = peg$c59;
+      if (input.substr(peg$currPos, 2) === peg$c61) {
+        s1 = peg$c61;
         peg$currPos += 2;
       } else {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c60); }
+        if (peg$silentFails === 0) { peg$fail(peg$c62); }
       }
       if (s1 !== peg$FAILED) {
         s2 = [];
@@ -2207,7 +2281,7 @@ var BletherParser = (function() {
           }
           if (s5 !== peg$FAILED) {
             peg$reportedPos = s3;
-            s4 = peg$c67(s5);
+            s4 = peg$c69(s5);
             s3 = s4;
           } else {
             peg$currPos = s3;
@@ -2228,7 +2302,7 @@ var BletherParser = (function() {
             }
             if (s5 !== peg$FAILED) {
               peg$reportedPos = s3;
-              s4 = peg$c67(s5);
+              s4 = peg$c69(s5);
               s3 = s4;
             } else {
               peg$currPos = s3;
@@ -2243,15 +2317,15 @@ var BletherParser = (function() {
           s3 = peg$parsews();
           if (s3 !== peg$FAILED) {
             if (input.charCodeAt(peg$currPos) === 41) {
-              s4 = peg$c64;
+              s4 = peg$c66;
               peg$currPos++;
             } else {
               s4 = peg$FAILED;
-              if (peg$silentFails === 0) { peg$fail(peg$c65); }
+              if (peg$silentFails === 0) { peg$fail(peg$c67); }
             }
             if (s4 !== peg$FAILED) {
               peg$reportedPos = s0;
-              s1 = peg$c68(s2);
+              s1 = peg$c70(s2);
               s0 = s1;
             } else {
               peg$currPos = s0;
@@ -2278,43 +2352,43 @@ var BletherParser = (function() {
 
       s0 = peg$currPos;
       if (input.charCodeAt(peg$currPos) === 123) {
-        s1 = peg$c69;
+        s1 = peg$c71;
         peg$currPos++;
       } else {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c70); }
+        if (peg$silentFails === 0) { peg$fail(peg$c72); }
       }
       if (s1 !== peg$FAILED) {
         s2 = peg$parsews();
         if (s2 !== peg$FAILED) {
           s3 = peg$parseexpressions();
           if (s3 === peg$FAILED) {
-            s3 = peg$c45;
+            s3 = peg$c49;
           }
           if (s3 !== peg$FAILED) {
             s4 = peg$parsews();
             if (s4 !== peg$FAILED) {
               if (input.charCodeAt(peg$currPos) === 46) {
-                s5 = peg$c55;
+                s5 = peg$c24;
                 peg$currPos++;
               } else {
                 s5 = peg$FAILED;
-                if (peg$silentFails === 0) { peg$fail(peg$c56); }
+                if (peg$silentFails === 0) { peg$fail(peg$c25); }
               }
               if (s5 === peg$FAILED) {
-                s5 = peg$c45;
+                s5 = peg$c49;
               }
               if (s5 !== peg$FAILED) {
                 if (input.charCodeAt(peg$currPos) === 125) {
-                  s6 = peg$c71;
+                  s6 = peg$c73;
                   peg$currPos++;
                 } else {
                   s6 = peg$FAILED;
-                  if (peg$silentFails === 0) { peg$fail(peg$c72); }
+                  if (peg$silentFails === 0) { peg$fail(peg$c74); }
                 }
                 if (s6 !== peg$FAILED) {
                   peg$reportedPos = s0;
-                  s1 = peg$c73(s3);
+                  s1 = peg$c75(s3);
                   s0 = s1;
                 } else {
                   peg$currPos = s0;
@@ -2348,33 +2422,33 @@ var BletherParser = (function() {
       var s0, s1, s2, s3, s4, s5;
 
       s0 = peg$currPos;
-      if (input.substr(peg$currPos, 2) === peg$c74) {
-        s1 = peg$c74;
+      if (input.substr(peg$currPos, 2) === peg$c76) {
+        s1 = peg$c76;
         peg$currPos += 2;
       } else {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c75); }
+        if (peg$silentFails === 0) { peg$fail(peg$c77); }
       }
       if (s1 !== peg$FAILED) {
         s2 = peg$parsews();
         if (s2 !== peg$FAILED) {
           s3 = peg$parseassociations();
           if (s3 === peg$FAILED) {
-            s3 = peg$c45;
+            s3 = peg$c49;
           }
           if (s3 !== peg$FAILED) {
             s4 = peg$parsews();
             if (s4 !== peg$FAILED) {
               if (input.charCodeAt(peg$currPos) === 125) {
-                s5 = peg$c71;
+                s5 = peg$c73;
                 peg$currPos++;
               } else {
                 s5 = peg$FAILED;
-                if (peg$silentFails === 0) { peg$fail(peg$c72); }
+                if (peg$silentFails === 0) { peg$fail(peg$c74); }
               }
               if (s5 !== peg$FAILED) {
                 peg$reportedPos = s0;
-                s1 = peg$c76(s3);
+                s1 = peg$c78(s3);
                 s0 = s1;
               } else {
                 peg$currPos = s0;
@@ -2405,36 +2479,36 @@ var BletherParser = (function() {
 
       s0 = peg$currPos;
       s1 = peg$currPos;
-      if (input.substr(peg$currPos, 4) === peg$c77) {
-        s2 = peg$c77;
+      if (input.substr(peg$currPos, 4) === peg$c79) {
+        s2 = peg$c79;
         peg$currPos += 4;
       } else {
         s2 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c78); }
+        if (peg$silentFails === 0) { peg$fail(peg$c80); }
       }
       if (s2 !== peg$FAILED) {
         peg$reportedPos = s1;
-        s2 = peg$c79();
+        s2 = peg$c81();
       }
       s1 = s2;
       if (s1 === peg$FAILED) {
         s1 = peg$currPos;
-        if (input.substr(peg$currPos, 5) === peg$c80) {
-          s2 = peg$c80;
+        if (input.substr(peg$currPos, 5) === peg$c82) {
+          s2 = peg$c82;
           peg$currPos += 5;
         } else {
           s2 = peg$FAILED;
-          if (peg$silentFails === 0) { peg$fail(peg$c81); }
+          if (peg$silentFails === 0) { peg$fail(peg$c83); }
         }
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s1;
-          s2 = peg$c82();
+          s2 = peg$c84();
         }
         s1 = s2;
       }
       if (s1 !== peg$FAILED) {
         peg$reportedPos = s0;
-        s1 = peg$c83(s1);
+        s1 = peg$c85(s1);
       }
       s0 = s1;
 
@@ -2445,16 +2519,16 @@ var BletherParser = (function() {
       var s0, s1;
 
       s0 = peg$currPos;
-      if (input.substr(peg$currPos, 3) === peg$c84) {
-        s1 = peg$c84;
+      if (input.substr(peg$currPos, 3) === peg$c86) {
+        s1 = peg$c86;
         peg$currPos += 3;
       } else {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c85); }
+        if (peg$silentFails === 0) { peg$fail(peg$c87); }
       }
       if (s1 !== peg$FAILED) {
         peg$reportedPos = s0;
-        s1 = peg$c86(s1);
+        s1 = peg$c88(s1);
       }
       s0 = s1;
 
@@ -2527,7 +2601,7 @@ var BletherParser = (function() {
       s1 = peg$parseidentifier();
       if (s1 !== peg$FAILED) {
         peg$reportedPos = s0;
-        s1 = peg$c87(s1);
+        s1 = peg$c89(s1);
       }
       s0 = s1;
 
@@ -2547,7 +2621,7 @@ var BletherParser = (function() {
             s4 = peg$parsebinarySend();
             if (s4 !== peg$FAILED) {
               peg$reportedPos = s0;
-              s1 = peg$c88(s2, s4);
+              s1 = peg$c90(s2, s4);
               s0 = s1;
             } else {
               peg$currPos = s0;
@@ -2574,22 +2648,22 @@ var BletherParser = (function() {
 
       s0 = peg$currPos;
       s1 = [];
-      if (peg$c89.test(input.charAt(peg$currPos))) {
+      if (peg$c91.test(input.charAt(peg$currPos))) {
         s2 = input.charAt(peg$currPos);
         peg$currPos++;
       } else {
         s2 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c90); }
+        if (peg$silentFails === 0) { peg$fail(peg$c92); }
       }
       if (s2 !== peg$FAILED) {
         while (s2 !== peg$FAILED) {
           s1.push(s2);
-          if (peg$c89.test(input.charAt(peg$currPos))) {
+          if (peg$c91.test(input.charAt(peg$currPos))) {
             s2 = input.charAt(peg$currPos);
             peg$currPos++;
           } else {
             s2 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c90); }
+            if (peg$silentFails === 0) { peg$fail(peg$c92); }
           }
         }
       } else {
@@ -2597,7 +2671,7 @@ var BletherParser = (function() {
       }
       if (s1 !== peg$FAILED) {
         peg$reportedPos = s0;
-        s1 = peg$c91(s1);
+        s1 = peg$c93(s1);
       }
       s0 = s1;
 
@@ -2619,7 +2693,7 @@ var BletherParser = (function() {
             s6 = peg$parseidentifier();
             if (s6 !== peg$FAILED) {
               peg$reportedPos = s2;
-              s3 = peg$c88(s4, s6);
+              s3 = peg$c90(s4, s6);
               s2 = s3;
             } else {
               peg$currPos = s2;
@@ -2650,7 +2724,7 @@ var BletherParser = (function() {
                 s6 = peg$parseidentifier();
                 if (s6 !== peg$FAILED) {
                   peg$reportedPos = s2;
-                  s3 = peg$c88(s4, s6);
+                  s3 = peg$c90(s4, s6);
                   s2 = s3;
                 } else {
                   peg$currPos = s2;
@@ -2674,7 +2748,7 @@ var BletherParser = (function() {
       }
       if (s1 !== peg$FAILED) {
         peg$reportedPos = s0;
-        s1 = peg$c92(s1);
+        s1 = peg$c94(s1);
       }
       s0 = s1;
 
@@ -2694,7 +2768,7 @@ var BletherParser = (function() {
             s4 = peg$parseidentifier();
             if (s4 !== peg$FAILED) {
               peg$reportedPos = s0;
-              s1 = peg$c93(s2, s4);
+              s1 = peg$c95(s2, s4);
               s0 = s1;
             } else {
               peg$currPos = s0;
@@ -2725,7 +2799,7 @@ var BletherParser = (function() {
         s2 = peg$parseidentifier();
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c94(s2);
+          s1 = peg$c96(s2);
           s0 = s1;
         } else {
           peg$currPos = s0;
@@ -2751,7 +2825,7 @@ var BletherParser = (function() {
           s4 = peg$parseexpressionChain();
           if (s4 !== peg$FAILED) {
             peg$reportedPos = s2;
-            s3 = peg$c95(s4);
+            s3 = peg$c97(s4);
             s2 = s3;
           } else {
             peg$currPos = s2;
@@ -2762,11 +2836,11 @@ var BletherParser = (function() {
           s2 = peg$c1;
         }
         if (s2 === peg$FAILED) {
-          s2 = peg$c45;
+          s2 = peg$c49;
         }
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c96(s1);
+          s1 = peg$c98(s1);
           s0 = s1;
         } else {
           peg$currPos = s0;
@@ -2795,7 +2869,7 @@ var BletherParser = (function() {
           s4 = peg$parseexpressionChain();
           if (s4 !== peg$FAILED) {
             peg$reportedPos = s2;
-            s3 = peg$c97(s4);
+            s3 = peg$c99(s4);
             s2 = s3;
           } else {
             peg$currPos = s2;
@@ -2806,11 +2880,11 @@ var BletherParser = (function() {
           s2 = peg$c1;
         }
         if (s2 === peg$FAILED) {
-          s2 = peg$c45;
+          s2 = peg$c49;
         }
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c98(s1, s2);
+          s1 = peg$c100(s1, s2);
           s0 = s1;
         } else {
           peg$currPos = s0;
@@ -2845,11 +2919,11 @@ var BletherParser = (function() {
       s1 = peg$parsews();
       if (s1 !== peg$FAILED) {
         if (input.charCodeAt(peg$currPos) === 46) {
-          s2 = peg$c55;
+          s2 = peg$c24;
           peg$currPos++;
         } else {
           s2 = peg$FAILED;
-          if (peg$silentFails === 0) { peg$fail(peg$c56); }
+          if (peg$silentFails === 0) { peg$fail(peg$c25); }
         }
         if (s2 !== peg$FAILED) {
           s3 = peg$parsews();
@@ -2857,7 +2931,7 @@ var BletherParser = (function() {
             s4 = peg$parseexpression();
             if (s4 !== peg$FAILED) {
               peg$reportedPos = s0;
-              s1 = peg$c99(s4);
+              s1 = peg$c101(s4);
               s0 = s1;
             } else {
               peg$currPos = s0;
@@ -2893,7 +2967,7 @@ var BletherParser = (function() {
         }
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c100(s1, s2);
+          s1 = peg$c102(s1, s2);
           s0 = s1;
         } else {
           peg$currPos = s0;
@@ -2915,12 +2989,12 @@ var BletherParser = (function() {
       if (s1 !== peg$FAILED) {
         s2 = peg$parsews();
         if (s2 !== peg$FAILED) {
-          if (input.substr(peg$currPos, 2) === peg$c101) {
-            s3 = peg$c101;
+          if (input.substr(peg$currPos, 2) === peg$c103) {
+            s3 = peg$c103;
             peg$currPos += 2;
           } else {
             s3 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c102); }
+            if (peg$silentFails === 0) { peg$fail(peg$c104); }
           }
           if (s3 !== peg$FAILED) {
             s4 = peg$parsews();
@@ -2928,7 +3002,7 @@ var BletherParser = (function() {
               s5 = peg$parseexpression();
               if (s5 !== peg$FAILED) {
                 peg$reportedPos = s0;
-                s1 = peg$c103(s1, s5);
+                s1 = peg$c105(s1, s5);
                 s0 = s1;
               } else {
                 peg$currPos = s0;
@@ -2959,11 +3033,11 @@ var BletherParser = (function() {
 
       s0 = peg$currPos;
       if (input.charCodeAt(peg$currPos) === 94) {
-        s1 = peg$c104;
+        s1 = peg$c106;
         peg$currPos++;
       } else {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c105); }
+        if (peg$silentFails === 0) { peg$fail(peg$c107); }
       }
       if (s1 !== peg$FAILED) {
         s2 = peg$parsews();
@@ -2973,18 +3047,18 @@ var BletherParser = (function() {
             s4 = peg$parsews();
             if (s4 !== peg$FAILED) {
               if (input.charCodeAt(peg$currPos) === 46) {
-                s5 = peg$c55;
+                s5 = peg$c24;
                 peg$currPos++;
               } else {
                 s5 = peg$FAILED;
-                if (peg$silentFails === 0) { peg$fail(peg$c56); }
+                if (peg$silentFails === 0) { peg$fail(peg$c25); }
               }
               if (s5 === peg$FAILED) {
-                s5 = peg$c45;
+                s5 = peg$c49;
               }
               if (s5 !== peg$FAILED) {
                 peg$reportedPos = s0;
-                s1 = peg$c106(s3);
+                s1 = peg$c108(s3);
                 s0 = s1;
               } else {
                 peg$currPos = s0;
@@ -3015,11 +3089,11 @@ var BletherParser = (function() {
 
       s0 = peg$currPos;
       if (input.charCodeAt(peg$currPos) === 124) {
-        s1 = peg$c107;
+        s1 = peg$c109;
         peg$currPos++;
       } else {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c108); }
+        if (peg$silentFails === 0) { peg$fail(peg$c110); }
       }
       if (s1 !== peg$FAILED) {
         s2 = [];
@@ -3029,7 +3103,7 @@ var BletherParser = (function() {
           s5 = peg$parseidentifier();
           if (s5 !== peg$FAILED) {
             peg$reportedPos = s3;
-            s4 = peg$c109(s5);
+            s4 = peg$c111(s5);
             s3 = s4;
           } else {
             peg$currPos = s3;
@@ -3047,7 +3121,7 @@ var BletherParser = (function() {
             s5 = peg$parseidentifier();
             if (s5 !== peg$FAILED) {
               peg$reportedPos = s3;
-              s4 = peg$c109(s5);
+              s4 = peg$c111(s5);
               s3 = s4;
             } else {
               peg$currPos = s3;
@@ -3062,15 +3136,15 @@ var BletherParser = (function() {
           s3 = peg$parsews();
           if (s3 !== peg$FAILED) {
             if (input.charCodeAt(peg$currPos) === 124) {
-              s4 = peg$c107;
+              s4 = peg$c109;
               peg$currPos++;
             } else {
               s4 = peg$FAILED;
-              if (peg$silentFails === 0) { peg$fail(peg$c108); }
+              if (peg$silentFails === 0) { peg$fail(peg$c110); }
             }
             if (s4 !== peg$FAILED) {
               peg$reportedPos = s0;
-              s1 = peg$c110(s2);
+              s1 = peg$c112(s2);
               s0 = s1;
             } else {
               peg$currPos = s0;
@@ -3113,7 +3187,7 @@ var BletherParser = (function() {
             s6 = peg$parseidentifier();
             if (s6 !== peg$FAILED) {
               peg$reportedPos = s2;
-              s3 = peg$c111(s6);
+              s3 = peg$c113(s6);
               s2 = s3;
             } else {
               peg$currPos = s2;
@@ -3150,7 +3224,7 @@ var BletherParser = (function() {
                 s6 = peg$parseidentifier();
                 if (s6 !== peg$FAILED) {
                   peg$reportedPos = s2;
-                  s3 = peg$c111(s6);
+                  s3 = peg$c113(s6);
                   s2 = s3;
                 } else {
                   peg$currPos = s2;
@@ -3176,15 +3250,15 @@ var BletherParser = (function() {
         s2 = peg$parsews();
         if (s2 !== peg$FAILED) {
           if (input.charCodeAt(peg$currPos) === 124) {
-            s3 = peg$c107;
+            s3 = peg$c109;
             peg$currPos++;
           } else {
             s3 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c108); }
+            if (peg$silentFails === 0) { peg$fail(peg$c110); }
           }
           if (s3 !== peg$FAILED) {
             peg$reportedPos = s0;
-            s1 = peg$c112(s1);
+            s1 = peg$c114(s1);
             s0 = s1;
           } else {
             peg$currPos = s0;
@@ -3207,11 +3281,11 @@ var BletherParser = (function() {
 
       s0 = peg$currPos;
       if (input.charCodeAt(peg$currPos) === 40) {
-        s1 = peg$c61;
+        s1 = peg$c63;
         peg$currPos++;
       } else {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c62); }
+        if (peg$silentFails === 0) { peg$fail(peg$c64); }
       }
       if (s1 !== peg$FAILED) {
         s2 = peg$parsews();
@@ -3221,15 +3295,15 @@ var BletherParser = (function() {
             s4 = peg$parsews();
             if (s4 !== peg$FAILED) {
               if (input.charCodeAt(peg$currPos) === 41) {
-                s5 = peg$c64;
+                s5 = peg$c66;
                 peg$currPos++;
               } else {
                 s5 = peg$FAILED;
-                if (peg$silentFails === 0) { peg$fail(peg$c65); }
+                if (peg$silentFails === 0) { peg$fail(peg$c67); }
               }
               if (s5 !== peg$FAILED) {
                 peg$reportedPos = s0;
-                s1 = peg$c99(s3);
+                s1 = peg$c101(s3);
                 s0 = s1;
               } else {
                 peg$currPos = s0;
@@ -3263,25 +3337,25 @@ var BletherParser = (function() {
       if (s1 !== peg$FAILED) {
         s2 = [];
         if (input.charCodeAt(peg$currPos) === 46) {
-          s3 = peg$c55;
+          s3 = peg$c24;
           peg$currPos++;
         } else {
           s3 = peg$FAILED;
-          if (peg$silentFails === 0) { peg$fail(peg$c56); }
+          if (peg$silentFails === 0) { peg$fail(peg$c25); }
         }
         while (s3 !== peg$FAILED) {
           s2.push(s3);
           if (input.charCodeAt(peg$currPos) === 46) {
-            s3 = peg$c55;
+            s3 = peg$c24;
             peg$currPos++;
           } else {
             s3 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c56); }
+            if (peg$silentFails === 0) { peg$fail(peg$c25); }
           }
         }
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c113(s1);
+          s1 = peg$c115(s1);
           s0 = s1;
         } else {
           peg$currPos = s0;
@@ -3299,21 +3373,21 @@ var BletherParser = (function() {
           if (s2 !== peg$FAILED) {
             s3 = [];
             if (input.charCodeAt(peg$currPos) === 46) {
-              s4 = peg$c55;
+              s4 = peg$c24;
               peg$currPos++;
             } else {
               s4 = peg$FAILED;
-              if (peg$silentFails === 0) { peg$fail(peg$c56); }
+              if (peg$silentFails === 0) { peg$fail(peg$c25); }
             }
             if (s4 !== peg$FAILED) {
               while (s4 !== peg$FAILED) {
                 s3.push(s4);
                 if (input.charCodeAt(peg$currPos) === 46) {
-                  s4 = peg$c55;
+                  s4 = peg$c24;
                   peg$currPos++;
                 } else {
                   s4 = peg$FAILED;
-                  if (peg$silentFails === 0) { peg$fail(peg$c56); }
+                  if (peg$silentFails === 0) { peg$fail(peg$c25); }
                 }
               }
             } else {
@@ -3326,25 +3400,25 @@ var BletherParser = (function() {
                 if (s5 !== peg$FAILED) {
                   s6 = [];
                   if (input.charCodeAt(peg$currPos) === 46) {
-                    s7 = peg$c55;
+                    s7 = peg$c24;
                     peg$currPos++;
                   } else {
                     s7 = peg$FAILED;
-                    if (peg$silentFails === 0) { peg$fail(peg$c56); }
+                    if (peg$silentFails === 0) { peg$fail(peg$c25); }
                   }
                   while (s7 !== peg$FAILED) {
                     s6.push(s7);
                     if (input.charCodeAt(peg$currPos) === 46) {
-                      s7 = peg$c55;
+                      s7 = peg$c24;
                       peg$currPos++;
                     } else {
                       s7 = peg$FAILED;
-                      if (peg$silentFails === 0) { peg$fail(peg$c56); }
+                      if (peg$silentFails === 0) { peg$fail(peg$c25); }
                     }
                   }
                   if (s6 !== peg$FAILED) {
                     peg$reportedPos = s0;
-                    s1 = peg$c114(s1, s5);
+                    s1 = peg$c116(s1, s5);
                     s0 = s1;
                   } else {
                     peg$currPos = s0;
@@ -3374,30 +3448,30 @@ var BletherParser = (function() {
           s0 = peg$currPos;
           s1 = peg$parseexpressions();
           if (s1 === peg$FAILED) {
-            s1 = peg$c45;
+            s1 = peg$c49;
           }
           if (s1 !== peg$FAILED) {
             s2 = [];
             if (input.charCodeAt(peg$currPos) === 46) {
-              s3 = peg$c55;
+              s3 = peg$c24;
               peg$currPos++;
             } else {
               s3 = peg$FAILED;
-              if (peg$silentFails === 0) { peg$fail(peg$c56); }
+              if (peg$silentFails === 0) { peg$fail(peg$c25); }
             }
             while (s3 !== peg$FAILED) {
               s2.push(s3);
               if (input.charCodeAt(peg$currPos) === 46) {
-                s3 = peg$c55;
+                s3 = peg$c24;
                 peg$currPos++;
               } else {
                 s3 = peg$FAILED;
-                if (peg$silentFails === 0) { peg$fail(peg$c56); }
+                if (peg$silentFails === 0) { peg$fail(peg$c25); }
               }
             }
             if (s2 !== peg$FAILED) {
               peg$reportedPos = s0;
-              s1 = peg$c115(s1);
+              s1 = peg$c117(s1);
               s0 = s1;
             } else {
               peg$currPos = s0;
@@ -3421,15 +3495,15 @@ var BletherParser = (function() {
       s2 = peg$parseexpression();
       if (s2 !== peg$FAILED) {
         if (input.charCodeAt(peg$currPos) === 46) {
-          s3 = peg$c55;
+          s3 = peg$c24;
           peg$currPos++;
         } else {
           s3 = peg$FAILED;
-          if (peg$silentFails === 0) { peg$fail(peg$c56); }
+          if (peg$silentFails === 0) { peg$fail(peg$c25); }
         }
         if (s3 !== peg$FAILED) {
           peg$reportedPos = s1;
-          s2 = peg$c116(s2);
+          s2 = peg$c118(s2);
           s1 = s2;
         } else {
           peg$currPos = s1;
@@ -3444,7 +3518,7 @@ var BletherParser = (function() {
       }
       if (s1 !== peg$FAILED) {
         peg$reportedPos = s0;
-        s1 = peg$c117(s1);
+        s1 = peg$c119(s1);
       }
       s0 = s1;
 
@@ -3468,20 +3542,20 @@ var BletherParser = (function() {
       s0 = peg$currPos;
       s1 = peg$parsetemps();
       if (s1 === peg$FAILED) {
-        s1 = peg$c45;
+        s1 = peg$c49;
       }
       if (s1 !== peg$FAILED) {
         s2 = peg$parsews();
         if (s2 !== peg$FAILED) {
           s3 = peg$parsestatements();
           if (s3 === peg$FAILED) {
-            s3 = peg$c45;
+            s3 = peg$c49;
           }
           if (s3 !== peg$FAILED) {
             s4 = peg$parsews();
             if (s4 !== peg$FAILED) {
               peg$reportedPos = s0;
-              s1 = peg$c118(s1, s3);
+              s1 = peg$c120(s1, s3);
               s0 = s1;
             } else {
               peg$currPos = s0;
@@ -3508,37 +3582,37 @@ var BletherParser = (function() {
 
       s0 = peg$currPos;
       if (input.charCodeAt(peg$currPos) === 91) {
-        s1 = peg$c119;
+        s1 = peg$c121;
         peg$currPos++;
       } else {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c120); }
+        if (peg$silentFails === 0) { peg$fail(peg$c122); }
       }
       if (s1 !== peg$FAILED) {
         s2 = peg$parseblockParamList();
         if (s2 === peg$FAILED) {
-          s2 = peg$c45;
+          s2 = peg$c49;
         }
         if (s2 !== peg$FAILED) {
           s3 = peg$parsews();
           if (s3 !== peg$FAILED) {
             s4 = peg$parsesequence();
             if (s4 === peg$FAILED) {
-              s4 = peg$c45;
+              s4 = peg$c49;
             }
             if (s4 !== peg$FAILED) {
               s5 = peg$parsews();
               if (s5 !== peg$FAILED) {
                 if (input.charCodeAt(peg$currPos) === 93) {
-                  s6 = peg$c121;
+                  s6 = peg$c123;
                   peg$currPos++;
                 } else {
                   s6 = peg$FAILED;
-                  if (peg$silentFails === 0) { peg$fail(peg$c122); }
+                  if (peg$silentFails === 0) { peg$fail(peg$c124); }
                 }
                 if (s6 !== peg$FAILED) {
                   peg$reportedPos = s0;
-                  s1 = peg$c123(s2, s4);
+                  s1 = peg$c125(s2, s4);
                   s0 = s1;
                 } else {
                   peg$currPos = s0;
@@ -3569,13 +3643,22 @@ var BletherParser = (function() {
     }
 
     function peg$parseoperand() {
-      var s0;
+      var s0, s1;
 
       s0 = peg$parseliteral();
       if (s0 === peg$FAILED) {
-        s0 = peg$parsevariable();
+        s0 = peg$currPos;
+        s1 = peg$parseclassName();
+        if (s1 !== peg$FAILED) {
+          peg$reportedPos = s0;
+          s1 = peg$c126(s1);
+        }
+        s0 = s1;
         if (s0 === peg$FAILED) {
-          s0 = peg$parsesubexpression();
+          s0 = peg$parsevariable();
+          if (s0 === peg$FAILED) {
+            s0 = peg$parsesubexpression();
+          }
         }
       }
 
@@ -3601,14 +3684,14 @@ var BletherParser = (function() {
           }
           peg$silentFails--;
           if (s4 === peg$FAILED) {
-            s3 = peg$c124;
+            s3 = peg$c127;
           } else {
             peg$currPos = s3;
             s3 = peg$c1;
           }
           if (s3 !== peg$FAILED) {
             peg$reportedPos = s0;
-            s1 = peg$c125(s2);
+            s1 = peg$c128(s2);
             s0 = s1;
           } else {
             peg$currPos = s0;
@@ -3636,13 +3719,13 @@ var BletherParser = (function() {
         if (s2 !== peg$FAILED) {
           s3 = peg$parseunaryTail();
           if (s3 === peg$FAILED) {
-            s3 = peg$c45;
+            s3 = peg$c49;
           }
           if (s3 !== peg$FAILED) {
             s4 = peg$parsews();
             if (s4 !== peg$FAILED) {
               peg$reportedPos = s0;
-              s1 = peg$c126(s1, s3);
+              s1 = peg$c129(s1, s3);
               s0 = s1;
             } else {
               peg$currPos = s0;
@@ -3674,11 +3757,11 @@ var BletherParser = (function() {
         if (s2 !== peg$FAILED) {
           s3 = peg$parseunaryTail();
           if (s3 === peg$FAILED) {
-            s3 = peg$c45;
+            s3 = peg$c49;
           }
           if (s3 !== peg$FAILED) {
             peg$reportedPos = s0;
-            s1 = peg$c127(s1, s3);
+            s1 = peg$c130(s1, s3);
             s0 = s1;
           } else {
             peg$currPos = s0;
@@ -3712,7 +3795,7 @@ var BletherParser = (function() {
             }
             if (s4 !== peg$FAILED) {
               peg$reportedPos = s0;
-              s1 = peg$c128(s2, s4);
+              s1 = peg$c131(s2, s4);
               s0 = s1;
             } else {
               peg$currPos = s0;
@@ -3742,11 +3825,11 @@ var BletherParser = (function() {
       if (s1 !== peg$FAILED) {
         s2 = peg$parsebinaryTail();
         if (s2 === peg$FAILED) {
-          s2 = peg$c45;
+          s2 = peg$c49;
         }
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c126(s1, s2);
+          s1 = peg$c129(s1, s2);
           s0 = s1;
         } else {
           peg$currPos = s0;
@@ -3768,11 +3851,11 @@ var BletherParser = (function() {
       if (s1 !== peg$FAILED) {
         s2 = peg$parsebinaryTail();
         if (s2 === peg$FAILED) {
-          s2 = peg$c45;
+          s2 = peg$c49;
         }
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c127(s1, s2);
+          s1 = peg$c130(s1, s2);
           s0 = s1;
         } else {
           peg$currPos = s0;
@@ -3802,7 +3885,7 @@ var BletherParser = (function() {
       }
       if (s1 !== peg$FAILED) {
         peg$reportedPos = s0;
-        s1 = peg$c129(s1);
+        s1 = peg$c132(s1);
       }
       s0 = s1;
 
@@ -3818,7 +3901,7 @@ var BletherParser = (function() {
         s2 = peg$parsekeywordMessage();
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c130(s1, s2);
+          s1 = peg$c133(s1, s2);
           s0 = s1;
         } else {
           peg$currPos = s0;
@@ -3862,11 +3945,11 @@ var BletherParser = (function() {
           s5 = peg$parsews();
           if (s5 !== peg$FAILED) {
             if (input.charCodeAt(peg$currPos) === 59) {
-              s6 = peg$c131;
+              s6 = peg$c134;
               peg$currPos++;
             } else {
               s6 = peg$FAILED;
-              if (peg$silentFails === 0) { peg$fail(peg$c132); }
+              if (peg$silentFails === 0) { peg$fail(peg$c135); }
             }
             if (s6 !== peg$FAILED) {
               s7 = peg$parsews();
@@ -3874,7 +3957,7 @@ var BletherParser = (function() {
                 s8 = peg$parsemessage();
                 if (s8 !== peg$FAILED) {
                   peg$reportedPos = s4;
-                  s5 = peg$c133(s8);
+                  s5 = peg$c136(s8);
                   s4 = s5;
                 } else {
                   peg$currPos = s4;
@@ -3899,11 +3982,11 @@ var BletherParser = (function() {
               s5 = peg$parsews();
               if (s5 !== peg$FAILED) {
                 if (input.charCodeAt(peg$currPos) === 59) {
-                  s6 = peg$c131;
+                  s6 = peg$c134;
                   peg$currPos++;
                 } else {
                   s6 = peg$FAILED;
-                  if (peg$silentFails === 0) { peg$fail(peg$c132); }
+                  if (peg$silentFails === 0) { peg$fail(peg$c135); }
                 }
                 if (s6 !== peg$FAILED) {
                   s7 = peg$parsews();
@@ -3911,7 +3994,7 @@ var BletherParser = (function() {
                     s8 = peg$parsemessage();
                     if (s8 !== peg$FAILED) {
                       peg$reportedPos = s4;
-                      s5 = peg$c133(s8);
+                      s5 = peg$c136(s8);
                       s4 = s5;
                     } else {
                       peg$currPos = s4;
@@ -3935,7 +4018,7 @@ var BletherParser = (function() {
           }
           if (s3 !== peg$FAILED) {
             peg$reportedPos = s0;
-            s1 = peg$c134(s2, s3);
+            s1 = peg$c137(s2, s3);
             s0 = s1;
           } else {
             peg$currPos = s0;
@@ -3958,72 +4041,72 @@ var BletherParser = (function() {
 
       s0 = peg$currPos;
       if (input.charCodeAt(peg$currPos) === 60) {
-        s1 = peg$c135;
+        s1 = peg$c138;
         peg$currPos++;
       } else {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c136); }
+        if (peg$silentFails === 0) { peg$fail(peg$c139); }
       }
       if (s1 !== peg$FAILED) {
         s2 = [];
         s3 = peg$currPos;
-        if (input.substr(peg$currPos, 2) === peg$c137) {
-          s4 = peg$c137;
+        if (input.substr(peg$currPos, 2) === peg$c140) {
+          s4 = peg$c140;
           peg$currPos += 2;
         } else {
           s4 = peg$FAILED;
-          if (peg$silentFails === 0) { peg$fail(peg$c138); }
+          if (peg$silentFails === 0) { peg$fail(peg$c141); }
         }
         if (s4 !== peg$FAILED) {
           peg$reportedPos = s3;
-          s4 = peg$c139();
+          s4 = peg$c142();
         }
         s3 = s4;
         if (s3 === peg$FAILED) {
-          if (peg$c140.test(input.charAt(peg$currPos))) {
+          if (peg$c143.test(input.charAt(peg$currPos))) {
             s3 = input.charAt(peg$currPos);
             peg$currPos++;
           } else {
             s3 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c141); }
+            if (peg$silentFails === 0) { peg$fail(peg$c144); }
           }
         }
         while (s3 !== peg$FAILED) {
           s2.push(s3);
           s3 = peg$currPos;
-          if (input.substr(peg$currPos, 2) === peg$c137) {
-            s4 = peg$c137;
+          if (input.substr(peg$currPos, 2) === peg$c140) {
+            s4 = peg$c140;
             peg$currPos += 2;
           } else {
             s4 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c138); }
+            if (peg$silentFails === 0) { peg$fail(peg$c141); }
           }
           if (s4 !== peg$FAILED) {
             peg$reportedPos = s3;
-            s4 = peg$c139();
+            s4 = peg$c142();
           }
           s3 = s4;
           if (s3 === peg$FAILED) {
-            if (peg$c140.test(input.charAt(peg$currPos))) {
+            if (peg$c143.test(input.charAt(peg$currPos))) {
               s3 = input.charAt(peg$currPos);
               peg$currPos++;
             } else {
               s3 = peg$FAILED;
-              if (peg$silentFails === 0) { peg$fail(peg$c141); }
+              if (peg$silentFails === 0) { peg$fail(peg$c144); }
             }
           }
         }
         if (s2 !== peg$FAILED) {
           if (input.charCodeAt(peg$currPos) === 62) {
-            s3 = peg$c142;
+            s3 = peg$c145;
             peg$currPos++;
           } else {
             s3 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c143); }
+            if (peg$silentFails === 0) { peg$fail(peg$c146); }
           }
           if (s3 !== peg$FAILED) {
             peg$reportedPos = s0;
-            s1 = peg$c144(s2);
+            s1 = peg$c147(s2);
             s0 = s1;
           } else {
             peg$currPos = s0;
@@ -4057,13 +4140,13 @@ var BletherParser = (function() {
         if (s2 !== peg$FAILED) {
           s3 = peg$parsesequence();
           if (s3 === peg$FAILED) {
-            s3 = peg$c45;
+            s3 = peg$c49;
           }
           if (s3 !== peg$FAILED) {
             s4 = peg$parsews();
             if (s4 !== peg$FAILED) {
               peg$reportedPos = s0;
-              s1 = peg$c145(s1, s3);
+              s1 = peg$c148(s1, s3);
               s0 = s1;
             } else {
               peg$currPos = s0;
@@ -4092,15 +4175,15 @@ var BletherParser = (function() {
       s1 = peg$parsebinarySend();
       if (s1 !== peg$FAILED) {
         peg$reportedPos = peg$currPos;
-        s2 = peg$c146(s1);
+        s2 = peg$c149(s1);
         if (s2) {
-          s2 = peg$c124;
+          s2 = peg$c127;
         } else {
           s2 = peg$c1;
         }
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c147(s1);
+          s1 = peg$c150(s1);
           s0 = s1;
         } else {
           peg$currPos = s0;
@@ -4121,11 +4204,11 @@ var BletherParser = (function() {
       s1 = peg$parsews();
       if (s1 !== peg$FAILED) {
         if (input.charCodeAt(peg$currPos) === 46) {
-          s2 = peg$c55;
+          s2 = peg$c24;
           peg$currPos++;
         } else {
           s2 = peg$FAILED;
-          if (peg$silentFails === 0) { peg$fail(peg$c56); }
+          if (peg$silentFails === 0) { peg$fail(peg$c25); }
         }
         if (s2 !== peg$FAILED) {
           s3 = peg$parsews();
@@ -4133,7 +4216,7 @@ var BletherParser = (function() {
             s4 = peg$parseassociationSend();
             if (s4 !== peg$FAILED) {
               peg$reportedPos = s0;
-              s1 = peg$c99(s4);
+              s1 = peg$c101(s4);
               s0 = s1;
             } else {
               peg$currPos = s0;
@@ -4169,7 +4252,7 @@ var BletherParser = (function() {
         }
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c148(s1, s2);
+          s1 = peg$c151(s1, s2);
           s0 = s1;
         } else {
           peg$currPos = s0;
@@ -4191,12 +4274,12 @@ var BletherParser = (function() {
       if (s1 !== peg$FAILED) {
         s2 = peg$parsews();
         if (s2 !== peg$FAILED) {
-          if (input.substr(peg$currPos, 9) === peg$c149) {
-            s3 = peg$c149;
+          if (input.substr(peg$currPos, 9) === peg$c152) {
+            s3 = peg$c152;
             peg$currPos += 9;
           } else {
             s3 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c150); }
+            if (peg$silentFails === 0) { peg$fail(peg$c153); }
           }
           if (s3 !== peg$FAILED) {
             s4 = peg$parsews();
@@ -4205,20 +4288,20 @@ var BletherParser = (function() {
               if (s5 !== peg$FAILED) {
                 s6 = peg$parsews();
                 if (s6 !== peg$FAILED) {
-                  if (input.substr(peg$currPos, 10) === peg$c151) {
-                    s7 = peg$c151;
+                  if (input.substr(peg$currPos, 10) === peg$c154) {
+                    s7 = peg$c154;
                     peg$currPos += 10;
                   } else {
                     s7 = peg$FAILED;
-                    if (peg$silentFails === 0) { peg$fail(peg$c152); }
+                    if (peg$silentFails === 0) { peg$fail(peg$c155); }
                   }
                   if (s7 === peg$FAILED) {
-                    if (input.substr(peg$currPos, 22) === peg$c153) {
-                      s7 = peg$c153;
+                    if (input.substr(peg$currPos, 22) === peg$c156) {
+                      s7 = peg$c156;
                       peg$currPos += 22;
                     } else {
                       s7 = peg$FAILED;
-                      if (peg$silentFails === 0) { peg$fail(peg$c154); }
+                      if (peg$silentFails === 0) { peg$fail(peg$c157); }
                     }
                   }
                   if (s7 !== peg$FAILED) {
@@ -4229,12 +4312,12 @@ var BletherParser = (function() {
                         s10 = peg$currPos;
                         s11 = peg$parsews();
                         if (s11 !== peg$FAILED) {
-                          if (input.substr(peg$currPos, 19) === peg$c155) {
-                            s12 = peg$c155;
+                          if (input.substr(peg$currPos, 19) === peg$c158) {
+                            s12 = peg$c158;
                             peg$currPos += 19;
                           } else {
                             s12 = peg$FAILED;
-                            if (peg$silentFails === 0) { peg$fail(peg$c156); }
+                            if (peg$silentFails === 0) { peg$fail(peg$c159); }
                           }
                           if (s12 !== peg$FAILED) {
                             s13 = peg$parsews();
@@ -4243,12 +4326,12 @@ var BletherParser = (function() {
                               if (s14 !== peg$FAILED) {
                                 s15 = peg$parsews();
                                 if (s15 !== peg$FAILED) {
-                                  if (input.substr(peg$currPos, 17) === peg$c157) {
-                                    s16 = peg$c157;
+                                  if (input.substr(peg$currPos, 17) === peg$c160) {
+                                    s16 = peg$c160;
                                     peg$currPos += 17;
                                   } else {
                                     s16 = peg$FAILED;
-                                    if (peg$silentFails === 0) { peg$fail(peg$c158); }
+                                    if (peg$silentFails === 0) { peg$fail(peg$c161); }
                                   }
                                   if (s16 !== peg$FAILED) {
                                     s17 = peg$parsews();
@@ -4290,21 +4373,21 @@ var BletherParser = (function() {
                           s10 = peg$c1;
                         }
                         if (s10 === peg$FAILED) {
-                          s10 = peg$c45;
+                          s10 = peg$c49;
                         }
                         if (s10 !== peg$FAILED) {
                           s11 = peg$parsews();
                           if (s11 !== peg$FAILED) {
                             if (input.charCodeAt(peg$currPos) === 46) {
-                              s12 = peg$c55;
+                              s12 = peg$c24;
                               peg$currPos++;
                             } else {
                               s12 = peg$FAILED;
-                              if (peg$silentFails === 0) { peg$fail(peg$c56); }
+                              if (peg$silentFails === 0) { peg$fail(peg$c25); }
                             }
                             if (s12 !== peg$FAILED) {
                               peg$reportedPos = s0;
-                              s1 = peg$c159(s1, s5, s9);
+                              s1 = peg$c162(s1, s5, s9);
                               s0 = s1;
                             } else {
                               peg$currPos = s0;
@@ -4363,11 +4446,11 @@ var BletherParser = (function() {
 
       s0 = peg$currPos;
       if (input.charCodeAt(peg$currPos) === 33) {
-        s1 = peg$c160;
+        s1 = peg$c163;
         peg$currPos++;
       } else {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c161); }
+        if (peg$silentFails === 0) { peg$fail(peg$c164); }
       }
       if (s1 !== peg$FAILED) {
         s2 = peg$parseclassName();
@@ -4375,12 +4458,12 @@ var BletherParser = (function() {
           s3 = peg$parsews();
           if (s3 !== peg$FAILED) {
             s4 = peg$currPos;
-            if (input.substr(peg$currPos, 5) === peg$c162) {
-              s5 = peg$c162;
+            if (input.substr(peg$currPos, 5) === peg$c165) {
+              s5 = peg$c165;
               peg$currPos += 5;
             } else {
               s5 = peg$FAILED;
-              if (peg$silentFails === 0) { peg$fail(peg$c163); }
+              if (peg$silentFails === 0) { peg$fail(peg$c166); }
             }
             if (s5 !== peg$FAILED) {
               s6 = [];
@@ -4405,34 +4488,34 @@ var BletherParser = (function() {
               s4 = peg$c1;
             }
             if (s4 === peg$FAILED) {
-              s4 = peg$c45;
+              s4 = peg$c49;
             }
             if (s4 !== peg$FAILED) {
               s5 = peg$parsemethod();
               if (s5 !== peg$FAILED) {
                 if (input.charCodeAt(peg$currPos) === 33) {
-                  s6 = peg$c160;
+                  s6 = peg$c163;
                   peg$currPos++;
                 } else {
                   s6 = peg$FAILED;
-                  if (peg$silentFails === 0) { peg$fail(peg$c161); }
+                  if (peg$silentFails === 0) { peg$fail(peg$c164); }
                 }
                 if (s6 !== peg$FAILED) {
                   s7 = peg$parsews();
                   if (s7 === peg$FAILED) {
-                    s7 = peg$c45;
+                    s7 = peg$c49;
                   }
                   if (s7 !== peg$FAILED) {
                     if (input.charCodeAt(peg$currPos) === 46) {
-                      s8 = peg$c55;
+                      s8 = peg$c24;
                       peg$currPos++;
                     } else {
                       s8 = peg$FAILED;
-                      if (peg$silentFails === 0) { peg$fail(peg$c56); }
+                      if (peg$silentFails === 0) { peg$fail(peg$c25); }
                     }
                     if (s8 !== peg$FAILED) {
                       peg$reportedPos = s0;
-                      s1 = peg$c164(s2, s4, s5);
+                      s1 = peg$c167(s2, s4, s5);
                       s0 = s1;
                     } else {
                       peg$currPos = s0;
@@ -4476,7 +4559,7 @@ var BletherParser = (function() {
       s0 = peg$currPos;
       s1 = peg$parsews();
       if (s1 === peg$FAILED) {
-        s1 = peg$c45;
+        s1 = peg$c49;
       }
       if (s1 !== peg$FAILED) {
         s2 = peg$parseclassAndMethod();
@@ -4489,11 +4572,11 @@ var BletherParser = (function() {
         if (s2 !== peg$FAILED) {
           s3 = peg$parsews();
           if (s3 === peg$FAILED) {
-            s3 = peg$c45;
+            s3 = peg$c49;
           }
           if (s3 !== peg$FAILED) {
             peg$reportedPos = s0;
-            s1 = peg$c165(s2);
+            s1 = peg$c168(s2);
             s0 = s1;
           } else {
             peg$currPos = s0;
@@ -4518,18 +4601,18 @@ var BletherParser = (function() {
       s1 = peg$currPos;
       s2 = peg$parsews();
       if (s2 === peg$FAILED) {
-        s2 = peg$c45;
+        s2 = peg$c49;
       }
       if (s2 !== peg$FAILED) {
         s3 = peg$parsetemps();
         if (s3 !== peg$FAILED) {
           s4 = peg$parsews();
           if (s4 === peg$FAILED) {
-            s4 = peg$c45;
+            s4 = peg$c49;
           }
           if (s4 !== peg$FAILED) {
             peg$reportedPos = s1;
-            s2 = peg$c166(s3);
+            s2 = peg$c169(s3);
             s1 = s2;
           } else {
             peg$currPos = s1;
@@ -4555,7 +4638,7 @@ var BletherParser = (function() {
         }
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c167(s1, s2);
+          s1 = peg$c170(s1, s2);
           s0 = s1;
         } else {
           peg$currPos = s0;
@@ -4654,7 +4737,7 @@ var BletherReturnOperatorVisitor = function() {
     this.visit = function(node) {
 		return node.visit(this);
 	};
-	
+
     this.visitProgram = function(node) {
 		for (var i = 0; i < node.elements.length; i++) {
 			if (node.elements[i].visit(this)) {
@@ -4663,7 +4746,7 @@ var BletherReturnOperatorVisitor = function() {
 		}
 		return false;
 	};
-	
+
     this.visitClassDeclaration = function(node) {
 		for (var method in node.methods) {
 			if (node.methods.hasOwnProperty(method)) {
@@ -4674,7 +4757,7 @@ var BletherReturnOperatorVisitor = function() {
 		}
 		return false;
 	};
-	
+
     this.visitMethodDeclaration = function(node) {
 		return node.body.visit(this);
 	};
@@ -4688,7 +4771,7 @@ var BletherReturnOperatorVisitor = function() {
 
 		return false;
 	};
-	
+
     this.visitStatement = function(node) {
 		return node.expression.visit(this);
 	};
@@ -4702,7 +4785,7 @@ var BletherReturnOperatorVisitor = function() {
 
 		return false;
 	};
-	
+
     this.visitSend = function(node) {
 		// This happens with a Cascade
 		if (node.receiver !== null) {
@@ -4719,15 +4802,15 @@ var BletherReturnOperatorVisitor = function() {
 
 		return false;
 	};
-	
+
     this.visitAssignment = function(node) {
 		return node.expression.visit(this);
 	};
-	
+
     this.visitBlock = function(node) {
 		return node.sequence.visit(this);
 	};
-	
+
     this.visitCascade = function(node) {
 		if (node.receiver.visit(this)) {
 			return true;
@@ -4741,7 +4824,7 @@ var BletherReturnOperatorVisitor = function() {
 
 		return false;
 	};
-	
+
     this.visitDynamicArray = function(node) {
 		for (var i = 0; i < node.values.length; i++) {
 			if (node.values[i].visit(this)) {
@@ -4751,7 +4834,7 @@ var BletherReturnOperatorVisitor = function() {
 
 		return false;
 	};
-	
+
     this.visitDynamicDictionary = function(node) {
 		for (var key in node.values) {
 			if (node.values.hasOwnProperty(key)) {
@@ -4764,7 +4847,7 @@ var BletherReturnOperatorVisitor = function() {
 	};
 
 	this.visitReturn = returnTrue;
-	
+
     this.visitBinaryPattern = returnFalse;
     this.visitKeywordPattern = returnFalse;
     this.visitString = returnFalse;
@@ -4777,10 +4860,13 @@ var BletherReturnOperatorVisitor = function() {
     this.visitJsStatement = returnFalse;
     this.visitVariableDeclaration = returnFalse;
     this.visitVariable = returnFalse;
+    this.visitClassName = returnFalse;
 };
 
 var BletherTranslator = function() {
 	"use strict";
+
+	var NAMESPACES = {};
 
 	function checkBlockMaxParamCount(block, max, selector) {
 		if (block.params.length > max) {
@@ -4791,6 +4877,33 @@ var BletherTranslator = function() {
 			});
 		}
 	}
+
+	this.ensureNamespace = function(className) {
+
+		var parts = className.value.split(".");
+
+		if (parts.length === 1) {
+			return "";
+		}
+
+		// Already defined this namespace
+		if (NAMESPACES.hasOwnProperty(className)) {
+			return "";
+		}
+
+		var ns = parts[0];
+		var output = "var " + ns + " = " + ns + " || {};\n";
+		NAMESPACES[ns] = true;
+
+		var limit = parts.length - 1;
+		for (var i = 1; i < limit; i++) {
+			ns = ns + "." + parts[i];
+			output += ns + " = " + ns + " || {};\n";
+			NAMESPACES[ns] = true;
+		}
+
+		return output;
+	};
 
 	this.visit = function(node) {
 		return node.visit(this);
@@ -4826,7 +4939,13 @@ var BletherTranslator = function() {
 
 		var instanceNames = node.varNames.value;
 
-		output += "function " + node.className + "(";
+		if (node.isNamespaced()) {
+			output += this.ensureNamespace(node.className);
+			output += node.className + " = function(";
+		}
+		else {
+			output += "function " + node.className + "(";
+		}
 		output += instanceNames.map(function(each) { return "_" + each.value }).join(", ");
 		output += ") {\n";
 
@@ -4835,7 +4954,7 @@ var BletherTranslator = function() {
 			output += "this." + name + " = _" + name + ";\n";
 		});
 
-		output += "};\n\n";
+		output += "}" + (node.isNamespaced() ? ";" : "") + "\n\n";
 
 		if (hasSuper) {
 			output += node.className + ".prototype = Object.create(" + node.superClass + ".prototype);\n";
@@ -4953,7 +5072,7 @@ var BletherTranslator = function() {
 	};
 
 	this.visitUnaryPattern = function(node) {
-		return[convertSelector(node.selector), []];
+		return [convertSelector(node.selector), []];
 	};
 
 	this.visitBinaryPattern = function(node) {
@@ -4985,6 +5104,10 @@ var BletherTranslator = function() {
 
 	this.visitSymbol = function(node) {
 		return this.visitString(node);
+	};
+
+	this.visitClassName = function(node) {
+		return node.value;
 	};
 
 	this.visitStatement = function(node) {
@@ -5294,6 +5417,7 @@ var BletherTranslator = function() {
 			case "Number":
 			case "Boolean":
 			case "UndefinedObject":
+			case "ClassName":
 				deconstruct = true;
 				break;
 		}
@@ -5628,5 +5752,7 @@ module.exports = {
 
 		var runtimePath = path.join(path.dirname(fs.realpathSync(__filename)), "runtime.js");
 		return fs.readFileSync(runtimePath).toString();
-	}
+	},
+
+	"BletherTranslator": BletherTranslator,
 };

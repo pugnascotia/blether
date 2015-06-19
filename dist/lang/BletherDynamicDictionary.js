@@ -1,7 +1,7 @@
 /* lib/lang/BletherDynamicDictionary.st*/
 function BletherDynamicDictionary(_values) {
 this.values = _values;
-};
+}
 
 BletherDynamicDictionary.prototype = Object.create(BletherNode.prototype);
 BletherDynamicDictionary.prototype.constructor = BletherNode;

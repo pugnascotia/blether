@@ -1,6 +1,6 @@
 /* lib/runtime/Module.st*/
 function Module() {
-};
+}
 
 Module.export_as$ = function(key, value) {
 exports[key] = value;
@@ -9,7 +9,7 @@ exports[key] = value;
 
 /* lib/runtime/Process.st*/
 function Process() {
-};
+}
 
 Process.argv = function() {
 return process.argv;
@@ -18,7 +18,7 @@ return process.argv;
 
 /* lib/runtime/Smalltalk.st*/
 function Smalltalk() {
-};
+}
 
 Smalltalk.document = function() {
 return document;

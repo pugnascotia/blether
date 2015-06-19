@@ -1,5 +1,5 @@
 function Foobar() {
-};
+}
 
 Foobar.prototype.one = function(argOne) {
 var self = this;

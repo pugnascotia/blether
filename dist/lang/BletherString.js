@@ -1,7 +1,7 @@
 /* lib/lang/BletherString.st*/
 function BletherString(_value) {
 this.value = _value;
-};
+}
 
 BletherString.prototype = Object.create(BletherNode.prototype);
 BletherString.prototype.constructor = BletherNode;
