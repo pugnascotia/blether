@@ -8,7 +8,7 @@ module.exports = function(grunt) {
 	grunt.util.linefeed = "\n";
 
     grunt.registerMultiTask("blether", "Run the blether compiler", function() {
-        var args = [ "--runtime=false", "-o", "./dist/runtime", "-c"].concat(this.filesSrc);
+        var args = [ "--runtime=false", "--verbose", "-o", "./dist/runtime", "-c"].concat(this.filesSrc);
 
         var result = require("child_process").spawnSync("./bin/blether", args);
 
@@ -37,7 +37,7 @@ module.exports = function(grunt) {
 
 		// Configure the grunt-contrib-jshint plugin
 		jshint: {
-			files: [ "lib/*.js", "lib/test/*.js", "test/**/*.js", "Gruntfile.js" ],
+			files: [ "lib/*.js", "lib/test/*.js", "test/**/*.js", "Gruntfile.js", "bin/blether" ],
 			options: {
 				jshintrc: ".jshintrc"
 			}

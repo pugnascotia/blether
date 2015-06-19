@@ -6,14 +6,14 @@
  * and this entrypoint is called by the unit tests. So, fall back to the
  * unminified one if necessary */
 function require_blether() {
-    var lib  = path.join(path.dirname(fs.realpathSync(__filename)), '../dist');
+    var lib  = path.join(path.dirname(fs.realpathSync(__filename)), "../dist");
 
     try {
         return require(lib + "/blether.min.js");
     }
     catch (e) {
         try {
-            return require(lib + '/blether.js');
+            return require(lib + "/blether.js");
         }
         catch (e2) {
             console.error("Failed to find blether.min.js or blether.js under " + lib);
@@ -26,10 +26,10 @@ function translate(source) {
     var text = fs.readFileSync(source).toString();
 
     if (/^#!/.test(text)) {
-        text = text.replace(/^#!.*$/m, '');
+        text = text.replace(/^#!.*$/m, "");
     }
 
-    return blether.translate(text, blether_opts);
+    return blether.translate(text);
 }
 
 function destPath(srcPath, output_arg) {
@@ -61,23 +61,21 @@ if (global.v8debug) {
 	global.v8debug.Debug.setBreakOnException(); // speaks for itself
 }
 
-var path = require('path');
-var fs   = require('fs');
+var path = require("path");
+var fs   = require("fs");
 var _eval = require("eval");
 
 var blether = require_blether();
 
-var argv = require('minimist')(process.argv.slice(2), {
-    'boolean': [ 'c', 'x', 'runtime' ],
-    'string': [ 'o' ],
-    'default': {
+var argv = require("minimist")(process.argv.slice(2), {
+    "boolean": [ "c", "x", "runtime", "verbose" ],
+    "string": [ "o" ],
+    "default": {
         "runtime": true,
         "x": false,
     },
-    '--': true
+    "--": true
 });
-
-var blether_opts = {};
 
 if (argv.x && argv._) {
     try {
@@ -101,11 +99,16 @@ else if(argv._.length) {
 
     argv._.forEach(function(srcPath) {
         try {
-            console.warn("Translating " + srcPath);
+			if (argv.verbose) {
+				console.warn("Translating " + srcPath);
+			}
             var js = "/* " + srcPath + "*/\n" + translate(srcPath);
 
             if (argv.c) {
-                console.warn("Writing to " + destPath(srcPath, argv.o));
+				if (argv.verbose) {
+					console.warn("Writing to " + destPath(srcPath, argv.o));
+				}
+
                 fs.writeFileSync(destPath(srcPath, argv.o), js);
             }
             else {
