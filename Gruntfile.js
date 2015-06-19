@@ -7,24 +7,24 @@ module.exports = function(grunt) {
 	// Force use of Unix newlines
 	grunt.util.linefeed = "\n";
 
-    grunt.registerMultiTask("blether", "Run the blether compiler", function() {
-        var args = [ "--runtime=false", "--verbose", "-o", "./dist/runtime", "-c"].concat(this.filesSrc);
+	grunt.registerMultiTask("blether", "Run the blether compiler", function() {
+		var args = [ "--runtime=false", "--verbose", "-o", this.data.dest, "-c"].concat(this.filesSrc);
 
-        var result = require("child_process").spawnSync("./bin/blether", args);
+		var result = require("child_process").spawnSync("./bin/blether", args);
 
-        console.log(result.stdout.toString());
-        console.log(result.stderr.toString());
+		grunt.log.writeln(result.stdout.toString());
+		grunt.log.writeln(result.stderr.toString());
 
-        if (result.status !== 0) {
-            throw new Error("blether invocation failed");
-        }
-    });
+		if (result.status !== 0) {
+			throw new Error("blether invocation failed");
+		}
+	});
 
 	// 1. All configuration goes here
 	grunt.initConfig({
 		pkg: grunt.file.readJSON("package.json"),
 
-        clean: [ "dist" ],
+		clean: [ "dist" ],
 
 		// Configure the grunt-peg plugin
 		peg: {
@@ -43,13 +43,28 @@ module.exports = function(grunt) {
 			}
 		},
 
-        blether: {
-            files: "lib/runtime/*.st"
-        },
+		blether: {
+			lang: {
+				src: "lib/lang/*.st",
+				dest: "dist/lang"
+			},
+			runtime: {
+				src: "lib/runtime/*.st",
+				dest: "dist/runtime"
+			}
+		},
 
 		concat: {
-			dist: {
+			runtime: {
 				src: [
+					"dist/runtime/*.js",
+					"lib/runtime.js"
+				],
+				dest: "dist/runtime.js"
+			},
+			lang: {
+				src: [
+					"dist/lang/*.js",
 					"lib/lang.js",
 					"dist/parser.js",
 					"lib/selector.js",
@@ -57,15 +72,15 @@ module.exports = function(grunt) {
 					"lib/return_operator_visitor.js",
 					"lib/translator.js",
 				],
-				dest: "dist/blether.js"
+				dest: "dist/blether.lang.js"
 			},
-            runtime: {
-                src: [
-                    "dist/runtime/*.js",
-                    "lib/runtime.js"
-                ],
-                dest: "dist/runtime.js"
-            }
+			blether: {
+				src: [
+					"dist/runtime.js",
+					"dist/blether.lang.js"
+				],
+				dest: "dist/blether.js"
+			}
 		},
 
 		// Configure the grunt-contrib-uglify plugin
