@@ -63,8 +63,9 @@ if (global.v8debug) {
 
 var path = require('path');
 var fs   = require('fs');
-var blether = require_blether();
 var _eval = require("eval");
+
+var blether = require_blether();
 
 var argv = require('minimist')(process.argv.slice(2), {
     'boolean': [ 'c', 'x', 'runtime' ],
@@ -76,16 +77,14 @@ var argv = require('minimist')(process.argv.slice(2), {
     '--': true
 });
 
-var blether_opts = {
-    runtime: argv.runtime
-};
-
-// console.dir(argv);
-// console.dir(blether_opts);
+var blether_opts = {};
 
 if (argv.x && argv._) {
     try {
         var javascript = argv._.map(translate).join();
+		if (argv.runtime) {
+			javascript += blether.runtime();
+		}
         _eval(javascript, "<argv>", null, true);
     }
     catch (e) {
@@ -94,7 +93,12 @@ if (argv.x && argv._) {
         process.exit(1);
     }
 }
-else {
+else if(argv._.length) {
+	if (argv.runtime && !argv.c)  {
+		process.stdout.write(blether.runtime());
+		process.stdout.write("\n");
+	}
+
     argv._.forEach(function(srcPath) {
         try {
             console.warn("Translating " + srcPath);
